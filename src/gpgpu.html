@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <script src="https://cdn.jsdelivr.net/npm/gpu.js@latest/dist/gpu-browser.min.js"></script>
+
+        <title>GPGPU</title>
+    </head>
+
+    <body>
+        WebGL GPGPU
+    </body>
+
+    <script id="shader" type="x-shader/x-compute">
+        #version 310 es
+
+        layout (local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
+
+        layout (std430, binding = 0) buffer SSBO {
+            float data[];
+        } ssbo;
+
+        void main(){
+            int ssboLength = int(ssbo.data.length());
+
+            int wgSizeX = int(gl_WorkGroupSize.x);
+            int wgCountX = int(gl_NumWorkGroups.x);
+            int gIdX = int(gl_GlobalInvocationID.x);
+
+            int offset = ssboLength;
+            if(ssboLength > wgSizeX){
+                offset = ssboLength / wgCountX / wgSizeX;
+            }
+
+            for(int i = 0; i < offset; i++){
+                int index = gIdX * offset + i;
+                ssbo.data[index] = ssbo.data[index] * 2.0;
+            }
+        }
+    </script>
+
+    <script>
+        class GPGPU{
+            #ctx = new OffscreenCanvas(1, 1).getContext("webgl2-compute");
+
+            constructor(src){
+                const shader = this.#ctx.createShader(this.#ctx.COMPUTE_SHADER);
+                const program = this.#ctx.createProgram();
+
+                this.#ctx.shaderSource(shader, src);
+                this.#ctx.compileShader(shader);
+
+                if(!this.#ctx.getShaderParameter(shader, this.#ctx.COMPILE_STATUS)){
+                    throw new Error(this.#ctx.getShaderInfoLog(shader));
+                }
+
+                this.#ctx.attachShader(program, shader);
+                this.#ctx.linkProgram(program);
+
+                if(!this.#ctx.getProgramParameter(program, this.#ctx.LINK_STATUS)){
+                    throw new Error(this.#ctx.getProgramInfoLog(program));
+                }
+
+                this.#ctx.useProgram(program);
+
+                this.#ctx.deleteShader(shader);
+                this.#ctx.deleteProgram(program);
+            }
+
+            compute(data, x, y, z){
+                if(!(data instanceof Float32Array)){
+                    throw new Error("Allowed type is only Float32Array");
+                }
+
+                const result = new Float32Array(data.length);
+
+                const ssbo = this.#ctx.createBuffer();
+
+                this.#ctx.bindBuffer(this.#ctx.SHADER_STORAGE_BUFFER, ssbo);
+                this.#ctx.bufferData(this.#ctx.SHADER_STORAGE_BUFFER, data, this.#ctx.DYNAMIC_COPY);
+                this.#ctx.bindBuffer(this.#ctx.SHADER_STORAGE_BUFFER, null);
+
+                this.#ctx.bindBufferBase(this.#ctx.SHADER_STORAGE_BUFFER, 0, ssbo);
+
+                this.#ctx.dispatchCompute(x, y, z);
+
+                this.#ctx.getBufferSubData(this.#ctx.SHADER_STORAGE_BUFFER, 0, result);
+
+                this.#ctx.deleteBuffer(ssbo);
+
+                return result;
+            }
+        }
+
+        const sample1 = new Float32Array(0x01000000).map(() => Math.random());
+
+        const gpgpu1 = new GPGPU(document.getElementById("shader").textContent.trim());
+
+        const result1 = gpgpu.compute(sample, 1024, 1, 1);
+        console.log(result1);
+
+        const sample2 = new Float32Array(1024).map(() => Math.random());
+
+        const gpgpu2 = new GPU({
+            context: new OffscreenCanvas(1, 1).getContext("webgl2")
+        });
+
+        const gpgpu2Kernel = gpgpu2.createKernel(function(a){
+            return a[this.thread.x] * 2.0;
+        }, {
+            output: [1024]
+        });
+
+        const result2 = gpgpu2Kernel(sample2);
+        console.log(result2);
+    </script>
+</html>

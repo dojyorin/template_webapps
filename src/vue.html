@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Kosugi|M+PLUS+1p&amp;subset=japanese">
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@latest/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.js"></script>
+
+        <title>Vue</title>
+    </head>
+
+    <body>
+        <div id="vue">
+            <v-app>
+                <v-app-bar app dark height="52" color="secondary">
+                    <v-toolbar-title>Vuetify</v-toolbar-title>
+                </v-app-bar>
+
+                <v-main>
+                    <v-container fluid>
+                        <v-row dense>
+                            <v-col cols sm="12">
+                                <v-card flat color="transparent">
+                                    <v-card-title>{{getName}}</v-card-title>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-main>
+            </v-app>
+        </div>
+    </body>
+
+    <style>
+        .v-application{
+            font-family: "M PLUS 1p", "Kosugi" !important;
+        }
+    </style>
+
+    <script>
+        new Vue({
+            el: "#vue",
+            vuetify: new Vuetify(),
+
+            data(){
+                return {
+                    name: ""
+                };
+            },
+
+            mounted(){
+                this.setName();
+            },
+
+            computed: {
+                getName(){
+                    return `${this.name}Bar`;
+                }
+            },
+
+            methods: {
+                setName(){
+                    this.name = "Foo";
+                }
+            }
+        });
+    </script>
+</html>

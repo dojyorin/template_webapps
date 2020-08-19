@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <script src="https://cdn.jsdelivr.net/npm/jszip@latest/dist/jszip.min.js"></script>
+
+        <title>Zip</title>
+    </head>
+
+    <body>
+        <input type="file" id="files" multiple>
+        <input type="file" id="zip" accept="application/zip">
+    </body>
+
+    <script>
+        async function enZip(files){
+            const option = {
+                type: "blob",
+                compression: "DEFLATE",
+                compressionOptions: {
+                    level: 9
+                }
+            };
+
+            return files.reduce((zip, [name, file]) => zip.file(name, file), new JSZip()).generateAsync(option);
+        }
+
+        async function unZip(archive){
+            return Promise.all(Object.values((await new JSZip().loadAsync(archive)).files).map(async file => [file.name, await file.async("blob")]));
+        }
+
+        document.getElementById("files").addEventListener("change", async({target})=>{
+            console.log(await enZip(Array.from(target.files).map(f => [f.name, f])));
+        });
+
+        document.getElementById("zip").addEventListener("change", async({target})=>{
+            console.log(await unZip(target.files[0]));
+        });
+    </script>
+</html>

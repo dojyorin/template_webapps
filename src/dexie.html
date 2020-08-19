@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <script src="https://cdn.jsdelivr.net/npm/dexie@latest/dist/dexie.min.js"></script>
+
+        <title>Dexie</title>
+    </head>
+
+    <body>
+        <button type="button" id="save">Save</button>
+        <button type="button" id="load">Load</button>
+    </body>
+
+    <script>
+        const db = new Dexie("test");
+
+        db.version(1).stores({
+            "temp": "++&id, name, age"
+        });
+
+        document.getElementById("save").addEventListener("click", ()=>{
+            const res = await db["temp"].put({
+                name: "hoge",
+                age: 20
+            });
+            console.log(res);
+        });
+
+        document.getElementById("load").addEventListener("click", ()=>{
+            const res = await db["temp"].get(1);
+            console.log(res);
+        });
+    </script>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+        <script src="https://cdn.jsdelivr.net/npm/@babel/polyfill@latest/dist/polyfill.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@latest/babel.min.js"></script>
+
+        <title>Babel</title>
+    </head>
+
+    <body>
+    </body>
+
+    <style>
+    </style>
+
+    <script type="text/babel" data-presets="env,stage-3">
+    </script>
+
+    <script>
+        Babel.disableScriptTags();
+
+        function babelTransform(js){
+            return Babel.transform(js, {
+                presets: ["env", "stage-3"]
+            }).code;
+        }
+    </script>
+</html>

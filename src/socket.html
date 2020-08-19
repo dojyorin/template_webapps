@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <title>WebSocket</title>
+    </head>
+
+    <body>
+        Web Socket API
+    </body>
+
+    <script>
+        const socket = new WebSocket("wss://echo.websocket.org");
+
+        socket.addEventListener("message", ({data})=>{
+            console.log(data);
+        });
+
+        socket.addEventListener("open", ()=>{
+            socket.send("test");
+        });
+    </script>
+</html>

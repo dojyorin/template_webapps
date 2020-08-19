@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Kosugi|M+PLUS+1p&amp;subset=japanese">
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@latest/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuex@latest/dist/vuex.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue-router@latest/dist/vue-router.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.js"></script>
+
+        <title>Vuex</title>
+    </head>
+
+    <body>
+        <div id="vue">
+            <v-app>
+                <v-app-bar app dark height="52" color="secondary">
+                    <v-toolbar-title>Vuetify</v-toolbar-title>
+                </v-app-bar>
+
+                <v-main>
+                    <router-view></router-view>
+                </v-main>
+            </v-app>
+        </div>
+    </body>
+
+    <script type="text/x-template" id="index">
+        <div>
+            <v-container fluid>
+                <v-row dense>
+                    <v-col cols sm="12">
+                        <v-card>
+                            <v-card-title>Location: "/"</v-card-title>
+
+                            <v-card-text>
+                                State: {{nowCount}}
+                            </v-card-text>
+
+                            <v-card-actions>
+                                <v-btn large color="primary" to="/foo">Go!</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="foo">
+        <div>
+            <v-container fluid>
+                <v-row dense>
+                    <v-col cols sm="12">
+                        <v-list>
+                            <v-list-item ripple to="/">
+                                <v-list-item-icon>
+                                    <v-icon large>mdi-home</v-icon>
+                                </v-list-item-icon>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>Home</v-list-item-title>
+                                    <v-list-item-subtitle>Jump to /Home</v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+
+                            <v-divider></v-divider>
+
+                            <v-list-item ripple @click="clicked()">
+                                <v-list-item-icon>
+                                    <v-icon large>mdi-console</v-icon>
+                                </v-list-item-icon>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>Console</v-list-item-title>
+                                    <v-list-item-subtitle>Path and State</v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </div>
+    </script>
+
+    <style>
+        .v-application{
+            font-family: "M PLUS 1p", "Kosugi" !important;
+        }
+    </style>
+
+    <script>
+        new Vue({
+            el: "#vue",
+            vuetify: new Vuetify(),
+
+            data(){
+                return {
+                    name: ""
+                };
+            },
+
+            mounted(){
+                this.name = "Name";
+                this.addCount(10);
+            },
+
+            methods: {
+                ...Vuex.mapActions([
+                    "addCount"
+                ])
+            },
+
+            router: new VueRouter({
+                routes: [{
+                    path: "/",
+                    component: {
+                        template: "#index",
+
+                        computed: {
+                            ...Vuex.mapGetters([
+                                "nowCount"
+                            ])
+                        }
+                    }
+                }, {
+                    path: "/foo",
+                    component: {
+                        template: "#foo",
+
+                        methods: {
+                            clicked(){
+                                console.log(this.$route.path);
+                            }
+                        }
+                    }
+                }]
+            }),
+
+            store: new Vuex.Store({
+                state(){
+                    return {
+                        count: 0
+                    };
+                },
+
+                mutations: {
+                    addCount(state, payload){
+                        state.count += payload;
+                    }
+                },
+
+                getters: {
+                    nowCount(state){
+                        return state.count;
+                    }
+                },
+
+                actions: {
+                    addCount(ctx, payload){
+                        setTimeout(() => ctx.commit("addCount", payload), 1000);
+                    }
+                }
+            })
+        });
+    </script>
+</html>

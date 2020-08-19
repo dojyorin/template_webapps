@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.css">
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@latest/dist/chartjs-plugin-datalabels.min.js"></script>
+
+        <title>Chart</title>
+    </head>
+
+    <body>
+        <canvas id="chart"></canvas>
+    </body>
+
+    <script>
+        new Chart(document.getElementById("chart").getContext("2d"), {
+            type: "line",
+
+            options: {
+                title: {
+                    display: true,
+                    text: "My Chart"
+                }
+            },
+
+            data: {
+                labels: ["January", "February", "March", "April", "May", "June", "July"],
+                datasets: [{
+                    label: "My First dataset",
+                    backgroundColor: "rgb(255, 127, 127)",
+                    borderColor: "rgb(255, 127, 127)",
+                    data: [0, 10, 5, 2, 20, 30, 40]
+                }, {
+                    label: "My Second dataset",
+                    backgroundColor: "rgb(127, 127, 255)",
+                    borderColor: "rgb(127, 127, 255)",
+                    data: [0, 5, 10, 4, 10, 30, 50]
+                }]
+            }
+        });
+    </script>
+</html>

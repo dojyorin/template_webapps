@@ -1,2 +1,2 @@
-# template_webapps
+# Template for SPA
 Template for SPA

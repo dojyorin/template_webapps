@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <title>WebWorker</title>
+    </head>
+
+    <body>
+        Web Worker API
+    </body>
+
+    <script>
+        class WorkerInline extends Worker{
+            #ctx = "";
+
+            constructor(src){
+                if(!(typeof src === "function" || typeof src === "string")){
+                    throw new Error("must be 'function' or 'string'");
+                }
+
+                const ctx = URL.createObjectURL(new Blob([typeof src === "function" ? src.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "") : src]));
+                super(ctx);
+                this.#ctx = ctx;
+            }
+
+            terminate(){
+                super.terminate();
+                URL.revokeObjectURL(this.#ctx);
+            }
+        }
+
+        const worker = new WorkerInline(()=>{
+            self.addEventListener("message", ({data})=>{
+                const bytes = new Uint8Array(data.length);
+
+                self.postMessage(bytes, [bytes.buffer]);
+            });
+        });
+
+        worker.addEventListener("message", ({data})=>{
+            worker.terminate();
+            console.log(data);
+        });
+
+        const bytes = new Uint8Array(1024 * 1024 * 128);
+
+        worker.postMessage(bytes, [bytes.buffer]);
+    </script>
+</html>

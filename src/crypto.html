@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <title>WebCrypto</title>
+    </head>
+
+    <body>
+        Web Crypto API
+    </body>
+
+    <script>
+        async function hashDigest(data){
+            return new Uint8Array(await crypto.subtle.digest("SHA-512", data));
+        }
+
+        function keyGenerate(){
+            const ec = {
+                name: "ECDH",
+                namedCurve: "P-521"
+            };
+            const usage = ["deriveKey"];
+
+            return crypto.subtle.generateKey(ec, true, usage);
+        }
+
+        function keyImport(key, isPub){
+            const encode = isPub ? "spki" : "pkcs8";
+            const ec = {
+                name: "ECDH",
+                namedCurve: "P-521"
+            };
+            const usage = isPub ? [] : ["deriveKey"];
+
+            return crypto.subtle.importKey(encode, key, ec, false, usage);
+        }
+
+        async function keyExport(key, isPub){
+            const encode = isPub ? "spki" : "pkcs8";
+
+            return new Uint8Array(await crypto.subtle.exportKey(encode, key));
+        }
+
+        function keyDerive(pub, priv){
+            const aes = {
+                name: "AES-GCM",
+                length: 256
+            };
+            const ec = {
+                name: "ECDH",
+                public: pub
+            };
+            const usage = ["encrypt", "decrypt"];
+
+            return crypto.subtle.deriveKey(ec, priv, aes, false, usage);
+        }
+
+        async function aesEncrypt(key, data){
+            const aes = {
+                name: "AES-GCM",
+                iv: crypto.getRandomValues(new Uint8Array(16)),
+                tagLength: 128
+            };
+
+            const result = await crypto.subtle.encrypt(aes, key, data);
+
+            const buffer = new Uint8Array(aes.iv.byteLength + result.byteLength);
+            buffer.set(aes.iv, 0);
+            buffer.set(new Uint8Array(result), aes.iv.byteLength);
+
+            return buffer;
+        }
+
+        async function aesDecrypt(key, data){
+            const aes = {
+                name: "AES-GCM",
+                iv: data.subarray(0, 16),
+                tagLength: 128
+            };
+
+            return new Uint8Array(await crypto.subtle.decrypt(aes, key, data.subarray(16)));
+        }
+
+        (async()=>{
+            const key1 = await keyGenerate();
+            const key2 = await keyGenerate();
+
+            const key1ExPub = await keyExport(key1.publicKey, true);
+            const key1ExPriv = await keyExport(key1.privateKey, false);
+            const key2ExPub = await keyExport(key2.publicKey, true);
+            const key2ExPriv = await keyExport(key2.privateKey, false);
+
+            console.log("--- Exported Keys ---");
+            for(const key of [key1ExPub, key1ExPriv, key2ExPub, key2ExPriv]){
+                console.log(key);
+            }
+
+            const key1ImPub = await keyImport(key1ExPub, true);
+            const key1ImPriv = await keyImport(key1ExPriv, false);
+            const key2ImPub = await keyImport(key2ExPub, true);
+            const key2ImPriv = await keyImport(key2ExPriv, false);
+
+            console.log("--- Imported Keys ---");
+            for(const key of [key1ImPub, key1ImPriv, key2ImPub, key2ImPriv]){
+                console.log(key);
+            }
+
+            const keyDe1Pub2Priv = await keyDerive(key1ImPub, key2ImPriv);
+            const keyDe2Pub1Priv = await keyDerive(key2ImPub, key1ImPriv);
+
+            console.log("--- Derived Keys ---");
+            for(const key of [keyDe1Pub2Priv, keyDe2Pub1Priv]){
+                console.log(key);
+            }
+
+            const raw = new TextEncoder().encode("hogehoge");
+
+            console.log("--- Raw Data ---");
+            console.log(new TextDecoder().decode(raw));
+            console.log(await hashDigest(raw));
+
+            const enc = await aesEncrypt(keyDe1Pub2Priv, raw);
+            const dec = await aesDecrypt(keyDe2Pub1Priv, enc);
+
+            console.log("--- Encoded Data ---");
+            console.log(new TextDecoder().decode(enc));
+
+            console.log("--- Decoded Data (Raw Data) ---");
+            console.log(new TextDecoder().decode(dec));
+            console.log(await hashDigest(dec));
+        })();
+    </script>
+</html>

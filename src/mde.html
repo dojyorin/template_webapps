@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Kosugi|M+PLUS+1p&amp;subset=japanese">
+
+        <script src="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+
+        <title>Markdown Editor</title>
+    </head>
+
+    <body>
+        <textarea id="mde"></textarea>
+    </body>
+
+    <style>
+        .editor-preview,
+        .editor-preview-side{
+            font-family: "M PLUS 1p";
+        }
+
+        .CodeMirror,
+        .editor-preview code,
+        .editor-preview-side code{
+            font-family: "Kosugi";
+        }
+    </style>
+
+    <script>
+        window.addEventListener("dragover", (ev)=>{
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = "none";
+        });
+
+        class FileReaderEx extends FileReader{
+            constructor(){
+                super();
+            }
+
+            #readAs(blob, ctx){
+                return new Promise((res, rej)=>{
+                    super.addEventListener("load", ({target}) => res(target.result));
+                    super.addEventListener("error", ({target}) => rej(target.error));
+                    super[ctx](blob);
+                });
+            }
+
+            readAsDataURL(blob){
+                return this.#readAs(blob, "readAsDataURL");
+            }
+
+            readAsText(blob){
+                return this.#readAs(blob, "readAsText");
+            }
+        }
+
+        function filePicker(){
+            const input = document.createElement("input");
+            input.type = "file";
+            input.multiple = false;
+
+            return new Promise((res, rej)=>{
+                input.addEventListener("change", ({target}) => res(target.files[0]));
+                input.click();
+            });
+        }
+
+        function fileSaver(blob, name){
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = name;
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+        }
+
+        const mde = new SimpleMDE({
+            element: document.getElementById("mde"),
+            autofocus: true,
+            forceSync: true,
+            tabSize: 4,
+            spellChecker: false,
+            status: false,
+            renderingConfig: {
+                codeSyntaxHighlighting: true
+            },
+            insertTexts: {
+                "horizontalRule": ["", "\n---\n"],
+                "link": ["[", "](https://)"],
+                "image": ["![", "](https://)"],
+                "table": ["", "\n|Column1|Column2|Column3|\n|:-|:-:|-:|\n|Item1|Item2|Item3|\n"]
+            },
+            toolbar: [{
+                name: "bold",
+                className: "fa fa-bold",
+                title: "太字",
+                action: SimpleMDE.toggleBold
+            }, {
+                name: "italic",
+                className: "fa fa-italic",
+                title: "斜体",
+                action: SimpleMDE.toggleItalic
+            }, {
+                name: "strikethrough",
+                className: "fa fa-strikethrough",
+                title: "打消し線",
+                action: SimpleMDE.toggleStrikethrough
+            }, {
+                name: "heading",
+                className: "fa fa-header",
+                title: "見出し",
+                action: SimpleMDE.toggleHeadingSmaller
+            }, {
+                name: "horizontal-rule",
+                className: "fa fa-bars",
+                title: "分割",
+                action: SimpleMDE.drawHorizontalRule
+            }, "|", {
+                name: "quote",
+                className: "fa fa-quote-left",
+                title: "引用",
+                action: SimpleMDE.toggleBlockquote
+            }, {
+                name: "code",
+                className: "fa fa-code",
+                title: "コード",
+                action: SimpleMDE.toggleCodeBlock
+            }, "|", {
+                name: "table",
+                className: "fa fa-table",
+                title: "テーブル",
+                action: SimpleMDE.drawTable
+            }, {
+                name: "unordered-list",
+                className: "fa fa-list-ul",
+                title: "番号無しリスト",
+                action: SimpleMDE.toggleUnorderedList
+            }, {
+                name: "ordered-list",
+                className: "fa fa-list-ol",
+                title: "番号付きリスト",
+                action: SimpleMDE.toggleOrderedList
+            }, "|", {
+                name: "link",
+                className: "fa fa-link",
+                title: "リンク",
+                action: SimpleMDE.drawLink
+            }, {
+                name: "image",
+                className: "fa fa-picture-o",
+                title: "画像リンク",
+                action: SimpleMDE.drawImage
+            }, {
+                name: "dataurl",
+                className: "fa fa-file",
+                title: "バイナリ挿入",
+                async action(ctx){
+                    const cursor = {
+                        line: ctx.codemirror.getCursor("start").line,
+                        ch: ctx.codemirror.getCursor("start").ch + 1
+                    };
+
+                    ctx.codemirror.replaceSelection(`[](${await new FileReaderEx().readAsDataURL(await filePicker())})`);
+                    ctx.codemirror.setCursor(cursor);
+                    ctx.codemirror.focus();
+                }
+            }, "|", {
+                name: "side-by-side",
+                className: "fa fa-columns no-disable no-mobile",
+                title: "プレビュー分割表示",
+                action: SimpleMDE.toggleSideBySide
+            }, {
+                name: "preview",
+                className: "fa fa-eye no-disable",
+                title: "プレビュー表示",
+                action: SimpleMDE.togglePreview
+            }, {
+                name: "fullscreen",
+                className: "fa fa-arrows-alt no-disable no-mobile",
+                title: "フルスクリーン",
+                action: SimpleMDE.toggleFullScreen
+            }, "|", {
+                name: "load",
+                className: "fa fa-upload",
+                title: "読込",
+                async action(ctx){
+                    ctx.value(await new FileReaderEx().readAsText(await filePicker()));
+                    ctx.codemirror.focus();
+                }
+            }, {
+                name: "save",
+                className: "fa fa-download",
+                title: "保存",
+                action(ctx){
+                    fileSaver(new Blob([ctx.value()]));
+                    ctx.codemirror.focus();
+                }
+            }, "|", {
+                name: "remove",
+                className: "fa fa-trash",
+                title: "クリア",
+                action(ctx){
+                    ctx.value("");
+                    ctx.codemirror.focus();
+                }
+            }]
+        });
+
+        mde.toggleFullScreen();
+        mde.toggleSideBySide();
+
+        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("dragover", (ev)=>{
+            ev.preventDefault();
+            ev.target.style.backgroundColor = "#B7E5FF";
+            ev.dataTransfer.dropEffect = "copy";
+        });
+
+        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("dragleave", (ev)=>{
+            ev.preventDefault();
+            ev.target.style.backgroundColor = "";
+        });
+
+        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("drop", async(ev)=>{
+            ev.preventDefault();
+            ev.target.style.backgroundColor = "";
+
+            mde.value(await new FileReaderEx().readAsText(ev.dataTransfer.files[0]));
+            mde.codemirror.focus();
+        });
+    </script>
+</html>
