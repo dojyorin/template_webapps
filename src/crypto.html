@@ -12,8 +12,8 @@
     </body>
 
     <script>
-        async function hashDigest(data){
-            return new Uint8Array(await crypto.subtle.digest("SHA-512", data));
+        function hashDigest(data){
+            return crypto.subtle.digest("SHA-512", data);
         }
 
         function keyGenerate(){
@@ -37,10 +37,10 @@
             return crypto.subtle.importKey(encode, key, ec, false, usage);
         }
 
-        async function keyExport(key, isPub){
+        function keyExport(key, isPub){
             const encode = isPub ? "spki" : "pkcs8";
 
-            return new Uint8Array(await crypto.subtle.exportKey(encode, key));
+            return crypto.subtle.exportKey(encode, key);
         }
 
         function keyDerive(pub, priv){
@@ -66,21 +66,21 @@
 
             const result = await crypto.subtle.encrypt(aes, key, data);
 
-            const buffer = new Uint8Array(aes.iv.byteLength + result.byteLength);
-            buffer.set(aes.iv, 0);
-            buffer.set(new Uint8Array(result), aes.iv.byteLength);
+            const output = new Uint8Array(aes.iv.byteLength + result.byteLength);
+            output.set(aes.iv, 0);
+            output.set(new Uint8Array(result), aes.iv.byteLength);
 
-            return buffer;
+            return output.buffer;
         }
 
-        async function aesDecrypt(key, data){
+        function aesDecrypt(key, data){
             const aes = {
                 name: "AES-GCM",
-                iv: data.subarray(0, 16),
+                iv: data.slice(0, 16),
                 tagLength: 128
             };
 
-            return new Uint8Array(await crypto.subtle.decrypt(aes, key, data.subarray(16)));
+            return crypto.subtle.decrypt(aes, key, data.slice(16));
         }
 
         (async()=>{
