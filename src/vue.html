@@ -11,22 +11,35 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@latest/dist/vue.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.js"></script>
 
-        <title>Vue</title>
+        <title>Application</title>
     </head>
 
     <body>
         <div id="vue">
             <v-app>
-                <v-app-bar app dark height="52" color="secondary">
-                    <v-toolbar-title>Vuetify</v-toolbar-title>
+                <v-app-bar app dark height="52" color="blue">
+                    <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
+                    <v-toolbar-title>Application</v-toolbar-title>
                 </v-app-bar>
+
+                <v-navigation-drawer app temporary stateless v-model="nav">
+                    <v-toolbar dark height="52" color="blue">
+                        <v-spacer></v-spacer>
+                        <v-btn icon @click="toggleNav()">
+                            <v-icon large>mdi-close</v-icon>
+                        </v-btn>
+                    </v-toolbar>
+                </v-navigation-drawer>
 
                 <v-main>
                     <v-container fluid>
                         <v-row dense>
                             <v-col cols sm="12">
-                                <v-card flat color="transparent">
-                                    <v-card-title>{{getName}}</v-card-title>
+                                <v-card>
+                                    <v-card-title>Title</v-card-title>
+                                    <v-card-subtitle>Subtitle</v-card-subtitle>
+
+                                    <v-card-text>{{name}}</v-card-text>
                                 </v-card>
                             </v-col>
                         </v-row>
@@ -37,6 +50,9 @@
     </body>
 
     <style>
+        ::-webkit-scrollbar{
+            display: none !important;
+        }
         .v-application{
             font-family: "M PLUS 1p", "Kosugi" !important;
         }
@@ -49,23 +65,17 @@
 
             data(){
                 return {
-                    name: ""
+                    nav: false
                 };
             },
 
             mounted(){
-                this.setName();
-            },
-
-            computed: {
-                getName(){
-                    return `${this.name}Bar`;
-                }
+                this.nav = false;
             },
 
             methods: {
-                setName(){
-                    this.name = "Foo";
+                toggleNav(){
+                    this.nav = !this.nav;
                 }
             }
         });

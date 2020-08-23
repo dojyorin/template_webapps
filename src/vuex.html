@@ -13,15 +13,25 @@
         <script src="https://cdn.jsdelivr.net/npm/vue-router@latest/dist/vue-router.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.js"></script>
 
-        <title>Vuex</title>
+        <title>Application</title>
     </head>
 
     <body>
         <div id="vue">
             <v-app>
-                <v-app-bar app dark height="52" color="secondary">
-                    <v-toolbar-title>Vuetify</v-toolbar-title>
+                <v-app-bar app dark height="52" color="blue">
+                    <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
+                    <v-toolbar-title>Application</v-toolbar-title>
                 </v-app-bar>
+
+                <v-navigation-drawer app temporary stateless v-model="nav">
+                    <v-toolbar dark height="52" color="blue">
+                        <v-spacer></v-spacer>
+                        <v-btn icon @click="toggleNav()">
+                            <v-icon large>mdi-close</v-icon>
+                        </v-btn>
+                    </v-toolbar>
+                </v-navigation-drawer>
 
                 <v-main>
                     <router-view></router-view>
@@ -30,13 +40,14 @@
         </div>
     </body>
 
-    <script type="text/x-template" id="index">
+    <template id="index">
         <div>
             <v-container fluid>
                 <v-row dense>
                     <v-col cols sm="12">
                         <v-card>
                             <v-card-title>Location: "/"</v-card-title>
+                            <v-card-subtitle>Subtitle</v-card-subtitle>
 
                             <v-card-text>
                                 State: {{nowCount}}
@@ -50,9 +61,9 @@
                 </v-row>
             </v-container>
         </div>
-    </script>
+    </template>
 
-    <script type="text/x-template" id="foo">
+    <template id="foo">
         <div>
             <v-container fluid>
                 <v-row dense>
@@ -86,9 +97,12 @@
                 </v-row>
             </v-container>
         </div>
-    </script>
+    </template>
 
     <style>
+        ::-webkit-scrollbar{
+            display: none !important;
+        }
         .v-application{
             font-family: "M PLUS 1p", "Kosugi" !important;
         }
@@ -101,19 +115,23 @@
 
             data(){
                 return {
-                    name: ""
+                    nav: false
                 };
             },
 
             mounted(){
-                this.name = "Name";
+                this.nav = false;
                 this.addCount(10);
             },
 
             methods: {
                 ...Vuex.mapActions([
                     "addCount"
-                ])
+                ]),
+
+                toggleNav(){
+                    this.nav = !this.nav;
+                }
             },
 
             router: new VueRouter({
@@ -149,15 +167,15 @@
                     };
                 },
 
-                mutations: {
-                    addCount(state, payload){
-                        state.count += payload;
-                    }
-                },
-
                 getters: {
                     nowCount(state){
                         return state.count;
+                    }
+                },
+
+                mutations: {
+                    addCount(state, payload){
+                        state.count += payload;
                     }
                 },
 
