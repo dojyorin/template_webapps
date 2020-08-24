@@ -18,19 +18,6 @@
         <textarea id="mde"></textarea>
     </body>
 
-    <style>
-        .editor-preview,
-        .editor-preview-side{
-            font-family: "M PLUS 1p";
-        }
-
-        .CodeMirror,
-        .editor-preview code,
-        .editor-preview-side code{
-            font-family: "Kosugi";
-        }
-    </style>
-
     <script>
         window.addEventListener("dragover", (ev)=>{
             ev.preventDefault();
@@ -233,4 +220,17 @@
             mde.codemirror.focus();
         });
     </script>
+
+    <style>
+        .editor-preview,
+        .editor-preview-side{
+            font-family: "M PLUS 1p";
+        }
+
+        .CodeMirror,
+        .editor-preview code,
+        .editor-preview-side code{
+            font-family: "Kosugi";
+        }
+    </style>
 </html>

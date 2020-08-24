@@ -14,19 +14,19 @@
     <body>
     </body>
 
-    <style>
-    </style>
-
     <script type="text/babel" data-presets="env,stage-3">
     </script>
 
     <script>
         Babel.disableScriptTags();
 
-        function babelTransform(js){
-            return Babel.transform(js, {
+        function babelTransform(id){
+            return Babel.transform(document.getElementById(id).textContent, {
                 presets: ["env", "stage-3"]
             }).code;
         }
     </script>
+
+    <style>
+    </style>
 </html>
