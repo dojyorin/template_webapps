@@ -23,9 +23,8 @@
                     <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
                     <v-toolbar-title v-ripple class="px-2" @click="$router.push('/')">Application</v-toolbar-title>
 
-                    <div>
-                        <vue-header></vue-header>
-                    </div>
+                    <v-spacer></v-spacer>
+                    <vue-header></vue-header>
                 </v-app-bar>
 
                 <v-navigation-drawer app temporary v-model="drawer">
@@ -37,9 +36,7 @@
                         </v-btn>
                     </v-toolbar>
 
-                    <div :style="`padding-top:${height}px!important;`">
-                        <vue-drawer></vue-drawer>
-                    </div>
+                    <vue-drawer :style="`padding-top:${height}px!important;`"></vue-drawer>
                 </v-navigation-drawer>
 
                 <v-main>
@@ -266,6 +263,9 @@
         }
         .v-btn{
             text-transform: unset !important;
+        }
+        .v-toolbar__content :not(.v-app-bar__nav-icon) .v-btn:last-of-type{
+            margin-right: -12px !important;
         }
         .override_window_action{
             margin: 0 !important;
