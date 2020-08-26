@@ -23,12 +23,6 @@
                         codes.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
                     }
                     else if(typeof source === "string"){
-                        try{
-                            new Function(source);
-                        }
-                        catch{
-                            throw "source code syntax error.";
-                        }
                         codes.push(source);
                     }
                     else{
