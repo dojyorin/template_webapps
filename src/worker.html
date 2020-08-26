@@ -15,12 +15,28 @@
         class WorkerInline extends Worker{
             #ctx = "";
 
-            constructor(src){
-                if(!(typeof src === "function" || typeof src === "string")){
-                    throw new Error("must be 'function' or 'string'");
+            constructor(...sources){
+                const code = [];
+
+                for(const source of sources){
+                    if(typeof source === "function"){
+                        code.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
+                    }
+                    else if(typeof source === "string"){
+                        try{
+                            new Function(source);
+                        }
+                        catch{
+                            throw "source code syntax error.";
+                        }
+                        code.push(source);
+                    }
+                    else{
+                        throw "source code must be 'function' or 'string'.";
+                    }
                 }
 
-                const ctx = URL.createObjectURL(new Blob([typeof src === "function" ? src.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "") : src]));
+                const ctx = URL.createObjectURL(new Blob([code.join(";\n")]));
                 super(ctx);
                 this.#ctx = ctx;
             }

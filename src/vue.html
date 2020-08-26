@@ -21,16 +21,17 @@
             <v-app>
                 <v-app-bar app dark :height="height" :color="color">
                     <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
-                    <v-toolbar-title v-ripple class="px-2" @click="$router.push('/')">Application</v-toolbar-title>
+                    <v-toolbar-title>Title</v-toolbar-title>
 
                     <v-spacer></v-spacer>
                     <vue-header></vue-header>
                 </v-app-bar>
 
                 <v-navigation-drawer app temporary v-model="drawer">
-                    <v-toolbar absolute dark width="100%" :height="height" :color="color">
+                    <v-toolbar dark absolute width="100%" :height="height" :color="color">
                         <v-toolbar-title>Menu</v-toolbar-title>
                         <v-spacer></v-spacer>
+
                         <v-btn icon @click="drawer = false">
                             <v-icon large>mdi-close</v-icon>
                         </v-btn>
@@ -42,42 +43,67 @@
                 <v-main>
                     <router-view></router-view>
                 </v-main>
+
+                <v-footer>
+                    <vue-footer></vue-footer>
+                </v-footer>
             </v-app>
         </div>
     </body>
 
-    <template id="layouts_header">
+    <template id="components_layouts_header">
+        <vue-menu system color="purple" title="Notify" icon="mdi-bell-outline" :count="1"></vue-menu>
     </template>
 
-    <template id="layouts_drawer">
+    <template id="components_layouts_drawer">
+        <v-list>
+            <template v-for="(page, i) in pages">
+                <v-list-item :key="i" :to="page.to">
+                    <v-list-item-icon class="mr-4">
+                        <v-icon>{{page.icon}}</v-icon>
+                    </v-list-item-icon>
+
+                    <v-list-item-content>
+                        <v-list-item-title>{{page.title}}</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </template>
+        </v-list>
     </template>
 
-    <template id="layouts_footer">
+    <template id="components_layouts_footer">
     </template>
 
-    <template id="windows_notify">
+    <template id="components_windows_notify">
         <v-snackbar app dark top :timeout="5000" :color="color" :value="value">
             <span>
                 <slot></slot>
             </span>
 
             <template #action="{attrs}">
-                <v-btn text v-bind="attrs" @click="$emit('input')">閉じる</v-btn>
+                <v-btn icon v-bind="attrs" @click="$emit('input')">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
             </template>
         </v-snackbar>
     </template>
 
-    <template id="windows_dialog">
-        <v-dialog persistent scrollable max-width="800" :value="value">
-            <v-card>
+    <template id="components_windows_dialog">
+        <v-dialog persistent scrollable :fullscreen="full" :value="value">
+            <v-card :tile="full">
                 <v-system-bar window dark :color="color">
                     <v-icon>{{icon}}</v-icon>
                     <span>{{title}}</span>
 
                     <v-spacer></v-spacer>
 
+                    <v-btn icon tile @click="full = !full">
+                        <v-icon v-if="full" class="mr-0">mdi-window-restore</v-icon>
+                        <v-icon v-else class="mr-0">mdi-window-maximize</v-icon>
+                    </v-btn>
+
                     <v-btn icon tile @click="$emit('input')">
-                        <v-icon class="override_window_action">mdi-window-close</v-icon>
+                        <v-icon class="mr-0">mdi-window-close</v-icon>
                     </v-btn>
                 </v-system-bar>
 
@@ -88,139 +114,148 @@
         </v-dialog>
     </template>
 
+    <template id="components_windows_menu">
+        <v-menu offset-y min-width="300" :close-on-content-click="false">
+            <template #activator="{on, attrs}">
+                <v-badge overlap bottom color="grey" offset-y="48" offset-x="8" :content="count" :value="!!count">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                        <v-icon large>{{icon}}</v-icon>
+                    </v-btn>
+                </v-badge>
+            </template>
+
+            <v-card>
+                <v-system-bar v-if="system" window dark :color="color">
+                    <v-icon>{{icon}}</v-icon>
+                    <span>{{title}}</span>
+                </v-system-bar>
+
+                <v-card-text class="pa-0">
+                    <slot></slot>
+                </v-card-text>
+            </v-card>
+        </v-menu>
+    </template>
+
     <template id="pages_index">
-        <v-container fluid>
-            <v-row dense>
-                <v-col cols sm="12">
-                    <v-card>
-                        <v-card-title>Location: {{$route.path}}</v-card-title>
-                        <v-card-subtitle>Subtitle</v-card-subtitle>
-
-                        <v-card-text>
-                            State: OK
-                        </v-card-text>
-
-                        <v-card-actions>
-                            <v-btn color="primary" to="/sub">SubPage</v-btn>
-                            <v-btn color="primary" @click="notify = true">Notify</v-btn>
-                            <v-btn color="primary" @click="dialog = true">Dialog</v-btn>
-                        </v-card-actions>
-
-                        <vue-notify color="error" v-model="notify">test</vue-notify>
-                        <vue-dialog color="blue" title="Title" icon="mdi-information" v-model="dialog">
-                            test
-                        </vue-dialog>
-                    </v-card>
-                </v-col>
-            </v-row>
-        </v-container>
+        <div>
+            <v-btn @click="notify = true">Notify</v-btn>
+            <vue-notify color="purple" v-model="notify"></vue-notify>
+        </div>
     </template>
 
     <template id="pages_sub">
-        <v-container fluid>
-            <v-row dense>
-                <v-col cols sm="12">
-                    <v-list>
-                        <v-list-item to="/">
-                            <v-list-item-icon>
-                                <v-icon large>mdi-home</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>Home</v-list-item-title>
-                                <v-list-item-subtitle>Jump to /</v-list-item-subtitle>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list>
-                </v-col>
-            </v-row>
-        </v-container>
+        <div>
+            <v-btn @click="dialog = true">Dialog</v-btn>
+            <vue-dialog color="purple" title="Dialog" icon="mdi-information-outline" v-model="dialog"></vue-dialog>
+        </div>
     </template>
 
     <script>
         const vue = (()=>{
-            const layouts_header = {
-                template: "#layouts_header"
-            };
-
-            const layouts_drawer = {
-                template: "#layouts_drawer"
-            };
-
-            const layouts_footer = {
-                template: "#layouts_footer"
-            };
-
-            const windows_notify = {
-                template: "#windows_notify",
+            const components_windows_notify = {
+                template: "#components_windows_notify",
                 props: {
                     value: Boolean,
                     color: String
                 }
             };
 
-            const windows_dialog = {
-                template: "#windows_dialog",
+            const components_windows_dialog = {
+                template: "#components_windows_dialog",
                 props: {
                     value: Boolean,
                     title: String,
                     color: String,
                     icon: String
+                },
+                data(){
+                    return {
+                        full: false
+                    };
                 }
             };
 
+            const components_windows_menu = {
+                template: "#components_windows_menu",
+                props: {
+                    value: Boolean,
+                    title: String,
+                    color: String,
+                    icon: String,
+                    count: Number,
+                    system: Boolean
+                }
+            };
+
+            const components_layouts_header = {
+                template: "#components_layouts_header",
+                components: {
+                    "vue-menu": components_windows_menu
+                }
+            };
+
+            const components_layouts_drawer = {
+                template: "#components_layouts_drawer",
+                data(){
+                    return {
+                        pages: [{
+                            title: "Main",
+                            to: "/",
+                            icon: "mdi-home"
+                        }, {
+                            title: "Sub",
+                            to: "/sub",
+                            icon: "mdi-web"
+                        }]
+                    };
+                }
+            };
+
+            const components_layouts_footer = {
+                template: "#components_layouts_footer"
+            };
+
             const pages_index = {
-                path: "/",
+                template: "#pages_index",
 
-                component: {
-                    template: "#pages_index",
+                components: {
+                    "vue-notify": components_windows_notify
+                },
 
-                    data(){
-                        return {
-                            notify: false,
-                            dialog: false
-                        };
-                    },
-
-                    components: {
-                        "vue-notify": windows_notify,
-                        "vue-dialog": windows_dialog
-                    }
+                data(){
+                    return {
+                        notify: false
+                    };
                 }
             };
 
             const pages_sub = {
-                path: "/sub",
+                template: "#pages_sub",
 
-                component: {
-                    template: "#pages_sub"
+                components: {
+                    "vue-dialog": components_windows_dialog
+                },
+
+                data(){
+                    return {
+                        dialog: false
+                    };
                 }
             };
 
             const router_index = {
-                routes: [
-                    pages_index,
-                    pages_sub
-                ]
-            };
-
-            const store_sub = {
-                namespaced: true,
-
-                state(){
-                    return {};
-                },
-                getters: {},
-                mutations: {},
-                actions: {}
+                routes: [{
+                    path: "/",
+                    component: pages_index
+                }, {
+                    path: "/sub",
+                    component: pages_sub
+                }]
             };
 
             const store_index = {
                 namespaced: true,
-
-                modules: {
-                    sub: store_sub
-                },
 
                 state(){
                     return {};
@@ -237,18 +272,18 @@
                 router: new VueRouter(router_index),
                 store: new Vuex.Store(store_index),
 
-                data(){
-                    return {
-                        drawer: false,
-                        height: 52,
-                        color: "blue"
-                    };
+                components: {
+                    "vue-header": components_layouts_header,
+                    "vue-drawer": components_layouts_drawer,
+                    "vue-footer": components_layouts_footer
                 },
 
-                components: {
-                    "vue-header": layouts_header,
-                    "vue-drawer": layouts_drawer,
-                    "vue-footer": layouts_footer
+                data(){
+                    return {
+                        height: 52,
+                        color: "blue",
+                        drawer: false
+                    };
                 }
             });
         })();
