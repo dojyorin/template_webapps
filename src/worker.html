@@ -16,11 +16,11 @@
             #ctx = "";
 
             constructor(...sources){
-                const code = [];
+                const codes = [];
 
                 for(const source of sources){
                     if(typeof source === "function"){
-                        code.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
+                        codes.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
                     }
                     else if(typeof source === "string"){
                         try{
@@ -29,14 +29,14 @@
                         catch{
                             throw "source code syntax error.";
                         }
-                        code.push(source);
+                        codes.push(source);
                     }
                     else{
                         throw "source code must be 'function' or 'string'.";
                     }
                 }
 
-                const ctx = URL.createObjectURL(new Blob([code.join(";\n")]));
+                const ctx = URL.createObjectURL(new Blob([codes.join(";\n")]));
                 super(ctx);
                 this.#ctx = ctx;
             }
