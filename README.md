@@ -1,2 +1,1 @@
-# Template for SPA
-Template for SPA
+# Web Application Templates
