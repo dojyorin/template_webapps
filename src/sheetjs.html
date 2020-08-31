@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+        <script src="https://cdn.jsdelivr.net/npm/js-xlsx@latest/dist/xlsx.full.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-xlsx@latest/dist/cpexcel.min.js"></script>
+
+        <title>SheetJS</title>
+    </head>
+
+    <body>
+        <input type="file" id="file">
+    </body>
+
+    <script>
+        document.getElementById("file").addEventListener("change", async({target})=>{
+            const buffer = await target.files[0]?.arrayBuffer() ?? new ArrayBuffer(0);
+
+            const book = XLSX.read(new Uint8Array(buffer), {
+                type: "array",
+                codepage: 932
+            });
+
+            const data = XLSX.write(book, {
+                type: "base64",
+                codepage: 932,
+                bookType: "xlsx"
+            });
+
+            console.log(data);
+        });
+    </script>
+</html>
