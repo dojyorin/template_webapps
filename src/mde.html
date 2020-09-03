@@ -5,8 +5,8 @@
         <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Kosugi|M+PLUS+1p&amp;subset=japanese">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
 
         <script src="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
@@ -62,25 +62,24 @@
             link.href = URL.createObjectURL(blob);
             link.download = name;
             link.click();
-
             URL.revokeObjectURL(link.href);
         }
 
         const mde = new SimpleMDE({
             element: document.getElementById("mde"),
-            autofocus: true,
-            forceSync: true,
             tabSize: 4,
-            spellChecker: false,
             status: false,
+            forceSync: true,
+            autofocus: true,
+            spellChecker: false,
             renderingConfig: {
                 codeSyntaxHighlighting: true
             },
             insertTexts: {
-                "horizontalRule": ["", "\n---\n"],
-                "link": ["[", "](https://)"],
-                "image": ["![", "](https://)"],
-                "table": ["", "\n|Column1|Column2|Column3|\n|:-|:-:|-:|\n|Item1|Item2|Item3|\n"]
+                horizontalRule: ["", "\n---\n"],
+                link: ["[", "](https://)"],
+                image: ["![", "](https://)"],
+                table: ["", "\n|Column1|Column2|Column3|\n|:-|:-:|-:|\n|Item1|Item2|Item3|\n"]
             },
             toolbar: [{
                 name: "bold",
@@ -151,8 +150,9 @@
                         line: ctx.codemirror.getCursor("start").line,
                         ch: ctx.codemirror.getCursor("start").ch + 1
                     };
+                    const file = await new FileReaderEx().readAsDataURL(await filePicker());
 
-                    ctx.codemirror.replaceSelection(`[](${await new FileReaderEx().readAsDataURL(await filePicker())})`);
+                    ctx.codemirror.replaceSelection(`[](${file})`);
                     ctx.codemirror.setCursor(cursor);
                     ctx.codemirror.focus();
                 }
@@ -176,7 +176,9 @@
                 className: "fa fa-upload",
                 title: "読込",
                 async action(ctx){
-                    ctx.value(await new FileReaderEx().readAsText(await filePicker()));
+                    const file = await new FileReaderEx().readAsText(await filePicker());
+
+                    ctx.value(file);
                     ctx.codemirror.focus();
                 }
             }, {
@@ -184,7 +186,7 @@
                 className: "fa fa-download",
                 title: "保存",
                 action(ctx){
-                    fileSaver(new Blob([ctx.value()]));
+                    fileSaver(new Blob([ctx.value()]), "document.md");
                     ctx.codemirror.focus();
                 }
             }, "|", {
@@ -192,33 +194,16 @@
                 className: "fa fa-trash",
                 title: "クリア",
                 action(ctx){
-                    ctx.value("");
-                    ctx.codemirror.focus();
+                    if(confirm("削除してもよろしいですか?")){
+                        ctx.value("");
+                        ctx.codemirror.focus();
+                    }
                 }
             }]
         });
 
         mde.toggleFullScreen();
         mde.toggleSideBySide();
-
-        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("dragover", (ev)=>{
-            ev.preventDefault();
-            ev.target.style.backgroundColor = "#B7E5FF";
-            ev.dataTransfer.dropEffect = "copy";
-        });
-
-        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("dragleave", (ev)=>{
-            ev.preventDefault();
-            ev.target.style.backgroundColor = "";
-        });
-
-        document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("drop", async(ev)=>{
-            ev.preventDefault();
-            ev.target.style.backgroundColor = "";
-
-            mde.value(await new FileReaderEx().readAsText(ev.dataTransfer.files[0]));
-            mde.codemirror.focus();
-        });
     </script>
 
     <style>
