@@ -163,7 +163,7 @@
                 className: "mdi mdi-printer-eye icon_large",
                 title: "改ページ",
                 action({codemirror}){
-                    codemirror.replaceSelection("\n<div style=\"page-break-before:always!important\"></div>\n");
+                    codemirror.replaceSelection("\n<div style=\"page-break-before:always!important;\"></div>\n");
                     codemirror.focus();
                 }
             }, "|", {
