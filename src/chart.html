@@ -18,7 +18,7 @@
 
     <script>
         new Chart(document.getElementById("chart").getContext("2d"), {
-            type: "line",
+            type: "bar",
 
             options: {
                 title: {
@@ -29,15 +29,14 @@
 
             data: {
                 labels: ["January", "February", "March", "April", "May", "June", "July"],
+
                 datasets: [{
-                    label: "My First dataset",
+                    label: "First Dataset",
                     backgroundColor: "rgb(255, 127, 127)",
-                    borderColor: "rgb(255, 127, 127)",
                     data: [0, 10, 5, 2, 20, 30, 40]
                 }, {
-                    label: "My Second dataset",
+                    label: "Second Dataset",
                     backgroundColor: "rgb(127, 127, 255)",
-                    borderColor: "rgb(127, 127, 255)",
                     data: [0, 5, 10, 4, 10, 30, 50]
                 }]
             }
