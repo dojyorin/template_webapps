@@ -98,7 +98,7 @@
 
         const gpgpu1 = new GPGPU(document.getElementById("shader").textContent.trim());
 
-        const result1 = gpgpu.compute(sample, 1024, 1, 1);
+        const result1 = gpgpu1.compute(sample1, 1024, 1, 1);
         console.log(result1);
 
         const sample2 = new Float32Array(1024).map(() => Math.random());

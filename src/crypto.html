@@ -17,70 +17,62 @@
         }
 
         function keyGenerate(){
-            const ec = {
+            return crypto.subtle.generateKey({
                 name: "ECDH",
                 namedCurve: "P-521"
-            };
-            const usage = ["deriveKey"];
-
-            return crypto.subtle.generateKey(ec, true, usage);
+            }, true, [
+                "deriveKey"
+            ]);
         }
 
         function keyImport(key, isPub){
-            const encode = isPub ? "spki" : "pkcs8";
-            const ec = {
+            return crypto.subtle.importKey(isPub ? "spki" : "pkcs8", key, {
                 name: "ECDH",
                 namedCurve: "P-521"
-            };
-            const usage = isPub ? [] : ["deriveKey"];
-
-            return crypto.subtle.importKey(encode, key, ec, false, usage);
+            }, false, isPub ? [] : [
+                "deriveKey"
+            ]);
         }
 
         function keyExport(key, isPub){
-            const encode = isPub ? "spki" : "pkcs8";
-
-            return crypto.subtle.exportKey(encode, key);
+            return crypto.subtle.exportKey(isPub ? "spki" : "pkcs8", key);
         }
 
         function keyDerive(pub, priv){
-            const aes = {
-                name: "AES-GCM",
-                length: 256
-            };
-            const ec = {
+            return crypto.subtle.deriveKey({
                 name: "ECDH",
                 public: pub
-            };
-            const usage = ["encrypt", "decrypt"];
-
-            return crypto.subtle.deriveKey(ec, priv, aes, false, usage);
+            }, priv, {
+                name: "AES-GCM",
+                length: 256
+            }, false, [
+                "encrypt",
+                "decrypt"
+            ]);
         }
 
         async function aesEncrypt(key, data){
-            const aes = {
+            const iv = crypto.getRandomValues(new Uint8Array(16));
+
+            const result = await crypto.subtle.encrypt({
                 name: "AES-GCM",
-                iv: crypto.getRandomValues(new Uint8Array(16)),
-                tagLength: 128
-            };
+                tagLength: 128,
+                iv
+            }, key, data);
 
-            const result = await crypto.subtle.encrypt(aes, key, data);
-
-            const output = new Uint8Array(aes.iv.byteLength + result.byteLength);
-            output.set(aes.iv, 0);
-            output.set(new Uint8Array(result), aes.iv.byteLength);
+            const output = new Uint8Array(iv.byteLength + result.byteLength);
+            output.set(iv, 0);
+            output.set(new Uint8Array(result), iv.byteLength);
 
             return output.buffer;
         }
 
         function aesDecrypt(key, data){
-            const aes = {
+            return crypto.subtle.decrypt({
                 name: "AES-GCM",
                 iv: data.slice(0, 16),
                 tagLength: 128
-            };
-
-            return crypto.subtle.decrypt(aes, key, data.slice(16));
+            }, key, data.slice(16));
         }
 
         (async()=>{

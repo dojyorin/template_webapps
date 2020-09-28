@@ -18,8 +18,8 @@
         axios.defaults.paramsSerializer = v => Qs.stringify(v);
         axios.defaults.transformRequest = v => Qs.stringify(v);
 
-        async function httpMiniFetch(path, type){
-            const options = {
+        async function httpGet(path, type){
+            return (await fetch(path, {
                 method: "GET",
                 mode: "cors",
                 cache: "no-cache",
@@ -31,36 +31,15 @@
                 integrity: "",
                 headers: {},
                 body: null
-            };
-
-            return (await fetch(path, options))[type]();
-        }
-
-        function httpMiniXhr(path, type){
-            const xhr = new XMLHttpRequest();
-
-            xhr.responseType = type;
-            xhr.withCredentials = false;
-
-            xhr.open("GET", path, true, null, null);
-
-            return new Promise((resolve, reject)=>{
-                xhr.addEventListener("load", () => resolve(xhr.response));
-                xhr.addEventListener("error", () => reject());
-
-                xhr.send(null);
-            });
+            }))[type]();
         }
 
         (async()=>{
-            const {data: response1} = await axios.get("https://ntp-a1.nict.go.jp/cgi-bin/json");
-            console.log(response1);
+            const {data} = await axios.get("https://ntp-a1.nict.go.jp/cgi-bin/json");
+            console.log(data);
 
-            const response2 = await httpMiniFetch("https://ntp-a1.nict.go.jp/cgi-bin/json", "json");
-            console.log(response2);
-
-            const response3 = await httpMiniXhr("https://ntp-a1.nict.go.jp/cgi-bin/json", "json");
-            console.log(response3);
+            const response = await httpGet("https://ntp-a1.nict.go.jp/cgi-bin/json", "json");
+            console.log(response);
         })();
     </script>
 </html>

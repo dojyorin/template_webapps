@@ -18,7 +18,7 @@
     </body>
 
     <script>
-        function qrParse(video){
+        function parseQr(video){
             const canvas = new OffscreenCanvas(240, 320);
             const render = canvas.getContext("2d");
 
@@ -37,14 +37,14 @@
             });
         }
 
-        function qrGenerate(data){
+        function generateQr(data){
             const canvas = new OffscreenCanvas(1, 1);
 
             return new Promise((res, rej) => QRCode.toCanvas(canvas, data, {}, err => !err ? res(canvas) : rej(err)));
         }
 
         document.getElementById("data").addEventListener("change", async({target})=>{
-            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await qrGenerate(target.value)).transferToImageBitmap());
+            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await generateQr(target.value)).transferToImageBitmap());
         });
 
         (async()=>{
@@ -56,7 +56,7 @@
                 }
             });
 
-            document.getElementById("result").value = await qrParse(video);
+            document.getElementById("result").value = await parseQr(video);
         })();
     </script>
 </html>

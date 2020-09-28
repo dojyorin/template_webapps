@@ -16,15 +16,13 @@
 
     <script>
         async function enZip(files){
-            const option = {
+            return files.reduce((zip, [name, file]) => zip.file(name, file), new JSZip()).generateAsync({
                 type: "blob",
                 compression: "DEFLATE",
                 compressionOptions: {
                     level: 9
                 }
-            };
-
-            return files.reduce((zip, [name, file]) => zip.file(name, file), new JSZip()).generateAsync(option);
+            });
         }
 
         async function unZip(archive){
