@@ -19,18 +19,21 @@
                 const codes = [];
 
                 for(const source of sources){
-                    if(typeof source === "function"){
-                        codes.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
-                    }
-                    else if(typeof source === "string"){
-                        codes.push(source);
-                    }
-                    else{
-                        throw "source code must be 'function' or 'string'.";
+                    switch(typeof source){
+                        case "function":
+                            codes.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
+                            break;
+
+                        case "string":
+                            codes.push(source);
+                            break;
+
+                        default:
+                            throw "source code must be 'function' or 'string'.";
                     }
                 }
 
-                const ctx = URL.createObjectURL(new Blob([codes.join(";\n")]));
+                const ctx = URL.createObjectURL(new Blob([codes.join(";")]));
                 super(ctx);
                 this.#ctx = ctx;
             }
