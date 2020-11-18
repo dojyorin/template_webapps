@@ -16,24 +16,13 @@
             #ctx = "";
 
             constructor(...sources){
-                const codes = [];
-
                 for(const source of sources){
-                    switch(typeof source){
-                        case "function":
-                            codes.push(source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, ""));
-                            break;
-
-                        case "string":
-                            codes.push(source);
-                            break;
-
-                        default:
-                            throw "source code must be 'function' or 'string'.";
+                    if(typeof source !== "function"){
+                        throw "Allowed argument is only 'function'.";
                     }
                 }
 
-                const ctx = URL.createObjectURL(new Blob([codes.join(";")]));
+                const ctx = URL.createObjectURL(new Blob([sources.map(source => source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
                 super(ctx);
                 this.#ctx = ctx;
             }
