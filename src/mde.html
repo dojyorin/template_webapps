@@ -48,13 +48,15 @@
             }
         }
 
-        function pickFile(){
+        function loadFile(multiple, accept){
             const input = document.createElement("input");
             input.type = "file";
-            input.multiple = false;
+            input.multiple = !!multiple;
+            input.accept = accept ?? "";
 
-            return new Promise((res)=>{
-                input.addEventListener("change", ({target}) => res(target.files[0]));
+            return new Promise((res, rej)=>{
+                input.addEventListener("change", ({target}) => res(input.multiple ? Array.from(target.files) : target.files[0]));
+                input.addEventListener("error", ({message}) => rej(message));
                 input.click();
             });
         }
@@ -154,9 +156,8 @@
                         line: codemirror.getCursor("start").line,
                         ch: codemirror.getCursor("start").ch + 1
                     };
-                    const file = await new FileReaderEx().readAsDataURL(await pickFile());
 
-                    codemirror.replaceSelection(`[](${file})`);
+                    codemirror.replaceSelection(`[](${await new FileReaderEx().readAsDataURL(await loadFile())})`);
                     codemirror.setCursor(cursor);
                     codemirror.focus();
                 }
@@ -188,10 +189,8 @@
                 className: "mdi mdi-file-upload-outline icon_large",
                 title: "読込",
                 async action(ctx){
-                    const file = await new FileReaderEx().readAsText(await pickFile());
-
                     if(confirm("上書きしてもよろしいですか?")){
-                        ctx.value(file);
+                        ctx.value(await new FileReaderEx().readAsText(await loadFile()));
                         ctx.codemirror.focus();
                     }
                 }

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
+
+        <title>I/O</title>
+    </head>
+
+    <body>
+        <button type="button" id="load">Load</button>
+        <button type="button" id="save">Save</button>
+    </body>
+
+    <script async type="module">
+        function loadFile(multiple, accept){
+            const input = document.createElement("input");
+            input.type = "file";
+            input.multiple = !!multiple;
+            input.accept = accept ?? "";
+
+            return new Promise((res, rej)=>{
+                input.addEventListener("change", ({target}) => res(input.multiple ? Array.from(target.files) : target.files[0]));
+                input.addEventListener("error", ({message}) => rej(message));
+                input.click();
+            });
+        }
+
+        function saveFile(blob, name){
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = name;
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+        }
+
+        function notifyAlert(msg){
+            const dialog = document.createElement("dialog");
+            dialog.textContent = `\u{1F514} ${msg}`;
+            dialog.show();
+
+            setTimeout(() => dialog.remove(), 5000);
+            document.body.appendChild(dialog);
+        }
+
+        document.getElementById("load").addEventListener("click", async()=>{
+            console.log(await loadFile());
+            notifyAlert("Loaded!");
+        });
+        document.getElementById("save").addEventListener("click", ()=>{
+            saveFile(new Blob(["test"]), "example.txt");
+            notifyAlert("Saved!");
+        });
+    </script>
+
+    <style>
+        dialog{
+            top: 10px;
+            transition: all 0.1s;
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 20px;
+            background-color: #CACACA;
+            box-shadow: 2px 3px 4px 0 #0000004D;
+        }
+    </style>
+</html>
