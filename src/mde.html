@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
@@ -19,7 +20,7 @@
         <textarea id="mde"></textarea>
     </body>
 
-    <script>
+    <script async type="module">
         window.addEventListener("dragover", (ev)=>{
             ev.preventDefault();
             ev.dataTransfer.dropEffect = "none";
@@ -34,35 +35,36 @@
                 return new Promise((res, rej)=>{
                     super.addEventListener("load", ({target}) => res(target.result));
                     super.addEventListener("error", ({target}) => rej(target.error));
-                    super[ctx](blob);
+                    super[`readAs${ctx}`](blob);
                 });
             }
 
             readAsDataURL(blob){
-                return this.#readAs(blob, "readAsDataURL");
+                return this.#readAs(blob, "DataURL");
             }
 
             readAsText(blob){
-                return this.#readAs(blob, "readAsText");
+                return this.#readAs(blob, "Text");
             }
         }
 
-        function filePicker(){
+        function pickFile(){
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = false;
 
-            return new Promise((res, rej)=>{
+            return new Promise((res)=>{
                 input.addEventListener("change", ({target}) => res(target.files[0]));
                 input.click();
             });
         }
 
-        function fileSaver(blob, name){
+        function saveFile(blob, name){
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = name;
             link.click();
+
             URL.revokeObjectURL(link.href);
         }
 
@@ -152,7 +154,7 @@
                         line: codemirror.getCursor("start").line,
                         ch: codemirror.getCursor("start").ch + 1
                     };
-                    const file = await new FileReaderEx().readAsDataURL(await filePicker());
+                    const file = await new FileReaderEx().readAsDataURL(await pickFile());
 
                     codemirror.replaceSelection(`[](${file})`);
                     codemirror.setCursor(cursor);
@@ -186,7 +188,7 @@
                 className: "mdi mdi-file-upload-outline icon_large",
                 title: "読込",
                 async action(ctx){
-                    const file = await new FileReaderEx().readAsText(await filePicker());
+                    const file = await new FileReaderEx().readAsText(await pickFile());
 
                     if(confirm("上書きしてもよろしいですか?")){
                         ctx.value(file);
@@ -198,7 +200,7 @@
                 className: "mdi mdi-file-download-outline icon_large",
                 title: "保存",
                 action(ctx){
-                    fileSaver(new Blob([ctx.value()]), "document.md");
+                    saveFile(new Blob([ctx.value()]), "document.md");
                     ctx.codemirror.focus();
                 }
             }, {

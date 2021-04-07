@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
 
         <script src="https://cdn.jsdelivr.net/npm/jszip@latest/dist/jszip.min.js"></script>
 
-        <title>Zip</title>
+        <title>ZIP</title>
     </head>
 
     <body>
@@ -14,10 +15,10 @@
         <input type="file" id="zip" accept="application/zip">
     </body>
 
-    <script>
-        async function enZip(files){
-            return files.reduce((zip, [name, file]) => zip.file(name, file), new JSZip()).generateAsync({
-                type: "blob",
+    <script async type="module">
+        function zipEncode(files){
+            return files.reduce((ctx, [file, name]) => ctx.file(name, file), new JSZip()).generateAsync({
+                type: "arraybuffer",
                 compression: "DEFLATE",
                 compressionOptions: {
                     level: 9
@@ -25,16 +26,16 @@
             });
         }
 
-        async function unZip(archive){
-            return Promise.all(Object.values((await new JSZip().loadAsync(archive)).files).map(async file => [file.name, await file.async("blob")]));
+        async function zipDecode(zip){
+            return Promise.all(Object.values((await new JSZip().loadAsync(zip)).files).map(async file => [await file.async("arraybuffer"), file.name]));
         }
 
         document.getElementById("files").addEventListener("change", async({target})=>{
-            console.log(await enZip(Array.from(target.files).map(f => [f.name, f])));
+            console.log(await zipEncode(Array.from(target.files).map(f => [f, f.name])));
         });
 
         document.getElementById("zip").addEventListener("change", async({target})=>{
-            console.log(await unZip(target.files[0]));
+            console.log(await zipDecode(target.files[0]));
         });
     </script>
 </html>

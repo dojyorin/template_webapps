@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
 
         <script src="https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/jsqr@latest/dist/jsQR.min.js"></script>
@@ -17,7 +18,7 @@
         <textarea id="data"></textarea>
     </body>
 
-    <script>
+    <script async type="module">
         function parseQr(video){
             const canvas = new OffscreenCanvas(240, 320);
             const render = canvas.getContext("2d");
@@ -47,16 +48,14 @@
             document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await generateQr(target.value)).transferToImageBitmap());
         });
 
-        (async()=>{
-            const video = document.getElementById("video");
-            video.srcObject = await navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: {
-                    facingMode: "environment"
-                }
-            });
+        const video = document.getElementById("video");
+        video.srcObject = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+                facingMode: "environment"
+            }
+        });
 
-            document.getElementById("result").value = await parseQr(video);
-        })();
+        document.getElementById("result").value = await parseQr(video);
     </script>
 </html>

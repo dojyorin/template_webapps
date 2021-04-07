@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
 
         <title>WebWorker</title>
     </head>
@@ -11,18 +12,18 @@
         Web Worker API
     </body>
 
-    <script>
+    <script async type="module">
         class WorkerInline extends Worker{
             #ctx = "";
 
-            constructor(...sources){
-                for(const source of sources){
-                    if(typeof source !== "function"){
+            constructor(...srcs){
+                for(const src of srcs){
+                    if(typeof src !== "function"){
                         throw "Allowed argument is only 'function'.";
                     }
                 }
 
-                const ctx = URL.createObjectURL(new Blob([sources.map(source => source.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
+                const ctx = URL.createObjectURL(new Blob([srcs.map(src => src.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
                 super(ctx);
                 this.#ctx = ctx;
             }
@@ -35,9 +36,7 @@
 
         const worker = new WorkerInline(()=>{
             self.addEventListener("message", ({data})=>{
-                const bytes = new Uint8Array(data.length);
-
-                self.postMessage(bytes, [bytes.buffer]);
+                self.postMessage(data, [data.buffer]);
             });
         });
 

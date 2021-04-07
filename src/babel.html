@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="referrer" content="never">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
 
         <script src="https://cdn.jsdelivr.net/npm/@babel/polyfill@latest/dist/polyfill.min.js"></script>
@@ -15,25 +16,6 @@
     </body>
 
     <script type="text/babel" data-presets="env,stage-3">
-    </script>
-
-    <script type="text/babel" id="js_main">
-    </script>
-
-    <script>
-        Babel.disableScriptTags();
-
-        function babelTransform(id){
-            return Babel.transform(document.getElementById(id).textContent, {
-                presets: ["env", "stage-3"]
-            }).code;
-        }
-
-        (function(){
-            const script = document.createElement("script");
-            script.textContent = babelTransform("js_main");
-            document.head.appendChild(script);
-        })();
     </script>
 
     <style>
