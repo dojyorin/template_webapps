@@ -27,21 +27,21 @@
             });
         }
 
-        function saveFile(blob, name){
+        function saveFile(data, name){
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
+            link.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
             link.download = name;
             link.click();
 
             URL.revokeObjectURL(link.href);
         }
 
-        function notifyAlert(msg){
+        function notifyAlert(msg, timeout){
             const dialog = document.createElement("dialog");
             dialog.textContent = `\u{1F514} ${msg}`;
             dialog.show();
 
-            setTimeout(() => dialog.remove(), 5000);
+            setTimeout(() => dialog.remove(), timeout ?? 5000);
             document.body.appendChild(dialog);
         }
 
