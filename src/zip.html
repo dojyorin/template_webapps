@@ -5,37 +5,44 @@
         <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <script src="https://cdn.jsdelivr.net/npm/jszip@latest/dist/jszip.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@latest/dist/zip.min.js"></script>
 
         <title>ZIP</title>
     </head>
 
     <body>
-        <input multiple type="file" id="files">
-        <input type="file" accept=".zip" id="zip">
+        <input multiple type="file" id="raws">
+        <input type="file" accept=".zip" id="archive">
     </body>
 
     <script async type="module">
-        function zipEncode(files){
-            return files.reduce((ctx, [file, name]) => ctx.file(name, file), new JSZip()).generateAsync({
-                type: "arraybuffer",
-                compression: "DEFLATE",
-                compressionOptions: {
-                    level: 9
-                }
-            });
-        }
-
-        async function zipDecode(zip){
-            return Promise.all(Object.values((await new JSZip().loadAsync(zip)).files).map(async file => [await file.async("arraybuffer"), file.name]));
-        }
-
-        document.getElementById("files").addEventListener("change", async({target})=>{
-            console.log(await zipEncode(Array.from(target.files).map(f => [f, f.name])));
+        zip.configure({
+            useWebWorkers: true,
+            maxWorkers: navigator.hardwareConcurrency - 1
         });
 
-        document.getElementById("zip").addEventListener("change", async({target})=>{
-            console.log(await zipDecode(target.files[0]));
+        document.getElementById("raws").addEventListener("change", async({target})=>{
+            const ctx = new zip.ZipWriter(new zip.Uint8ArrayWriter());
+
+            for(const file of target.files){
+                await ctx.add(file.name, new zip.BlobReader(file), {
+                    level: 9,
+                    bufferedWrite: true,
+                    keepOrder: false
+                });
+            }
+
+            console.log(await ctx.close());
+        });
+
+        document.getElementById("archive").addEventListener("change", async({target})=>{
+            const ctx = new zip.ZipReader(new zip.BlobReader(target.files[0]));
+
+            for(const entry of await ctx.getEntries()){
+                console.log(entry.filename, await entry.getData(new zip.Uint8ArrayWriter()));
+            }
+
+            await ctx.close();
         });
     </script>
 </html>
