@@ -5,9 +5,6 @@
         <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <script src="https://cdn.jsdelivr.net/npm/axios@latest/dist/axios.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/qs@latest/dist/qs.min.js"></script>
-
         <title>Ajax</title>
     </head>
 
@@ -16,29 +13,29 @@
     </body>
 
     <script async type="module">
-        axios.defaults.paramsSerializer = v => Qs.stringify(v);
-        axios.defaults.transformRequest = v => Qs.stringify(v);
-
-        async function httpGet(path, type){
-            return (await fetch(path, {
-                method: "GET",
-                mode: "cors",
-                cache: "no-cache",
-                credential: "omit",
-                referrerPolicy: "no-referrer",
-                referrer: "",
-                redirect: "follow",
-                keepalive: false,
-                integrity: "",
-                headers: {},
-                body: null
-            }))[type]();
+        async function fetchEx(path, option){
+            return (await fetch(Object.entries(option?.params ?? {}).reduce((url, [key, value])=>{
+                url.searchParams.append(key, value);
+                return url;
+            }, new URL(path)), {
+                headers: Object.entries(option?.headers ?? {}).reduce((header, [key, value])=>{
+                    header.append(key, value);
+                    return header;
+                }, new Headers()),
+                method: option?.method ?? "get",
+                mode: option?.mode ?? "cors",
+                cache: option?.cache ?? "no-cache",
+                credential: option?.credential ?? "omit",
+                referrerPolicy: option?.referrerPolicy ?? "no-referrer",
+                referrer: option?.referrer ?? "",
+                redirect: option?.redirect ?? "follow",
+                keepalive: option?.keepalive ?? false,
+                integrity: option?.integrity ?? "",
+                body: option?.body ?? null
+            }))[option?.type ?? "json"]();
         }
 
-        const {data} = await axios.get("http://worldclockapi.com/api/json/utc/now");
-        console.log(data);
-
-        const response = await httpGet("http://worldclockapi.com/api/json/utc/now", "json");
+        const response = await fetchEx("http://worldclockapi.com/api/json/utc/now");
         console.log(response);
     </script>
 </html>
