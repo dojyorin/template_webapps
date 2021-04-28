@@ -17,12 +17,6 @@
             #ctx = "";
 
             constructor(...srcs){
-                for(const src of srcs){
-                    if(typeof src !== "function"){
-                        throw "Allowed argument is only 'function'.";
-                    }
-                }
-
                 const ctx = URL.createObjectURL(new Blob([srcs.map(src => src.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
                 super(ctx);
                 this.#ctx = ctx;

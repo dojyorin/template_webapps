@@ -69,10 +69,6 @@
             }
 
             compute(data, x, y, z){
-                if(!(data instanceof Float32Array)){
-                    throw "Allowed argument is only 'Float32Array'.";
-                }
-
                 const result = new Float32Array(data.length);
 
                 const ssbo = this.#ctx.createBuffer();
