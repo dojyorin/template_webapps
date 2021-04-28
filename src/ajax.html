@@ -17,7 +17,7 @@
             return (await fetch(Object.entries(option?.params ?? {}).reduce((u, [k, v])=>{
                 u.searchParams.append(k, v);
                 return u;
-            }, new URL(url)), {
+            }, new URL(url, /^http(s|):\/\//i.test(url) ? "" : location.href)), {
                 headers: Object.entries(option?.headers ?? {}).reduce((h, [k, v])=>{
                     h.append(k, v);
                     return h;
