@@ -5,11 +5,14 @@
         <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/css/reveal.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/css/print/paper.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/css/theme/white.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/theme/white.min.css">
 
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/js/reveal.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/markdown/markdown.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/highlight/highlight.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/notes/notes.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/math/math.min.js"></script>
 
         <title>Reveal</title>
     </head>
@@ -18,14 +21,14 @@
         <div class="reveal">
             <div class="slides">
                 <section data-markdown>
-                    ## Reveal-Test Page:1
+                    # Test Page 1
                     - 1
                     - 2
                     - 3
                 </section>
 
                 <section data-markdown>
-                    ## Reveal-Test Page:2
+                    # Test Page 2
                     - 4
                     - 5
                     - 6
@@ -36,31 +39,15 @@
 
     <script async type="module">
         Reveal.initialize({
-            controls: true,
-            progress: true,
+            hash: true,
             history: true,
-            center: true,
-            transition: "slide",
             hideCursorTime: 1000,
-            dependencies: [{
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/markdown/marked.min.js",
-                async: true
-            }, {
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/markdown/markdown.min.js",
-                async: true
-            }, {
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/notes/notes.min.js",
-                async: true
-            }, {
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/zoom-js/zoom.min.js",
-                async: true
-            }, {
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/highlight/highlight.min.js",
-                async: true
-            }, {
-                src: "https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/math/math.min.js",
-                async: true
-            }]
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealMath
+            ]
         });
     </script>
 </html>

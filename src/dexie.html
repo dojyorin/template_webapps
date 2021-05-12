@@ -22,7 +22,7 @@
             "temp": "++&id, name, age"
         });
 
-        document.getElementById("save").addEventListener("click", ()=>{
+        document.getElementById("save").addEventListener("click", async()=>{
             const res = await db["temp"].put({
                 name: "hoge",
                 age: 20
@@ -30,7 +30,7 @@
             console.log(res);
         });
 
-        document.getElementById("load").addEventListener("click", ()=>{
+        document.getElementById("load").addEventListener("click", async()=>{
             const res = await db["temp"].get(1);
             console.log(res);
         });
