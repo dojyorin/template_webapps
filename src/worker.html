@@ -29,8 +29,8 @@
         }
 
         const worker = new WorkerInline(()=>{
-            self.addEventListener("message", ({data})=>{
-                self.postMessage(data, [data.buffer]);
+            globalThis.addEventListener("message", ({data})=>{
+                globalThis.postMessage(data, [data.buffer]);
             });
         });
 

@@ -36,9 +36,9 @@
             URL.revokeObjectURL(link.href);
         }
 
-        function notifyAlert(msg, timeout){
+        function notifyAlert(message, timeout){
             const dialog = document.createElement("dialog");
-            dialog.textContent = `\u{1F514} ${msg}`;
+            dialog.textContent = `\u{1F514} ${message}`;
             dialog.show();
 
             setTimeout(() => dialog.remove(), timeout ?? 5000);
@@ -49,6 +49,7 @@
             console.log(await loadFile());
             notifyAlert("Loaded!");
         });
+
         document.getElementById("save").addEventListener("click", ()=>{
             saveFile(new Blob(["test"]), "example.txt");
             notifyAlert("Saved!");

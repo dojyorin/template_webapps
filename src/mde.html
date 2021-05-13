@@ -21,9 +21,9 @@
     </body>
 
     <script async type="module">
-        window.addEventListener("dragover", (ev)=>{
-            ev.preventDefault();
-            ev.dataTransfer.dropEffect = "none";
+        window.addEventListener("dragover", (e)=>{
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "none";
         });
 
         class FileReaderEx extends FileReader{

@@ -23,16 +23,16 @@
         });
 
         document.getElementById("save").addEventListener("click", async()=>{
-            const res = await db["temp"].put({
+            const result = await db["temp"].put({
                 name: "hoge",
                 age: 20
             });
-            console.log(res);
+            console.log(result);
         });
 
         document.getElementById("load").addEventListener("click", async()=>{
-            const res = await db["temp"].get(1);
-            console.log(res);
+            const result = await db["temp"].get(1);
+            console.log(result);
         });
     </script>
 </html>
