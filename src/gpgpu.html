@@ -16,7 +16,8 @@
 
     <script async type="module">
         const gpu = new GPU({
-            context: new OffscreenCanvas(1, 1).getContext("webgl2")
+            canvas: new OffscreenCanvas(1, 1),
+            mode: "webgl2"
         });
 
         const kernel = gpu.createKernel(function(a, b){
