@@ -13,24 +13,25 @@
     </body>
 
     <script async type="module">
-        class WorkerInline extends Worker{
-            #ctx = "";
+        class WorkerEx extends Worker{
+            #url = "";
 
-            constructor(...srcs){
-                const ctx = URL.createObjectURL(new Blob([srcs.map(src => src.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
-                super(ctx);
-                this.#ctx = ctx;
+            constructor(...sources){
+                const url = URL.createObjectURL(new Blob([sources.map(s => s.toString().replace(/^function.+?\{/s, "").replace(/\}$/s, "").replace(/^\s+/gm, "").trim()).join("\n;\n")]));
+                super(url);
+                this.#url = url;
             }
 
             terminate(){
                 super.terminate();
-                URL.revokeObjectURL(this.#ctx);
+                URL.revokeObjectURL(this.#url);
             }
         }
 
-        const worker = new WorkerInline(()=>{
+        const worker = new WorkerEx(function(){
             globalThis.addEventListener("message", ({data})=>{
-                globalThis.postMessage(data, [data.buffer]);
+                const bytes = new Float32Array(data.buffer).map(() => Math.random());
+                globalThis.postMessage(bytes, [bytes.buffer]);
             });
         });
 
@@ -39,8 +40,7 @@
             console.log(data);
         });
 
-        const bytes = new Uint8Array(1024 * 1024 * 128);
-
+        const bytes = new Float32Array(1024 * 1024 * 128);
         worker.postMessage(bytes, [bytes.buffer]);
     </script>
 </html>
