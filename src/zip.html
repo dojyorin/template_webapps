@@ -22,14 +22,14 @@
         });
 
         document.getElementById("raws").addEventListener("change", async({target})=>{
-            const ctx = new zip.ZipWriter(new zip.Uint8ArrayWriter());
+            const ctx = new zip.ZipWriter(new zip.Uint8ArrayWriter(), {
+                level: 9,
+                bufferedWrite: true,
+                keepOrder: false
+            });
 
             for(const file of target.files){
-                await ctx.add(file.name, new zip.BlobReader(file), {
-                    level: 9,
-                    bufferedWrite: true,
-                    keepOrder: false
-                });
+                await ctx.add(file.name, new zip.BlobReader(file));
             }
 
             console.log(await ctx.close());
