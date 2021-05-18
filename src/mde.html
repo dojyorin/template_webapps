@@ -26,43 +26,39 @@
             e.dataTransfer.dropEffect = "none";
         });
 
-        class FileReaderEx extends FileReader{
-            constructor(){
-                super();
-            }
-
-            #readAs(blob, ctx){
-                return new Promise((res, rej)=>{
-                    super.addEventListener("load", ({target}) => res(target.result));
-                    super.addEventListener("error", ({target}) => rej(target.error));
-                    super[`readAs${ctx}`](blob);
-                });
-            }
-
-            readAsDataURL(blob){
-                return this.#readAs(blob, "DataURL");
-            }
-
-            readAsText(blob){
-                return this.#readAs(blob, "Text");
-            }
-        }
-
-        function loadFile(multiple, accept){
+        function readFile(type, multiple, accept){
             const input = document.createElement("input");
+
             input.type = "file";
             input.multiple = !!multiple;
             input.accept = accept ?? "";
 
-            return new Promise((res, rej)=>{
-                input.addEventListener("change", ({target}) => res(input.multiple ? Array.from(target.files) : target.files[0]));
-                input.addEventListener("error", ({message}) => rej(message));
+            return new Promise((res)=>{
+                input.addEventListener("change", async()=>{
+                    const files = await Array.from(input.files).map(async(file)=>{
+                        return {
+                            blob: file,
+                            buffer: await file.arrayBuffer(),
+                            byte: new Uint8Array(await file.arrayBuffer()),
+                            text: await file.text(),
+                            dataurl: await new Promise((_res)=>{
+                                const reader = new FileReader();
+                                reader.addEventListener("load", () => _res(reader.result));
+                                reader.readAsDataURL(file);
+                            })
+                        }[type];
+                    });
+
+                    res(input.multiple ? files : files[0]);
+                });
+
                 input.click();
             });
         }
 
-        function saveFile(data, name){
+        function writeFile(data, name){
             const link = document.createElement("a");
+
             link.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
             link.download = name;
             link.click();
@@ -157,7 +153,7 @@
                         ch: codemirror.getCursor("start").ch + 1
                     };
 
-                    codemirror.replaceSelection(`[](${await new FileReaderEx().readAsDataURL(await loadFile())})`);
+                    codemirror.replaceSelection(`[](${await readFile("dataurl")})`);
                     codemirror.setCursor(cursor);
                     codemirror.focus();
                 }
@@ -190,7 +186,7 @@
                 title: "読込",
                 async action(ctx){
                     if(confirm("上書きしてもよろしいですか?")){
-                        ctx.value(await new FileReaderEx().readAsText(await loadFile()));
+                        ctx.value(await readFile("text"));
                         ctx.codemirror.focus();
                     }
                 }
@@ -199,7 +195,7 @@
                 className: "mdi mdi-file-download-outline icon_large",
                 title: "保存",
                 action(ctx){
-                    saveFile(new Blob([ctx.value()]), "document.md");
+                    writeFile(ctx.value(), "document.md");
                     ctx.codemirror.focus();
                 }
             }, {

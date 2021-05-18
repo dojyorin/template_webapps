@@ -16,6 +16,7 @@
     <script async type="module">
         function readFile(type, multiple, accept){
             const input = document.createElement("input");
+
             input.type = "file";
             input.multiple = !!multiple;
             input.accept = accept ?? "";
@@ -35,14 +36,17 @@
                             })
                         }[type];
                     });
+
                     res(input.multiple ? files : files[0]);
                 });
+
                 input.click();
             });
         }
 
         function writeFile(data, name){
             const link = document.createElement("a");
+
             link.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
             link.download = name;
             link.click();
