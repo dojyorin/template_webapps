@@ -13,32 +13,170 @@
     </body>
 
     <script async type="module">
+        class WebSerial{
+            #port;
+            #writer;
+            #reader;
+
+            #available = false;
+            #observer = 0;
+
+            constructor(){
+                if(!Serial){
+                    throw "WebSerial is not supported";
+                }
+            }
+
+            get port(){
+                return this.#port;
+            }
+
+            get reader(){
+                return this.#reader;
+            }
+
+            get writer(){
+                return this.#writer;
+            }
+
+            get available(){
+                return this.#available;
+            }
+
+            #openAssert(){
+                if(!this.#available){
+                    throw "SerialPort is not connected.";
+                }
+            }
+
+            #closeAssert(){
+                if(this.#available){
+                    throw "SerialPort is already connected.";
+                }
+            }
+
+            #readyState(reader, writer){
+                return new Promise((res)=>{
+                    const h = setInterval(()=>{
+                        const r = this.#reader && this.#port.readable.locked;
+                        const w = this.#writer && this.#port.writable.locked;
+
+                        if(reader && writer ? r && w : reader ? r : writer ? w : true){
+                            clearInterval(h);
+                            res();
+                        }
+                    }, 10);
+                });
+            }
+
+            #setStream(reader, writer){
+                if(reader && !this.#port.readable.locked){
+                    this.#reader = this.#port.readable.pipeThrough(new TextDecoderStream()).getReader();
+                }
+
+                if(writer && !this.#port.writable.locked){
+                    this.#writer = this.#port.writable.getWriter();
+                }
+            }
+
+            async open(options){
+                this.#closeAssert();
+
+                this.#port = await navigator.serial.requestPort();
+                await this.#port.open(options);
+
+                this.#setStream(true, true);
+                await this.#readyState(true, true);
+
+                this.#available = true;
+            }
+
+            async close(){
+                this.#openAssert();
+
+                if(this.#observer){
+                    this.unobserve();
+                }
+
+                await this.#reader.cancel();
+                await this.#writer.close();
+                await this.#port.close();
+
+                this.#available = false;
+            }
+
+            observe(interval){
+                this.#openAssert();
+
+                if(this.#observer){
+                    throw "Observer is already registered.";
+                }
+
+                this.#observer = setInterval(()=>{
+                    this.#setStream(true, true);
+                }, interval ?? 100);
+            }
+
+            unobserve(){
+                this.#openAssert();
+
+                if(!this.#observer){
+                    throw "Observer is not registered.";
+                }
+
+                clearInterval(this.#observer);
+                this.#observer = 0;
+            }
+
+            async *read(){
+                while(true){
+                    this.#openAssert();
+                    await this.#readyState(true, false);
+
+                    const {value, done} = await this.#reader.read();
+                    await new Promise(res => setTimeout(res, 200));
+
+                    if(done){
+                        return value;
+                    }
+
+                    yield value;
+                }
+            }
+
+            async write(data){
+                this.#openAssert();
+                await this.#readyState(false, true);
+
+                await this.#writer.ready;
+                await this.#writer.write(new TextEncoder().encode(data));
+                await this.#writer.ready;
+            }
+        }
+
+        const serial = new WebSerial();
+
         document.getElementById("connect").addEventListener("click", async()=>{
-            const serial = await navigator.serial.requestPort();
+            try{
+                await serial.open({
+                    baudRate: 115200,
+                    dataBits: 8,
+                    stopBits: 1,
+                    parity: "none",
+                    bufferSize: 512,
+                    flowControl: "none"
+                });
+            }
+            catch{
+                console.log("Failed.");
+                return;
+            }
 
-            await serial.open({
-                baudRate: 115200,
-                dataBits: 8,
-                stopBits: 1,
-                parity: "none",
-                bufferSize: 512,
-                flowControl: "none"
-            });
+            console.log("Success.");
 
-            let reader = null;
-
-            setInterval(async()=>{
-                if(!serial.readable.locked){
-                    reader = serial.readable.pipeThrough(new TextDecoderStream()).getReader();
-                }
-
-                try{
-                    console.log((await reader.read()).value);
-                }
-                catch{
-                    console.error("error");
-                }
-            }, 500);
+            for await(const rx of serial.read()){
+                console.log(rx);
+            }
         });
     </script>
 </html>
