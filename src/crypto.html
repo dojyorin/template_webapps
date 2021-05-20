@@ -46,11 +46,11 @@
             }[key.type], key);
         }
 
-        function keyDerive(pub, priv){
+        function keyDerive(publickey, privatekey){
             return crypto.subtle.deriveKey({
                 name: "ECDH",
-                public: pub
-            }, priv, {
+                public: publickey
+            }, privatekey, {
                 name: "AES-GCM",
                 length: 256
             }, false, [
@@ -119,14 +119,14 @@
         console.log(new TextDecoder().decode(raw));
         console.log(await hashDigest(raw));
 
-        const enc = await aesEncrypt(keyDe1Pub2Priv, raw);
-        const dec = await aesDecrypt(keyDe2Pub1Priv, enc);
+        const encode = await aesEncrypt(keyDe1Pub2Priv, raw);
+        const decode = await aesDecrypt(keyDe2Pub1Priv, encode);
 
         console.log("--- Encoded Data ---");
-        console.log(new TextDecoder().decode(enc));
+        console.log(new TextDecoder().decode(encode));
 
         console.log("--- Decoded Data (Raw Data) ---");
-        console.log(new TextDecoder().decode(dec));
-        console.log(await hashDigest(dec));
+        console.log(new TextDecoder().decode(decode));
+        console.log(await hashDigest(decode));
     </script>
 </html>
