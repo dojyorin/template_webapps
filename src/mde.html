@@ -43,14 +43,14 @@
                             text: await file.text(),
                             dataurl: await new Promise((_res)=>{
                                 const reader = new FileReader();
-                                reader.addEventListener("load", () => _res(reader.result));
+                                reader.addEventListener("load", () => _res(reader.result), {once: true});
                                 reader.readAsDataURL(file);
                             })
                         }[type];
                     });
 
                     res(input.multiple ? files : files[0]);
-                });
+                }, {once: true});
 
                 input.click();
             });
