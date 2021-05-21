@@ -23,7 +23,7 @@
 
             constructor(){
                 if(!Serial){
-                    throw "WebSerial is not supported";
+                    throw "WebSerial is not supported.";
                 }
             }
 
@@ -43,47 +43,11 @@
                 return this.#available;
             }
 
-            #openAssert(){
-                if(!this.#available){
-                    throw "SerialPort is not connected.";
-                }
-            }
-
-            #closeAssert(){
-                if(this.#available){
-                    throw "SerialPort is already connected.";
-                }
-            }
-
-            #readyState(reader, writer){
-                return new Promise((res)=>{
-                    const h = setInterval(()=>{
-                        const r = this.#reader && this.#port.readable.locked;
-                        const w = this.#writer && this.#port.writable.locked;
-
-                        if(reader && writer ? r && w : reader ? r : writer ? w : true){
-                            clearInterval(h);
-                            res();
-                        }
-                    }, 10);
-                });
-            }
-
-            #setStream(reader, writer){
-                if(reader && !this.#port.readable.locked){
-                    this.#reader = this.#port.readable.pipeThrough(new TextDecoderStream()).getReader();
-                }
-
-                if(writer && !this.#port.writable.locked){
-                    this.#writer = this.#port.writable.getWriter();
-                }
-            }
-
-            async open(options){
+            async open(option){
                 this.#closeAssert();
 
                 this.#port = await navigator.serial.requestPort();
-                await this.#port.open(options);
+                await this.#port.open(option);
 
                 this.#setStream(true, true);
                 await this.#readyState(true, true);
@@ -151,6 +115,42 @@
                 await this.#writer.ready;
                 await this.#writer.write(new TextEncoder().encode(data));
                 await this.#writer.ready;
+            }
+
+            #openAssert(){
+                if(!this.#available){
+                    throw "SerialPort is closed.";
+                }
+            }
+
+            #closeAssert(){
+                if(this.#available){
+                    throw "SerialPort is already opened.";
+                }
+            }
+
+            #readyState(reader, writer){
+                return new Promise((res)=>{
+                    const h = setInterval(()=>{
+                        const r = this.#reader && this.#port.readable.locked;
+                        const w = this.#writer && this.#port.writable.locked;
+
+                        if(reader && writer ? r && w : reader ? r : writer ? w : true){
+                            clearInterval(h);
+                            res();
+                        }
+                    }, 10);
+                });
+            }
+
+            #setStream(reader, writer){
+                if(reader && !this.#port.readable.locked){
+                    this.#reader = this.#port.readable.pipeThrough(new TextDecoderStream()).getReader();
+                }
+
+                if(writer && !this.#port.writable.locked){
+                    this.#writer = this.#port.writable.getWriter();
+                }
             }
         }
 
