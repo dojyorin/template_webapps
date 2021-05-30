@@ -14,12 +14,13 @@
 
     <script async type="module">
         const socket = new WebSocket("wss://echo.websocket.org");
-        await new Promise(res => socket.addEventListener("open", res, {once: true}));
 
         socket.addEventListener("message", ({data})=>{
             console.log(data);
         });
 
-        socket.send("test");
+        socket.addEventListener("open", ()=>{
+            socket.send("test");
+        });
     </script>
 </html>
