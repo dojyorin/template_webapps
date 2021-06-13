@@ -16,15 +16,13 @@
     </head>
 
     <body>
-        <template id="vue">
-            <v-app>
-                <v-app-bar app dark color="blue" height="52">
-                    <v-toolbar-title>Application</v-toolbar-title>
-                </v-app-bar>
+        <v-app id="vue">
+            <v-app-bar app dark color="blue" height="52">
+                <v-toolbar-title>Application</v-toolbar-title>
+            </v-app-bar>
 
-                <v-main></v-main>
-            </v-app>
-        </template>
+            <v-main></v-main>
+        </v-app>
     </body>
 
     <script async type="module">
@@ -36,7 +34,11 @@
                 return {};
             },
 
-            methods: {}
+            computed: {},
+
+            methods: {},
+
+            async mounted(){}
         });
     </script>
 
