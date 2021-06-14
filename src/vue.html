@@ -17,11 +17,7 @@
 
     <body>
         <v-app id="vue" style="visibility: hidden;">
-            <v-app-bar app dark color="blue" height="52">
-                <v-toolbar-title>Application</v-toolbar-title>
-            </v-app-bar>
-
-            <v-snackbar app dark top centered :color="notify.color" v-model="notify.visible">
+            <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
                 <v-icon left>mdi-bell-ring</v-icon>
                 <span>{{notify.message}}</span>
                 <template #action>
@@ -31,11 +27,15 @@
                 </template>
             </v-snackbar>
 
-            <v-overlay opacity="0.9" v-model="loading">
+            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
                 <v-progress-circular indeterminate size="128" width="6" color="blue">
                     <span class="white--text">Loading...</span>
                 </v-progress-circular>
             </v-overlay>
+
+            <v-app-bar app dark color="blue" height="52">
+                <v-toolbar-title>Application</v-toolbar-title>
+            </v-app-bar>
 
             <v-main></v-main>
         </v-app>
@@ -53,21 +53,34 @@
                         message: "",
                         color: ""
                     },
-                    loading: true
+                    loading: {
+                        visible: false
+                    }
                 };
             },
 
             methods: {
-                vNotify(message, color, icon){
-                    this.notify.message = message;
+                vNotify(message, color){
+                    this.notify.visible = false;
+                    this.notify.message = message ?? "";
                     this.notify.color = color ?? "info";
                     this.notify.visible = true;
+                },
+
+                vLoading(state){
+                    this.loading.visible = state ?? false;
                 }
             },
 
             async mounted(){
-                this.$el.style.visibility = "unset";
-                this.loading = false;
+                this.$el.removeAttribute("style");
+
+                this.vLoading(true);
+
+                await new Promise(res => setTimeout(res, 3000));
+
+                this.vLoading(false);
+                this.vNotify("Loading...");
             }
         });
     </script>
