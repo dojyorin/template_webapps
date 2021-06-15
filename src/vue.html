@@ -17,6 +17,12 @@
 
     <body>
         <v-app id="vue" style="visibility: hidden;">
+            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
+                <v-progress-circular indeterminate size="128" width="6" color="blue">
+                    <span class="white--text">Loading...</span>
+                </v-progress-circular>
+            </v-overlay>
+
             <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
                 <v-icon left>mdi-bell-ring</v-icon>
                 <span>{{notify.message}}</span>
@@ -26,12 +32,6 @@
                     </v-btn>
                 </template>
             </v-snackbar>
-
-            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
-                <v-progress-circular indeterminate size="128" width="6" color="blue">
-                    <span class="white--text">Loading...</span>
-                </v-progress-circular>
-            </v-overlay>
 
             <v-app-bar app dark color="blue" height="52">
                 <v-toolbar-title>Application</v-toolbar-title>
