@@ -13,6 +13,17 @@
     </body>
 
     <script async type="module">
+        function concatBuffer(...arrays){
+            return arrays.reduce((c, array)=>{
+                c.byte.set(new Uint8Array(array?.buffer ?? array), c.offset);
+                c.offset += array.byteLength;
+                return c;
+            }, {
+                byte: new Uint8Array(arrays.reduce((c, {byteLength}) => c += byteLength, 0)),
+                offset: 0
+            }).byte.buffer;
+        }
+
         function CONFIG_PBKDF2(v){
             return {
                 name: "PBKDF2",
@@ -49,17 +60,6 @@
                 tagLength: 128,
                 iv: v
             };
-        }
-
-        function concatBuffer(...arrays){
-            return arrays.reduce((c, array)=>{
-                c.byte.set(new Uint8Array(array?.buffer ?? array), c.offset);
-                c.offset += array.byteLength;
-                return c;
-            }, {
-                byte: new Uint8Array(arrays.reduce((c, {byteLength}) => c += byteLength, 0)),
-                offset: 0
-            }).byte.buffer;
         }
 
         async function derivePassword(password, salt){
