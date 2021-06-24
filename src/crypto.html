@@ -13,120 +13,141 @@
     </body>
 
     <script async type="module">
+        function CONFIG_PBKDF2(v){
+            return {
+                name: "PBKDF2",
+                hash: "SHA-512",
+                iterations: 0xFFFF,
+                salt: v
+            };
+        }
+
+        function CONFIG_CURVE(){
+            return {
+                name: "ECDH",
+                namedCurve: "P-521"
+            };
+        }
+
+        function CONFIG_ECDH(v){
+            return {
+                name: "ECDH",
+                public: v
+            };
+        }
+
+        function CONFIG_AES(){
+            return {
+                name: "AES-GCM",
+                length: 256
+            };
+        }
+
+        function CONFIG_GCM(v){
+            return {
+                name: "AES-GCM",
+                tagLength: 128,
+                iv: v
+            };
+        }
+
+        function concatBuffer(...arrays){
+            return arrays.reduce((c, array)=>{
+                c.byte.set(new Uint8Array(array?.buffer ?? array), c.offset);
+                c.offset += array.byteLength;
+                return c;
+            }, {
+                byte: new Uint8Array(arrays.reduce((c, {byteLength}) => c += byteLength, 0)),
+                offset: 0
+            }).byte.buffer;
+        }
+
+        async function derivePassword(password, salt){
+            return crypto.subtle.deriveKey(CONFIG_PBKDF2(salt), await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]), CONFIG_AES(), false, ["wrapKey", "unwrapKey"]);
+        }
+
         function hashDigest(data){
             return crypto.subtle.digest("SHA-512", data);
         }
 
-        function keyGenerate(){
-            return crypto.subtle.generateKey({
-                name: "ECDH",
-                namedCurve: "P-521"
-            }, true, [
-                "deriveKey"
-            ]);
+        function generateKey(){
+            return crypto.subtle.generateKey(CONFIG_CURVE(), true, ["deriveKey"]);
         }
 
-        function keyImport(key){
-            return crypto.subtle.importKey({
-                158: "spki",
-                241: "pkcs8"
-            }[key.byteLength], key, {
-                name: "ECDH",
-                namedCurve: "P-521"
-            }, false, {
-                158: [],
-                241: ["deriveKey"]
-            }[key.byteLength]);
+        async function importKey(key, password){
+            return key.byteLength === 158 ? crypto.subtle.importKey("spki", key, CONFIG_CURVE(), false, []) : crypto.subtle.unwrapKey("pkcs8", key.slice(28), await derivePassword(password, key.slice(0, 16)), CONFIG_GCM(key.slice(16, 28)), CONFIG_CURVE(), false, ["deriveKey"]);
         }
 
-        function keyExport(key){
-            return crypto.subtle.exportKey({
-                "public": "spki",
-                "private": "pkcs8"
-            }[key.type], key);
+        async function exportKey(key, password){
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+
+            return key.type === "public" ? crypto.subtle.exportKey("spki", key) : concatBuffer(salt, iv, await crypto.subtle.wrapKey("pkcs8", key, await derivePassword(password, salt), CONFIG_GCM(iv)));
         }
 
-        function keyDerive(publickey, privatekey){
-            return crypto.subtle.deriveKey({
-                name: "ECDH",
-                public: publickey
-            }, privatekey, {
-                name: "AES-GCM",
-                length: 256
-            }, false, [
-                "encrypt",
-                "decrypt"
-            ]);
+        function deriveKey(keypublic, keyprivate){
+            return crypto.subtle.deriveKey(CONFIG_ECDH(keypublic), keyprivate, CONFIG_AES(), false, ["encrypt", "decrypt"]);
         }
 
-        async function aesEncrypt(key, data){
-            const iv = crypto.getRandomValues(new Uint8Array(16));
-            const result = await crypto.subtle.encrypt({
-                name: "AES-GCM",
-                tagLength: 128,
-                iv
-            }, key, data);
+        async function encryptData(key, data){
+            const iv = crypto.getRandomValues(new Uint8Array(12));
 
-            const output = new Uint8Array(iv.byteLength + result.byteLength);
-            output.set(iv, 0);
-            output.set(new Uint8Array(result), iv.byteLength);
-
-            return output.buffer;
+            return concatBuffer(iv, await crypto.subtle.encrypt(CONFIG_GCM(iv), key, data));
         }
 
-        function aesDecrypt(key, data){
-            return crypto.subtle.decrypt({
-                name: "AES-GCM",
-                iv: data.slice(0, 16),
-                tagLength: 128
-            }, key, data.slice(16));
+        function decryptData(key, data){
+            return crypto.subtle.decrypt(CONFIG_GCM(data.slice(0, 12)), key, data.slice(12));
         }
 
-        const key1 = await keyGenerate();
-        const key2 = await keyGenerate();
+        const key1 = await generateKey();
+        const key2 = await generateKey();
 
-        const key1ExPub = await keyExport(key1.publicKey);
-        const key1ExPriv = await keyExport(key1.privateKey);
-        const key2ExPub = await keyExport(key2.publicKey);
-        const key2ExPriv = await keyExport(key2.privateKey);
+        const key1ExportPublic = await exportKey(key1.publicKey);
+        const key1ExportPrivate = await exportKey(key1.privateKey, "foobar");
+        const key2ExportPublic = await exportKey(key2.publicKey);
+        const key2ExportPrivate = await exportKey(key2.privateKey, "foobar");
 
-        console.log("--- Exported Keys ---");
-        for(const key of [key1ExPub, key1ExPriv, key2ExPub, key2ExPriv]){
+        console.log("---------- Exported Keys ----------");
+        for(const key of [key1ExportPublic, key1ExportPrivate, key2ExportPublic, key2ExportPrivate]){
             console.log(key);
         }
 
-        const key1ImPub = await keyImport(key1ExPub);
-        const key1ImPriv = await keyImport(key1ExPriv);
-        const key2ImPub = await keyImport(key2ExPub);
-        const key2ImPriv = await keyImport(key2ExPriv);
+        const key1ImportPublic = await importKey(key1ExportPublic);
+        const key1ImportPrivate = await importKey(key1ExportPrivate, "foobar");
+        const key2ImportPublic = await importKey(key2ExportPublic);
+        const key2ImportPrivate = await importKey(key2ExportPrivate, "foobar");
 
-        console.log("--- Imported Keys ---");
-        for(const key of [key1ImPub, key1ImPriv, key2ImPub, key2ImPriv]){
+        console.log("---------- Imported Keys ----------");
+        for(const key of [key1ImportPublic, key1ImportPrivate, key2ImportPublic, key2ImportPrivate]){
             console.log(key);
         }
 
-        const keyDe1Pub2Priv = await keyDerive(key1ImPub, key2ImPriv);
-        const keyDe2Pub1Priv = await keyDerive(key2ImPub, key1ImPriv);
+        const keyDerivePublic1Private2 = await deriveKey(key1ImportPublic, key2ImportPrivate);
+        const keyDerivePublic2Private1 = await deriveKey(key2ImportPublic, key1ImportPrivate);
 
-        console.log("--- Derived Keys ---");
-        for(const key of [keyDe1Pub2Priv, keyDe2Pub1Priv]){
+        console.log("---------- Derived Keys ----------");
+        for(const key of [keyDerivePublic1Private2, keyDerivePublic2Private1]){
             console.log(key);
         }
 
         const raw = new TextEncoder().encode("hogehoge");
 
-        console.log("--- Raw Data ---");
+        console.log("---------- Raw Data ----------");
         console.log(new TextDecoder().decode(raw));
-        console.log(await hashDigest(raw));
 
-        const encode = await aesEncrypt(keyDe1Pub2Priv, raw);
-        const decode = await aesDecrypt(keyDe2Pub1Priv, encode);
+        console.log("---------- Raw Hash ----------");
+        console.log(Array.from(new Uint8Array(await hashDigest(raw))).map(n => n.toString(16)).join(""));
 
-        console.log("--- Encoded Data ---");
+        const encode = await encryptData(keyDerivePublic1Private2, raw);
+        const decode = await decryptData(keyDerivePublic2Private1, encode);
+
+        console.log("---------- Encoded Data ----------");
         console.log(new TextDecoder().decode(encode));
 
-        console.log("--- Decoded Data (Raw Data) ---");
+        console.log("---------- Decoded Data ----------");
         console.log(new TextDecoder().decode(decode));
-        console.log(await hashDigest(decode));
+
+        console.log("---------- Decoded Hash ----------");
+        console.log(Array.from(new Uint8Array(await hashDigest(decode))).map(n => n.toString(16)).join(""));
     </script>
 </html>
