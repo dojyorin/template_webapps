@@ -24,7 +24,7 @@
             </v-overlay>
 
             <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
-                <v-icon left>mdi-bell-ring</v-icon>
+                <v-icon left>mdi-bell-ring-outline</v-icon>
                 <span>{{notify.message}}</span>
                 <template #action>
                     <v-btn icon @click="notify.visible = false">
