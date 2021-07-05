@@ -5,24 +5,18 @@
         <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&family=Kosugi+Maru">
 
-        <script src="https://cdn.jsdelivr.net/npm/vue@latest/dist/vue.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@latest/dist/vuetify.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.js"></script>
 
         <title>Vue.js</title>
     </head>
 
     <body>
-        <v-app id="vue" style="visibility: hidden;">
-            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
-                <v-progress-circular indeterminate size="128" width="6" color="blue">
-                    <span class="white--text">Loading...</span>
-                </v-progress-circular>
-            </v-overlay>
-
+        <v-app id="vue" style="visibility:hidden!important">
             <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
                 <v-icon left>mdi-bell-ring-outline</v-icon>
                 <span>{{notify.message}}</span>
@@ -33,11 +27,68 @@
                 </template>
             </v-snackbar>
 
+            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
+                <v-progress-circular indeterminate size="128" width="6" color="blue">
+                    <span class="white--text">Loading...</span>
+                </v-progress-circular>
+            </v-overlay>
+
+            <v-navigation-drawer app temporary v-model="drawer.visible">
+                <v-toolbar dark color="blue" :height="$vuetify.application.top">
+                    <v-btn icon @click="vDrawer(false)">
+                        <v-icon large>mdi-close</v-icon>
+                    </v-btn>
+
+                    <v-toolbar-title>Menu</v-toolbar-title>
+                </v-toolbar>
+
+                <v-list>
+                    <template v-for="content in drawer.contents">
+                        <v-list-item @click="vRouter(content.to), vDrawer(false)">
+                            <v-list-item-icon>
+                                <v-icon>{{content.icon}}</v-icon>
+                            </v-list-item-icon>
+
+                            <v-list-item-content>
+                                <v-list-item-title>{{content.title}}</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </template>
+                </v-list>
+            </v-navigation-drawer>
+
             <v-app-bar app dark color="blue" height="52">
+                <v-app-bar-nav-icon @click="vDrawer(true)"></v-app-bar-nav-icon>
                 <v-toolbar-title>Application</v-toolbar-title>
             </v-app-bar>
 
-            <v-main></v-main>
+            <v-main>
+                <v-window class="fill-height" v-model="router.path">
+                    <v-window-item value="/">
+                        <v-container fluid>
+                            <v-row justify="center">
+                                <v-col cols>
+                                    <v-card>
+                                        <v-card-title>Main</v-card-title>
+                                    </v-card>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-window-item>
+
+                    <v-window-item value="/sub">
+                        <v-container fluid>
+                            <v-row justify="center">
+                                <v-col cols>
+                                    <v-card>
+                                        <v-card-title>Sub</v-card-title>
+                                    </v-card>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-window-item>
+                </v-window>
+            </v-main>
         </v-app>
     </body>
 
@@ -55,6 +106,21 @@
                     },
                     loading: {
                         visible: false
+                    },
+                    drawer: {
+                        visible: false,
+                        contents: [{
+                            title: "Main",
+                            to: "/",
+                            icon: "mdi-home"
+                        }, {
+                            title: "Sub",
+                            to: "/sub",
+                            icon: "mdi-account-circle"
+                        }]
+                    },
+                    router: {
+                        path: "/"
                     }
                 };
             },
@@ -69,6 +135,14 @@
 
                 vLoading(state){
                     this.loading.visible = state ?? false;
+                },
+
+                vDrawer(state){
+                    this.drawer.visible = state ?? false;
+                },
+
+                vRouter(path){
+                    this.router.path = path ?? "/";
                 }
             },
 
@@ -76,10 +150,9 @@
                 this.$el.removeAttribute("style");
 
                 this.vLoading(true);
-
-                await new Promise(res => setTimeout(res, 3000));
-
+                await new Promise(res => setTimeout(res, 1000));
                 this.vLoading(false);
+
                 this.vNotify("Loading...");
             }
         });
