@@ -24,7 +24,7 @@
             input.multiple = !!multiple;
             input.accept = accept ?? "";
 
-            return new Promise((res)=>{
+            const resolver = new Promise((res)=>{
                 input.addEventListener("input", async()=>{
                     const files = await Array.from(input.files).map(async(file)=>{
                         return {
@@ -33,9 +33,9 @@
                                 blob: new Blob([file]),
                                 byte: new Uint8Array(await file.arrayBuffer()),
                                 text: await file.text(),
-                                code: await new Promise((_res)=>{
+                                code: await new Promise((res0)=>{
                                     const reader = new FileReader();
-                                    reader.addEventListener("load", () => _res(reader.result));
+                                    reader.addEventListener("load", () => res0(reader.result));
                                     reader.readAsDataURL(file);
                                 })
                             }[type ?? "byte"]
@@ -44,9 +44,11 @@
 
                     res(input.multiple ? files : files.pop());
                 });
-
-                input.click();
             });
+
+            input.click();
+
+            return resolver;
         }
 
         function writeFile(data, name){
