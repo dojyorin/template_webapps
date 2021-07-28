@@ -66,7 +66,7 @@
             return crypto.subtle.deriveKey(CONFIG_PBKDF2(salt), await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]), CONFIG_AES(), false, ["wrapKey", "unwrapKey"]);
         }
 
-        function hashDigest(data){
+        async function hashDigest(data){
             return crypto.subtle.digest("SHA-512", data);
         }
 
@@ -89,7 +89,7 @@
             };
         }
 
-        function deriveKey(pub, sec){
+        async function deriveKey(pub, sec){
             return crypto.subtle.deriveKey(CONFIG_ECDH(pub), sec, CONFIG_AES(), false, ["encrypt", "decrypt"]);
         }
 
@@ -99,7 +99,7 @@
             return concatBuffer(iv, await crypto.subtle.encrypt(CONFIG_GCM(iv), com, data));
         }
 
-        function decryptData(com, data){
+        async function decryptData(com, data){
             return crypto.subtle.decrypt(CONFIG_GCM(data.slice(0, 12)), com, data.slice(12));
         }
 
