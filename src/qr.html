@@ -19,7 +19,7 @@
     </body>
 
     <script async type="module">
-        function parseQr(video){
+        async function parseQr(video){
             const canvas = new OffscreenCanvas(240, 320);
             const render = canvas.getContext("2d");
 
@@ -38,7 +38,7 @@
             });
         }
 
-        function generateQr(data){
+        async function generateQr(data){
             return new Promise((res, rej) => QRCode.toCanvas(new OffscreenCanvas(1, 1), data, {}, (err, canvas) => !err ? res(canvas) : rej(err)));
         }
 

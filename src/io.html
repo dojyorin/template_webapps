@@ -18,7 +18,7 @@
             return document.getElementById(id);
         }
 
-        function readFile(type, multiple, accept){
+        async function readFile(type, multiple, accept){
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = !!multiple;
