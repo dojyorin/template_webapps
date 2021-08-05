@@ -16,80 +16,82 @@
     </head>
 
     <body>
-        <v-app id="vue" style="visibility:hidden!important">
-            <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
-                <v-icon left>mdi-bell-ring-outline</v-icon>
-                <span>{{notify.message}}</span>
-                <template #action>
-                    <v-btn icon @click="notify.visible = false">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                </template>
-            </v-snackbar>
-
-            <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
-                <v-progress-circular indeterminate size="128" width="6" color="blue">
-                    <span class="white--text">Loading...</span>
-                </v-progress-circular>
-            </v-overlay>
-
-            <v-navigation-drawer app temporary v-model="drawer.visible">
-                <v-toolbar dark color="blue" :height="$vuetify.application.top">
-                    <v-btn icon @click="vDrawer(false)">
-                        <v-icon large>mdi-close</v-icon>
-                    </v-btn>
-
-                    <v-toolbar-title>Menu</v-toolbar-title>
-                </v-toolbar>
-
-                <v-list>
-                    <template v-for="content in drawer.contents">
-                        <v-list-item @click="vRouter(content.to), vDrawer(false)">
-                            <v-list-item-icon>
-                                <v-icon>{{content.icon}}</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>{{content.title}}</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
+        <template id="vue">
+            <v-app>
+                <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
+                    <v-icon left>mdi-bell-ring-outline</v-icon>
+                    <span>{{notify.message}}</span>
+                    <template #action>
+                        <v-btn icon @click="notify.visible = false">
+                            <v-icon>mdi-close</v-icon>
+                        </v-btn>
                     </template>
-                </v-list>
-            </v-navigation-drawer>
+                </v-snackbar>
 
-            <v-app-bar app dark color="blue" height="52">
-                <v-app-bar-nav-icon @click="vDrawer(true)"></v-app-bar-nav-icon>
-                <v-toolbar-title>Application</v-toolbar-title>
-            </v-app-bar>
+                <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
+                    <v-progress-circular indeterminate size="128" width="6" color="blue">
+                        <span class="white--text">Loading...</span>
+                    </v-progress-circular>
+                </v-overlay>
 
-            <v-main>
-                <v-window class="fill-height" v-model="router.path">
-                    <v-window-item value="/">
-                        <v-container fluid>
-                            <v-row justify="center">
-                                <v-col cols>
-                                    <v-card>
-                                        <v-card-title>Main</v-card-title>
-                                    </v-card>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-window-item>
+                <v-navigation-drawer app temporary v-model="drawer.visible">
+                    <v-toolbar dark color="blue" :height="$vuetify.application.top">
+                        <v-btn icon @click="vDrawer(false)">
+                            <v-icon large>mdi-close</v-icon>
+                        </v-btn>
 
-                    <v-window-item value="/sub">
-                        <v-container fluid>
-                            <v-row justify="center">
-                                <v-col cols>
-                                    <v-card>
-                                        <v-card-title>Sub</v-card-title>
-                                    </v-card>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                    </v-window-item>
-                </v-window>
-            </v-main>
-        </v-app>
+                        <v-toolbar-title>Menu</v-toolbar-title>
+                    </v-toolbar>
+
+                    <v-list>
+                        <template v-for="content in drawer.contents">
+                            <v-list-item @click="vRouter(content.to), vDrawer(false)">
+                                <v-list-item-icon>
+                                    <v-icon>{{content.icon}}</v-icon>
+                                </v-list-item-icon>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>{{content.title}}</v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </template>
+                    </v-list>
+                </v-navigation-drawer>
+
+                <v-app-bar app dark color="blue" height="52">
+                    <v-app-bar-nav-icon @click="vDrawer(true)"></v-app-bar-nav-icon>
+                    <v-toolbar-title>Application</v-toolbar-title>
+                </v-app-bar>
+
+                <v-main>
+                    <v-window class="fill-height" v-model="router.path">
+                        <v-window-item value="/">
+                            <v-container fluid>
+                                <v-row justify="center">
+                                    <v-col cols>
+                                        <v-card>
+                                            <v-card-title>Main</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                        </v-window-item>
+
+                        <v-window-item value="/sub">
+                            <v-container fluid>
+                                <v-row justify="center">
+                                    <v-col cols>
+                                        <v-card>
+                                            <v-card-title>Sub</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                        </v-window-item>
+                    </v-window>
+                </v-main>
+            </v-app>
+        </template>
     </body>
 
     <script async type="module">
@@ -147,8 +149,6 @@
             },
 
             async mounted(){
-                this.$el.removeAttribute("style");
-
                 this.vLoading(true);
                 await new Promise(res => setTimeout(res, 1000));
                 this.vLoading(false);
