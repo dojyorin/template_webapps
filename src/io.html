@@ -11,6 +11,7 @@
     <body>
         <button type="button" id="read">Read</button>
         <button type="button" id="write">Write</button>
+        <button type="button" id="directory">Directory</button>
     </body>
 
     <script async type="module">
@@ -91,6 +92,12 @@
             return handle;
         }
 
+        async function readDirectoryNative(){
+            const handle = await showDirectoryPicker();
+
+            return handle;
+        }
+
         function openNotify(message){
             const dialog = document.createElement("dialog");
             dialog.style.position = "fixed";
@@ -117,6 +124,11 @@
         $id("write").addEventListener("click", async()=>{
             console.log(await writeFileNative(null, "test"));
             openNotify("Saved!");
+        });
+
+        $id("directory").addEventListener("click", async()=>{
+            console.log(await readDirectoryNative());
+            openNotify("Loaded!");
         });
     </script>
 </html>
