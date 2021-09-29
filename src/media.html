@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
+
+        <title>Media</title>
+    </head>
+
+    <body>
+        <button type="button" id="camera">Camera</button>
+        <button type="button" id="screen">Screen</button>
+        <button type="button" id="mic">Mic</button>
+        <video autoplay muted controls width="480" height="320" id="video"></video>
+        <audio autoplay muted controls id="audio"></video>
+    </body>
+
+    <script async type="module">
+        const video = document.getElementById("video");
+        const audio = document.getElementById("audio");
+
+        document.getElementById("camera").addEventListener("click", async()=>{
+            video.srcObject = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    facingMode: "environment"
+                }
+            });
+        });
+
+        document.getElementById("screen").addEventListener("click", async()=>{
+            video.srcObject = await navigator.mediaDevices.getDisplayMedia();
+        });
+
+        document.getElementById("mic").addEventListener("click", async()=>{
+            audio.srcObject = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            });
+        });
+    </script>
+</html>
