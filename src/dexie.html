@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
+
+        <script src="https://cdn.jsdelivr.net/npm/dexie@latest/dist/dexie.min.js"></script>
+
+        <title>Dexie</title>
+    </head>
+
+    <body>
+        <button type="button" id="insert">Insert</button>
+    </body>
+
+    <script async type="module">
+        const db = new Dexie("test", {
+            autoOpen: false
+        });
+
+        if(!db.verno){
+            db.version(1).stores({
+                "user": "++&id, name, age"
+            });
+        }
+
+        await db.open();
+
+        document.getElementById("insert").addEventListener("click", async()=>{
+            await db.transaction("rw", ["user"], async()=>{
+                const insert = await db["user"].put({
+                    "name": `Name${Math.floor(Math.random() * 30)}`,
+                    "age": Math.floor(Math.random() * 90)
+                });
+
+                const select = await db["user"].get(insert);
+
+                console.log(insert);
+                console.log(select);
+            });
+        });
+    </script>
+</html>

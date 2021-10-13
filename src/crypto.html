@@ -13,13 +13,13 @@
     </body>
 
     <script async type="module">
-        function concatBuffer(...arrays){
-            return arrays.reduce((c, array)=>{
-                c.byte.set(new Uint8Array(array?.buffer ?? array), c.offset);
-                c.offset += array.byteLength;
-                return c;
+        function concatBufferSource(...sources){
+            return sources.reduce((sum, source)=>{
+                sum.byte.set(new Uint8Array(source?.buffer ?? source), sum.offset);
+                sum.offset += source.byteLength;
+                return sum;
             }, {
-                byte: new Uint8Array(arrays.reduce((c, {byteLength}) => c += byteLength, 0)),
+                byte: new Uint8Array(sources.reduce((sum, {byteLength}) => sum += byteLength, 0)),
                 offset: 0
             }).byte.buffer;
         }
@@ -78,14 +78,17 @@
 
             return {
                 pub: await crypto.subtle.exportKey("spki", publicKey),
-                sec: concatBuffer(iv, salt, await crypto.subtle.wrapKey("pkcs8", privateKey, await derivePassword(pw, salt), CONFIG_GCM(iv)))
+                sec: concatBufferSource(iv, salt, await crypto.subtle.wrapKey("pkcs8", privateKey, await derivePassword(pw, salt), CONFIG_GCM(iv)))
             };
         }
 
         async function importKey(pub, sec, pw){
+            const vpub = new Uint8Array(pub?.buffer ?? pub);
+            const vsec = new Uint8Array(sec?.buffer ?? sec);
+
             return {
-                pub: await crypto.subtle.importKey("spki", pub, CONFIG_CURVE(), false, []),
-                sec: await crypto.subtle.unwrapKey("pkcs8", sec.slice(28), await derivePassword(pw, sec.slice(12, 28)), CONFIG_GCM(sec.slice(0, 12)), CONFIG_CURVE(), false, ["deriveKey"])
+                pub: await crypto.subtle.importKey("spki", vpub, CONFIG_CURVE(), false, []),
+                sec: await crypto.subtle.unwrapKey("pkcs8", vsec.subarray(28), await derivePassword(pw, vsec.subarray(12, 28)), CONFIG_GCM(vsec.subarray(0, 12)), CONFIG_CURVE(), false, ["deriveKey"])
             };
         }
 
@@ -96,11 +99,17 @@
         async function encryptData(com, data){
             const iv = crypto.getRandomValues(new Uint8Array(12));
 
-            return concatBuffer(iv, await crypto.subtle.encrypt(CONFIG_GCM(iv), com, data));
+            return concatBufferSource(iv, await crypto.subtle.encrypt(CONFIG_GCM(iv), com, data));
         }
 
         async function decryptData(com, data){
-            return crypto.subtle.decrypt(CONFIG_GCM(data.slice(0, 12)), com, data.slice(12));
+            const vdata = new Uint8Array(data?.buffer ?? data);
+
+            return crypto.subtle.decrypt(CONFIG_GCM(vdata.subarray(0, 12)), com, vdata.subarray(12));
+        }
+
+        async function toHex(buffer){
+            return Array.from(new Uint8Array(await hashDigest(buffer))).map(n => n.toString(16)).join("");
         }
 
         const raw = new TextEncoder().encode("hogehoge");
@@ -132,19 +141,19 @@
             console.log(key);
         }
 
-        console.log("---------- Raw Data ----------");
-        console.log(new TextDecoder().decode(raw));
-
-        console.log("---------- Raw Hash ----------");
-        console.log(Array.from(new Uint8Array(await hashDigest(raw))).map(n => n.toString(16)).join(""));
-
         console.log("---------- Encoded Data ----------");
         console.log(new TextDecoder().decode(encode));
+
+        console.log("---------- Raw Data ----------");
+        console.log(new TextDecoder().decode(raw));
 
         console.log("---------- Decoded Data ----------");
         console.log(new TextDecoder().decode(decode));
 
+        console.log("---------- Raw Hash ----------");
+        console.log(await toHex(raw));
+
         console.log("---------- Decoded Hash ----------");
-        console.log(Array.from(new Uint8Array(await hashDigest(decode))).map(n => n.toString(16)).join(""));
+        console.log(await toHex(decode));
     </script>
 </html>

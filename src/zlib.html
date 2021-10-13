@@ -13,27 +13,33 @@
     </body>
 
     <script async type="module">
-        async function zlibCodec(data, deflate, encode){
-            return new Uint8Array(await new Response(new Blob([data?.buffer ?? ""]).stream().pipeThrough(new(encode ? CompressionStream : DecompressionStream)(deflate ? "deflate" : "gzip"))).arrayBuffer());
-        }
+        Object.defineProperty(globalThis, "$zlib", {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            async value(data, header, usage){
+                return new Response(new Blob([data]).stream().pipeThrough(new {
+                    "encode": CompressionStream,
+                    "decode": DecompressionStream
+                }[usage]({
+                    "zlib": "deflate",
+                    "gzip": "gzip"
+                }[header]))).arrayBuffer();
+            }
+        });
 
         const raw = new Uint8Array(new Float32Array(0x100000).map(() => Math.random()).buffer);
 
-        const deflateE = await zlibCodec(raw, true, true);
-        const deflateD = await zlibCodec(deflateE, true, false);
-
-        const gzipE = await zlibCodec(raw, false, true);
-        const gzipD = await zlibCodec(gzipE, false, false);
+        const enc = await $zlib(raw, "zlib", "encode");
+        const dec = await $zlib(enc, "zlib", "decode");
 
         console.log("---------- Raw Data ----------");
         console.log(raw);
 
-        console.log("---------- Encoded Data ----------");
-        console.log(deflateE);
-        console.log(gzipE);
-
         console.log("---------- Decoded Data ----------");
-        console.log(deflateD);
-        console.log(gzipD);
+        console.log(new Uint8Array(dec));
+
+        console.log("---------- Encoded Data ----------");
+        console.log(new Uint8Array(enc));
     </script>
 </html>
