@@ -5,11 +5,13 @@
         <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
+        <script src="https://cdn.jsdelivr.net/npm/pako@latest/dist/pako.min.js"></script>
+
         <title>ZLIB</title>
     </head>
 
     <body>
-        Compression Streams API
+        Compression Streams API / Pako
     </body>
 
     <script async type="module">
@@ -31,13 +33,13 @@
         const raw = new Uint8Array(new Float32Array(0x100000).map(() => Math.random()).buffer);
 
         const enc = await $zlib(raw, "zlib", "encode");
-        const dec = await $zlib(enc, "zlib", "decode");
+        const dec = pako.inflate(enc);
 
         console.log("---------- Raw Data ----------");
         console.log(raw);
 
         console.log("---------- Decoded Data ----------");
-        console.log(new Uint8Array(dec));
+        console.log(dec);
 
         console.log("---------- Encoded Data ----------");
         console.log(new Uint8Array(enc));
