@@ -11,7 +11,7 @@
     </head>
 
     <body>
-        <input multiple type="file" id="raws">
+        <input multiple type="file" id="files">
         <input type="file" accept=".zip" id="archive">
     </body>
 
@@ -21,28 +21,39 @@
             maxWorkers: navigator.hardwareConcurrency - 1
         });
 
-        document.getElementById("raws").addEventListener("change", async({target})=>{
-            const ctx = new zip.ZipWriter(new zip.Uint8ArrayWriter(), {
-                level: 9,
-                bufferedWrite: true,
-                keepOrder: false
-            });
+        async function zipEncode(files){
+            const ctx = new zip.ZipWriter(new zip.Uint8ArrayWriter());
 
-            for(const file of target.files){
-                await ctx.add(file.name, new zip.BlobReader(file));
+            for(const entry of files){
+                await ctx.add(entry.name, new zip.Uint8ArrayReader(new Uint8Array(entry.data)));
             }
 
-            console.log(await ctx.close());
-        });
+            return (await ctx.close()).buffer;
+        }
 
-        document.getElementById("archive").addEventListener("change", async({target})=>{
-            const ctx = new zip.ZipReader(new zip.BlobReader(target.files[0]));
+        async function zipDecode(archive){
+            const files = [];
+            const ctx = new zip.ZipReader(new zip.Uint8ArrayReader(new Uint8Array(archive)));
 
             for(const entry of await ctx.getEntries()){
-                console.log(entry.filename, await entry.getData(new zip.Uint8ArrayWriter()));
+                if(!entry.directory){
+                    files.push({
+                        name: entry.filename.split("/").pop(),
+                        data: (await entry.getData(new zip.Uint8ArrayWriter())).buffer
+                    });
+                }
             }
 
             await ctx.close();
+            return files;
+        }
+
+        document.getElementById("files").addEventListener("change", async({target})=>{
+            console.log(await zipEncode(await Promise.all(Array.from(target.files).map(async f => ({name: f.name, data: await f.arrayBuffer()})))));
+        });
+
+        document.getElementById("archive").addEventListener("change", async({target})=>{
+            console.log(await zipDecode(await target.files[0].arrayBuffer()));
         });
     </script>
 </html>
