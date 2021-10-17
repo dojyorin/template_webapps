@@ -71,7 +71,7 @@
             };
         }
 
-        function writeFile(data, name){
+        function writeFile(name, data){
             const link = document.createElement("a");
             link.href = URL.createObjectURL(new Blob([data]));
             link.download = name;
