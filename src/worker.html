@@ -13,7 +13,7 @@
     </body>
 
     <script async type="module">
-        class WorkerEx extends Worker{
+        class WorkerInline extends Worker{
             #url = "";
 
             constructor(...sources){
@@ -28,7 +28,7 @@
             }
         }
 
-        const worker = new WorkerEx(function(){
+        const worker = new WorkerInline(function(){
             globalThis.addEventListener("message", ({data})=>{
                 const bytes = new Float32Array(data.buffer).map(() => Math.random());
                 globalThis.postMessage(bytes, [bytes.buffer]);
