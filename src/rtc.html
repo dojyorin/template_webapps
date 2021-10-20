@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
+
+        <title>WebRTC</title>
+    </head>
+
+    <body>
+        <video autoplay muted width="640" height="360" id="video"></video>
+        <progress min="0" max="0" value="0"id="progress"></progress>
+    </body>
+
+    <script async type="module">
+        const video = document.getElementById("video");
+        const progress = document.getElementById("progress");
+
+        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+
+        async function $sleep(time){
+            return new Promise(done => setTimeout(done, time));
+        }
+
+        async function generateHash(data){
+            return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-512", data))).map(n => n.toString(16).toUpperCase()).join("");
+        }
+
+        async function getMedia(){
+            return navigator.mediaDevices.getDisplayMedia({
+                audio: true,
+                video: true
+            });
+        }
+
+        async function txData(peer, meta, data){
+            const ch = peer.createDataChannel("");
+            const byte = new Uint8Array(data?.buffer ?? data);
+
+            let offset = 0;
+
+            while(ch.readyState !== "open"){
+                await $sleep(10);
+            }
+
+            ch.send(`${meta}:${byte.byteLength}:${await generateHash(byte)}`);
+            progress.max = byte.byteLength;
+
+            while(offset < byte.byteLength){
+                while(ch.bufferedAmount > 0x200000){
+                    await $sleep(10);
+                }
+
+                ch.send(byte.subarray(offset, offset += 0x4000));
+                progress.value = offset;
+            }
+
+            ch.send("");
+        }
+
+        const peerLocal = new RTCPeerConnection();
+        const peerRemote = new RTCPeerConnection();
+
+        peerRemote.addEventListener("track", ({track})=>{
+            video.srcObject = new MediaStream([track]);
+        });
+
+        peerRemote.addEventListener("datachannel", ({channel})=>{
+            let offset = 0;
+            let byte = null;
+            let meta = "";
+            let hash = "";
+
+            channel.addEventListener("message", async({data})=>{
+                if(typeof data === "string"){
+                    if(data === ""){
+                        channel.close();
+
+                        if(hash !== await generateHash(byte)){
+                            throw "SHA-512 not matched.";
+                        }
+
+                        console.log(meta, byte.buffer);
+                    }
+                    else{
+                        const [m, b, h] = data.split(":");
+                        byte = new Uint8Array(Number(b));
+                        meta = m;
+                        hash = h;
+                    }
+                }
+                else{
+                    byte.set(new Uint8Array(data), offset);
+                    offset += data.byteLength;
+                }
+            });
+        });
+
+        peerLocal.addTrack((await getMedia()).getTracks()[0]);
+        txData(peerLocal, "test", sample);
+
+        peerLocal.addEventListener("icecandidate", ({candidate})=>{
+            peerRemote.addIceCandidate(candidate);
+        });
+
+        peerRemote.addEventListener("icecandidate", ({candidate})=>{
+            peerLocal.addIceCandidate(candidate);
+        });
+
+        const peerLocalOffer = await peerLocal.createOffer();
+        await peerLocal.setLocalDescription(peerLocalOffer);
+
+        await peerRemote.setRemoteDescription(peerLocalOffer);
+        const peerRemoteAnswer = await peerRemote.createAnswer();
+        await peerRemote.setLocalDescription(peerRemoteAnswer);
+
+        await peerLocal.setRemoteDescription(peerRemoteAnswer);
+    </script>
+</html>

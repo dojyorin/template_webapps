@@ -30,13 +30,13 @@
             }
         });
 
-        const raw = new Uint8Array(new Float32Array(0x100000).map(() => Math.random()).buffer);
+        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
 
-        const enc = await $zlib(raw, "zlib", "encode");
+        const enc = await $zlib(sample, "zlib", "encode");
         const dec = pako.inflate(enc);
 
         console.log("---------- Raw Data ----------");
-        console.log(raw);
+        console.log(sample);
 
         console.log("---------- Decoded Data ----------");
         console.log(dec);

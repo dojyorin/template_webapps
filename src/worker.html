@@ -14,33 +14,23 @@
 
     <script async type="module">
         class WorkerInline extends Worker{
-            #url = "";
-
             constructor(...sources){
-                const url = URL.createObjectURL(new Blob([sources.map(s => s.toString().replace(/^function.+?\{/s, "").replace(/\}$/s, "").replace(/^\s+/gm, "").trim()).join("\n;\n")]));
-                super(url);
-                this.#url = url;
-            }
-
-            terminate(){
-                super.terminate();
-                URL.revokeObjectURL(this.#url);
+                super(URL.createObjectURL(new Blob([sources.map(s => s.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "").replace(/^\s+/gm, "").trim()).join("\n;\n")])));
             }
         }
 
-        const worker = new WorkerInline(function(){
+        const worker = new WorkerInline(()=>{
             globalThis.addEventListener("message", ({data})=>{
-                const bytes = new Float32Array(data.buffer).map(() => Math.random());
-                globalThis.postMessage(bytes, [bytes.buffer]);
+                const sample = data.map(n => n * 2);
+                globalThis.postMessage(sample, [sample.buffer]);
             });
         });
 
         worker.addEventListener("message", ({data})=>{
-            worker.terminate();
             console.log(data);
         });
 
-        const bytes = new Float32Array(1024 * 1024 * 128);
-        worker.postMessage(bytes, [bytes.buffer]);
+        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+        worker.postMessage(sample, [sample.buffer]);
     </script>
 </html>
