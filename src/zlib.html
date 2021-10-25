@@ -19,20 +19,14 @@
             enumerable: false,
             configurable: false,
             writable: false,
-            async value(data, header, usage){
-                return new Response(new Blob([data]).stream().pipeThrough(new {
-                    "encode": CompressionStream,
-                    "decode": DecompressionStream
-                }[usage]({
-                    "zlib": "deflate",
-                    "gzip": "gzip"
-                }[header]))).arrayBuffer();
+            async value(data, gzip, encode){
+                return new Response(new Blob([data]).stream().pipeThrough(new (!!encode ? CompressionStream : DecompressionStream)(!!gzip ? "gzip" : "deflate"))).arrayBuffer();
             }
         });
 
         const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
 
-        const enc = await $zlib(sample, "zlib", "encode");
+        const enc = await $zlib(sample, true, true);
         const dec = pako.inflate(enc);
 
         console.log("---------- Raw Data ----------");

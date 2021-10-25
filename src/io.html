@@ -19,40 +19,38 @@
             return document.getElementById(id);
         }
 
-        async function readFile(type, multiple, accept){
+        async function fsRead(type, multiple, accept){
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = !!multiple;
             input.accept = accept ?? "";
 
-            const resolver = new Promise((res)=>{
+            const promise = new Promise((res)=>{
                 input.addEventListener("input", async()=>{
-                    const files = await Array.from(input.files).map(async(file)=>{
+                    res(await Array.from(input.files).map(async(file)=>{
                         return {
                             name: file.name,
                             data: {
                                 blob: new Blob([file]),
-                                byte: new Uint8Array(await file.arrayBuffer()),
+                                buffer: await file.arrayBuffer(),
                                 text: await file.text(),
-                                code: await new Promise((res0)=>{
+                                code: await new Promise((_res)=>{
                                     const reader = new FileReader();
-                                    reader.addEventListener("load", () => res0(reader.result));
+                                    reader.addEventListener("load", () => _res(reader.result));
                                     reader.readAsDataURL(file);
                                 })
-                            }[type ?? "byte"]
+                            }[type ?? "buffer"]
                         };
-                    });
-
-                    res(input.multiple ? files : files.pop());
+                    }));
                 });
             });
 
             input.click();
 
-            return resolver;
+            return promise;
         }
 
-        async function readFileNative(fs, type){
+        async function fsReadNative(fs, type){
             const handle = fs instanceof FileSystemFileHandle ? fs : (await showOpenFilePicker(fs)).shift();
             const file = await handle.getFile();
 
@@ -60,18 +58,18 @@
                 fs: handle,
                 data: {
                     blob: new Blob([file]),
-                    byte: new Uint8Array(await file.arrayBuffer()),
+                    buffer: await file.arrayBuffer(),
                     text: await file.text(),
                     code: await new Promise((res)=>{
                         const reader = new FileReader();
                         reader.addEventListener("load", () => res(reader.result));
                         reader.readAsDataURL(file);
                     })
-                }[type ?? "byte"]
+                }[type ?? "buffer"]
             };
         }
 
-        function writeFile(name, data){
+        function fsWrite(name, data){
             const link = document.createElement("a");
             link.href = URL.createObjectURL(new Blob([data]));
             link.download = name;
@@ -81,7 +79,7 @@
             URL.revokeObjectURL(link.href);
         }
 
-        async function writeFileNative(fs, data){
+        async function fsWriteNative(fs, data){
             const handle = fs instanceof FileSystemFileHandle ? fs : await showSaveFilePicker(fs);
             const writer = await handle.createWritable();
 
@@ -92,7 +90,7 @@
             return handle;
         }
 
-        async function readDirectoryNative(){
+        async function fsDirectoryNative(){
             const handle = await showDirectoryPicker();
 
             return handle;
@@ -117,17 +115,17 @@
         }
 
         $id("read").addEventListener("click", async()=>{
-            console.log(await readFileNative());
+            console.log(await fsReadNative());
             openNotify("Loaded!");
         });
 
         $id("write").addEventListener("click", async()=>{
-            console.log(await writeFileNative(null, "test"));
+            console.log(await fsWriteNative(null, "test"));
             openNotify("Saved!");
         });
 
         $id("directory").addEventListener("click", async()=>{
-            console.log(await readDirectoryNative());
+            console.log(await fsDirectoryNative());
             openNotify("Loaded!");
         });
     </script>
