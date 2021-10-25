@@ -13,7 +13,7 @@
     </body>
 
     <script async type="module">
-        function $mergeBuffer(...sources){
+        function mergeBuffer(...sources){
             return sources.reduce((sum, source)=>{
                 sum.byte.set(new Uint8Array(source?.buffer ?? source), sum.offset);
                 sum.offset += source.byteLength;
@@ -24,7 +24,7 @@
             }).byte.buffer;
         }
 
-        async function $toHex(buffer){
+        async function toHex(buffer){
             return Array.from(new Uint8Array(await wcHashDigest(buffer))).map(n => n.toString(16)).join("");
         }
 
@@ -82,7 +82,7 @@
 
             return {
                 pub: await crypto.subtle.exportKey("spki", publicKey),
-                sec: $mergeBuffer(iv, salt, await crypto.subtle.wrapKey("pkcs8", privateKey, await wcDerivePassword(pw, salt), wcConfigGCM(iv)))
+                sec: mergeBuffer(iv, salt, await crypto.subtle.wrapKey("pkcs8", privateKey, await wcDerivePassword(pw, salt), wcConfigGCM(iv)))
             };
         }
 
@@ -103,7 +103,7 @@
         async function wcEncryptData(com, data){
             const iv = crypto.getRandomValues(new Uint8Array(12));
 
-            return $mergeBuffer(iv, await crypto.subtle.encrypt(wcConfigGCM(iv), com, data));
+            return mergeBuffer(iv, await crypto.subtle.encrypt(wcConfigGCM(iv), com, data));
         }
 
         async function wcDecryptData(com, data){
@@ -151,9 +151,9 @@
         console.log(new TextDecoder().decode(decode));
 
         console.log("---------- Raw Hash ----------");
-        console.log(await $toHex(raw));
+        console.log(await toHex(raw));
 
         console.log("---------- Decoded Hash ----------");
-        console.log(await $toHex(decode));
+        console.log(await toHex(decode));
     </script>
 </html>
