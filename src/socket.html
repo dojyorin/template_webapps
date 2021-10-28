@@ -13,14 +13,98 @@
     </body>
 
     <script async type="module">
-        const socket = new WebSocket("wss://echo.websocket.org");
+        class WebSocketReconnect{
+            #ctx = null;
+            #path = "";
+            #reconnect = 0;
+            #interval = 0;
+
+            constructor(path, reconnect, interval){
+                this.#path = path;
+                this.#reconnect = reconnect ?? 3;
+                this.#interval = interval ?? 5000;
+            }
+
+            async post(data){
+                const byte = new Uint8Array(data?.buffer ?? data);
+                let offset = 0;
+
+                while(offset < byte.byteLength){
+                    while(this.#ctx.bufferedAmount > 0x200000){
+                        await new Promise(done => setTimeout(done, 10));
+                    }
+
+                    this.#ctx.send(byte.subarray(offset, offset += 0x4000));
+                }
+            }
+
+            async connect(){
+                this.#ctx = new WebSocket(this.#path);
+                this.#ctx.binaryType = "arraybuffer";
+
+                try{
+                    await new Promise((resolve, reject)=>{
+                        setTimeout(()=>{
+                            this.#ctx = null;
+                            reject();
+                        }, this.#interval);
+
+                        this.#ctx.onopen = ()=>{
+                            this.#ctx.onopen = null;
+                            resolve();
+                        };
+                    });
+
+                    if(this.#reconnect){
+                        this.#ctx.onclose = async()=>{
+                            for(let i = 0; i < this.#reconnect && !this.ready; i++){
+                                console.log("Connection closed. Reconnecting now.");
+                                await this.connect();
+                            }
+
+                            if(!this.ready){
+                                console.error("Connection lost.");
+                            }
+                        }
+                    }
+                }
+                catch{}
+            }
+
+            disconnect(){
+                this.#ctx.close();
+                this.#ctx = null;
+            }
+
+            addEventListener(...args){
+                this.#ctx.addEventListener(...args);
+            }
+
+            removeEventListener(...args){
+                this.#ctx.addEventListener(...args);
+            }
+
+            dispatchEvent(...args){
+                this.#ctx.dispatchEvent(...args);
+            }
+
+            get ws(){
+                return this.#ctx;
+            }
+
+            get ready(){
+                return this.#ctx?.readyState === 1;
+            }
+        }
+
+        const socket = new WebSocketReconnect("ws://localhost:5500/./ws");
+
+        await socket.connect();
 
         socket.addEventListener("message", ({data})=>{
             console.log(data);
         });
 
-        socket.addEventListener("open", ()=>{
-            socket.send("test");
-        });
+        await socket.post("test");
     </script>
 </html>

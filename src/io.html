@@ -20,37 +20,45 @@
         }
 
         async function fsRead(type, multiple, accept){
-            const input = document.createElement("input");
-            input.type = "file";
-            input.multiple = !!multiple;
-            input.accept = accept ?? "";
+            return new Promise((resolve)=>{
+                const input = document.createElement("input");
+                input.type = "file";
+                input.multiple = !!multiple;
+                input.accept = accept ?? "";
 
-            const promise = new Promise((res)=>{
                 input.addEventListener("input", async()=>{
-                    res(await Array.from(input.files).map(async(file)=>{
+                    resolve(await Promise.all(Array.from(input.files).map(async(file)=>{
                         return {
                             name: file.name,
                             data: {
                                 blob: new Blob([file]),
                                 buffer: await file.arrayBuffer(),
                                 text: await file.text(),
-                                code: await new Promise((_res)=>{
+                                code: await new Promise((res)=>{
                                     const reader = new FileReader();
-                                    reader.addEventListener("load", () => _res(reader.result));
+                                    reader.addEventListener("load", () => res(reader.result));
                                     reader.readAsDataURL(file);
                                 })
                             }[type ?? "buffer"]
                         };
-                    }));
+                    })));
                 });
+
+                input.click();
             });
-
-            input.click();
-
-            return promise;
         }
 
-        async function fsReadNative(fs, type){
+        function fsWrite(name, data){
+            const anchor = document.createElement("a");
+            anchor.download = name;
+            anchor.href = URL.createObjectURL(new Blob([data]));
+
+            anchor.click();
+
+            URL.revokeObjectURL(anchor.href);
+        }
+
+        async function fsNativeRead(fs, type){
             const handle = fs instanceof FileSystemFileHandle ? fs : (await showOpenFilePicker(fs)).shift();
             const file = await handle.getFile();
 
@@ -69,34 +77,27 @@
             };
         }
 
-        function fsWrite(name, data){
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([data]));
-            link.download = name;
-
-            link.click();
-
-            URL.revokeObjectURL(link.href);
-        }
-
-        async function fsWriteNative(fs, data){
+        async function fsNativeWrite(fs, data){
             const handle = fs instanceof FileSystemFileHandle ? fs : await showSaveFilePicker(fs);
             const writer = await handle.createWritable();
 
-            await writer.truncate(0);
             await writer.write(data);
             await writer.close();
 
-            return handle;
+            return {
+                fs: handle
+            };
         }
 
-        async function fsDirectoryNative(){
+        async function fsNativeDirectory(){
             const handle = await showDirectoryPicker();
 
-            return handle;
+            return {
+                fs: handle
+            };
         }
 
-        function openNotify(message){
+        function dialogNotify(message){
             const dialog = document.createElement("dialog");
             dialog.style.position = "fixed";
             dialog.style.top = "10px";
@@ -115,18 +116,20 @@
         }
 
         $id("read").addEventListener("click", async()=>{
-            console.log(await fsReadNative());
-            openNotify("Loaded!");
+            console.log(await fsRead());
+            console.log(await fsNativeRead());
+            dialogNotify("Loaded!");
         });
 
         $id("write").addEventListener("click", async()=>{
-            console.log(await fsWriteNative(null, "test"));
-            openNotify("Saved!");
+            console.log(await fsWrite("test.txt", "test"));
+            console.log(await fsNativeWrite(null, "test"));
+            dialogNotify("Saved!");
         });
 
         $id("directory").addEventListener("click", async()=>{
-            console.log(await fsDirectoryNative());
-            openNotify("Loaded!");
+            console.log(await fsNativeDirectory());
+            dialogNotify("Loaded!");
         });
     </script>
 </html>

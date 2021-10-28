@@ -14,8 +14,17 @@
 
     <script async type="module">
         class WorkerInline extends Worker{
+            #path = "";
+
             constructor(...sources){
-                super(URL.createObjectURL(new Blob([sources.map(s => s.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "").replace(/^\s+/gm, "").trim()).join("\n;\n")])));
+                const path = URL.createObjectURL(new Blob([sources.map(s => s.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
+                super(path);
+                this.#path = path;
+            }
+
+            terminate(){
+                super.terminate();
+                URL.revokeObjectURL(this.#path);
             }
         }
 
@@ -28,6 +37,7 @@
 
         worker.addEventListener("message", ({data})=>{
             console.log(data);
+            worker.terminate();
         });
 
         const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
