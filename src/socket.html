@@ -30,11 +30,11 @@
                 let offset = 0;
 
                 while(offset < byte.byteLength){
-                    while(this.#ctx.bufferedAmount > 0x200000){
+                    while(this.#ctx.bufferedAmount > 0x100000){
                         await new Promise(done => setTimeout(done, 10));
                     }
 
-                    this.#ctx.send(byte.subarray(offset, offset += 0x4000));
+                    this.#ctx.send(byte.subarray(offset, offset += 0x2000));
                 }
             }
 
@@ -81,14 +81,14 @@
             }
 
             removeEventListener(...args){
-                this.#ctx.addEventListener(...args);
+                this.#ctx.removeEventListener(...args);
             }
 
             dispatchEvent(...args){
                 this.#ctx.dispatchEvent(...args);
             }
 
-            get ws(){
+            get context(){
                 return this.#ctx;
             }
 
@@ -97,7 +97,7 @@
             }
         }
 
-        const socket = new WebSocketReconnect("ws://localhost:5500/./ws");
+        const socket = new WebSocketReconnect(`ws://${location.host}/./ws`);
 
         await socket.connect();
 
