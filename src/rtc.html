@@ -9,16 +9,12 @@
     </head>
 
     <body>
-        <video autoplay muted width="640" height="360" id="video"></video>
-        <progress min="0" max="0" value="0"id="progress"></progress>
+        <button type="button" id="offer">OFFER</button>
+        <button type="button" id="answer">ANSWER</button>
+        <button type="button" id="send">SEND</button>
     </body>
 
     <script async type="module">
-        const video = document.getElementById("video");
-        const progress = document.getElementById("progress");
-
-        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
-
         async function $sleep(time){
             return new Promise(done => setTimeout(done, time));
         }
@@ -27,46 +23,13 @@
             return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-512", data))).map(n => n.toString(16).toUpperCase()).join("");
         }
 
-        async function getMedia(){
-            return navigator.mediaDevices.getDisplayMedia({
-                audio: true,
-                video: true
-            });
-        }
-
-        async function txData(peer, meta, data){
-            const ch = peer.createDataChannel("");
-            const byte = new Uint8Array(data?.buffer ?? data);
-
-            let offset = 0;
-
-            while(ch.readyState !== "open"){
-                await $sleep(10);
-            }
-
-            ch.send(`${meta}:${byte.byteLength}:${await generateHash(byte)}`);
-            progress.max = byte.byteLength;
-
-            while(offset < byte.byteLength){
-                while(ch.bufferedAmount > 0x200000){
-                    await $sleep(10);
-                }
-
-                ch.send(byte.subarray(offset, offset += 0x4000));
-                progress.value = offset;
-            }
-
-            ch.send("");
-        }
-
-        const peerLocal = new RTCPeerConnection();
-        const peerRemote = new RTCPeerConnection();
-
-        peerRemote.addEventListener("track", ({track})=>{
-            video.srcObject = new MediaStream([track]);
+        const rtc = new RTCPeerConnection({
+            iceServers: [{
+                urls: ["stun:stun.l.google.com:19302"]
+            }]
         });
 
-        peerRemote.addEventListener("datachannel", ({channel})=>{
+        rtc.addEventListener("datachannel", ({channel})=>{
             let offset = 0;
             let byte = null;
             let meta = "";
@@ -74,20 +37,20 @@
 
             channel.addEventListener("message", async({data})=>{
                 if(typeof data === "string"){
-                    if(data === ""){
-                        channel.close();
-
-                        if(hash !== await generateHash(byte)){
-                            throw "SHA-512 not matched.";
-                        }
-
-                        console.log(meta, byte.buffer);
-                    }
-                    else{
+                    if(data){
                         const [m, b, h] = data.split(":");
                         byte = new Uint8Array(Number(b));
                         meta = m;
                         hash = h;
+                    }
+                    else{
+                        channel.close();
+
+                        if(hash !== await generateHash(byte)){
+                            throw "HASH not matched.";
+                        }
+
+                        console.log(meta, byte.buffer);
                     }
                 }
                 else{
@@ -97,24 +60,55 @@
             });
         });
 
-        peerLocal.addTrack((await getMedia()).getTracks()[0]);
-        txData(peerLocal, "test", sample);
+        document.getElementById("send").addEventListener("click", async({target})=>{
+            target.textContent = "SENDING...";
 
-        peerLocal.addEventListener("icecandidate", ({candidate})=>{
-            peerRemote.addIceCandidate(candidate);
+            const ch = rtc.createDataChannel("");
+
+            const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+            let offset = 0;
+
+            while(ch.readyState !== "open"){
+                await $sleep(10);
+            }
+
+            ch.send(`${"test"}:${sample.byteLength}:${await generateHash(sample)}`);
+
+            while(offset < sample.byteLength){
+                while(ch.bufferedAmount > 0x200000){
+                    await $sleep(10);
+                }
+
+                ch.send(sample.subarray(offset, offset += 0x4000));
+            }
+
+            ch.send("");
         });
 
-        peerRemote.addEventListener("icecandidate", ({candidate})=>{
-            peerLocal.addIceCandidate(candidate);
+        document.getElementById("offer").addEventListener("click", async({target})=>{
+            target.textContent = "OFFERING...";
+
+            await rtc.setLocalDescription(await rtc.createOffer());
+
+            while(rtc.iceGatheringState !== "complete"){
+                await $sleep(100);
+            }
+
+            console.log(btoa(JSON.stringify(rtc.localDescription)));
+            await rtc.setRemoteDescription(JSON.parse(atob(prompt("ANSWER?"))));
         });
 
-        const peerLocalOffer = await peerLocal.createOffer();
-        await peerLocal.setLocalDescription(peerLocalOffer);
+        document.getElementById("answer").addEventListener("click", async({target})=>{
+            target.textContent = "ANSWERING...";
 
-        await peerRemote.setRemoteDescription(peerLocalOffer);
-        const peerRemoteAnswer = await peerRemote.createAnswer();
-        await peerRemote.setLocalDescription(peerRemoteAnswer);
+            await rtc.setRemoteDescription(JSON.parse(atob(prompt("OFFER?"))));
+            await rtc.setLocalDescription(await rtc.createAnswer());
 
-        await peerLocal.setRemoteDescription(peerRemoteAnswer);
+            while(rtc.iceGatheringState !== "complete"){
+                await $sleep(100);
+            }
+
+            console.log(btoa(JSON.stringify(rtc.localDescription)));
+        });
     </script>
 </html>
