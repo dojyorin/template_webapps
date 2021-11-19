@@ -11,7 +11,6 @@
     <body>
         <button type="button" id="offer">OFFER</button>
         <button type="button" id="answer">ANSWER</button>
-        <button type="button" id="send">SEND</button>
     </body>
 
     <script async type="module">
@@ -23,54 +22,33 @@
             return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-512", data))).map(n => n.toString(16).toUpperCase()).join("");
         }
 
-        const rtc = new RTCPeerConnection({
-            iceServers: [{
-                urls: ["stun:stun.l.google.com:19302"]
-            }]
-        });
+        document.getElementById("offer").addEventListener("click", async({target})=>{
+            target.textContent = "OFFERING...";
 
-        rtc.addEventListener("datachannel", ({channel})=>{
-            let offset = 0;
-            let byte = null;
-            let meta = "";
-            let hash = "";
-
-            channel.addEventListener("message", async({data})=>{
-                if(typeof data === "string"){
-                    if(data){
-                        const [m, b, h] = data.split(":");
-                        byte = new Uint8Array(Number(b));
-                        meta = m;
-                        hash = h;
-                    }
-                    else{
-                        channel.close();
-
-                        if(hash !== await generateHash(byte)){
-                            throw "HASH not matched.";
-                        }
-
-                        console.log(meta, byte.buffer);
-                    }
-                }
-                else{
-                    byte.set(new Uint8Array(data), offset);
-                    offset += data.byteLength;
-                }
+            const rtc = new RTCPeerConnection({
+                iceServers: [{
+                    urls: ["stun:stun.l.google.com:19302"]
+                }]
             });
-        });
-
-        document.getElementById("send").addEventListener("click", async({target})=>{
-            target.textContent = "SENDING...";
 
             const ch = rtc.createDataChannel("");
 
-            const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
-            let offset = 0;
+            await rtc.setLocalDescription(await rtc.createOffer());
+
+            while(rtc.iceGatheringState !== "complete"){
+                await $sleep(100);
+            }
+
+            console.log(btoa(JSON.stringify(rtc.localDescription)));
+
+            await rtc.setRemoteDescription(JSON.parse(atob(prompt("ANSWER?"))));
 
             while(ch.readyState !== "open"){
                 await $sleep(10);
             }
+
+            const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+            let offset = 0;
 
             ch.send(`${"test"}:${sample.byteLength}:${await generateHash(sample)}`);
 
@@ -85,21 +63,45 @@
             ch.send("");
         });
 
-        document.getElementById("offer").addEventListener("click", async({target})=>{
-            target.textContent = "OFFERING...";
-
-            await rtc.setLocalDescription(await rtc.createOffer());
-
-            while(rtc.iceGatheringState !== "complete"){
-                await $sleep(100);
-            }
-
-            console.log(btoa(JSON.stringify(rtc.localDescription)));
-            await rtc.setRemoteDescription(JSON.parse(atob(prompt("ANSWER?"))));
-        });
-
         document.getElementById("answer").addEventListener("click", async({target})=>{
             target.textContent = "ANSWERING...";
+
+            const rtc = new RTCPeerConnection({
+                iceServers: [{
+                    urls: ["stun:stun.l.google.com:19302"]
+                }]
+            });
+
+            rtc.addEventListener("datachannel", ({channel})=>{
+                let offset = 0;
+                let byte = null;
+                let meta = "";
+                let hash = "";
+
+                channel.addEventListener("message", async({data})=>{
+                    if(typeof data === "string"){
+                        if(data){
+                            const [m, b, h] = data.split(":");
+                            byte = new Uint8Array(Number(b));
+                            meta = m;
+                            hash = h;
+                        }
+                        else{
+                            channel.close();
+
+                            if(hash !== await generateHash(byte)){
+                                throw "HASH not matched.";
+                            }
+
+                            console.log(meta, byte.buffer);
+                        }
+                    }
+                    else{
+                        byte.set(new Uint8Array(data), offset);
+                        offset += data.byteLength;
+                    }
+                });
+            });
 
             await rtc.setRemoteDescription(JSON.parse(atob(prompt("OFFER?"))));
             await rtc.setLocalDescription(await rtc.createAnswer());
