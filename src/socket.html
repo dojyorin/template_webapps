@@ -43,15 +43,15 @@
                 this.#ctx.binaryType = "arraybuffer";
 
                 try{
-                    await new Promise((resolve, reject)=>{
+                    await new Promise((res, rej)=>{
                         setTimeout(()=>{
                             this.#ctx = null;
-                            reject();
+                            rej();
                         }, this.#interval);
 
                         this.#ctx.onopen = ()=>{
                             this.#ctx.onopen = null;
-                            resolve();
+                            res();
                         };
                     });
 

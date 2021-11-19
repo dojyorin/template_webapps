@@ -72,37 +72,6 @@
                 }]
             });
 
-            rtc.addEventListener("datachannel", ({channel})=>{
-                let offset = 0;
-                let byte = null;
-                let meta = "";
-                let hash = "";
-
-                channel.addEventListener("message", async({data})=>{
-                    if(typeof data === "string"){
-                        if(data){
-                            const [m, b, h] = data.split(":");
-                            byte = new Uint8Array(Number(b));
-                            meta = m;
-                            hash = h;
-                        }
-                        else{
-                            channel.close();
-
-                            if(hash !== await generateHash(byte)){
-                                throw "HASH not matched.";
-                            }
-
-                            console.log(meta, byte.buffer);
-                        }
-                    }
-                    else{
-                        byte.set(new Uint8Array(data), offset);
-                        offset += data.byteLength;
-                    }
-                });
-            });
-
             await rtc.setRemoteDescription(JSON.parse(atob(prompt("OFFER?"))));
             await rtc.setLocalDescription(await rtc.createAnswer());
 
@@ -111,6 +80,37 @@
             }
 
             console.log(btoa(JSON.stringify(rtc.localDescription)));
+
+            const {channel: ch} = await new Promise(res => rtc.addEventListener("datachannel", res, {once: true}));
+
+            let offset = 0;
+            let byte = null;
+            let meta = "";
+            let hash = "";
+
+            ch.addEventListener("message", async({data})=>{
+                if(typeof data === "string"){
+                    if(data){
+                        const [m, b, h] = data.split(":");
+                        byte = new Uint8Array(Number(b));
+                        meta = m;
+                        hash = h;
+                    }
+                    else{
+                        ch.close();
+
+                        if(hash !== await generateHash(byte)){
+                            throw "HASH not matched.";
+                        }
+
+                        console.log(meta, byte.buffer);
+                    }
+                }
+                else{
+                    byte.set(new Uint8Array(data), offset);
+                    offset += data.byteLength;
+                }
+            });
         });
     </script>
 </html>
