@@ -27,8 +27,8 @@
                 const loop = setInterval(()=>{
                     render.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                    const img = render.getImageData(0, 0, canvas.width, canvas.height);
-                    const result = jsQR(img.data, img.width, img.height);
+                    const image = render.getImageData(0, 0, canvas.width, canvas.height);
+                    const result = jsQR(image.data, image.width, image.height);
 
                     if(result){
                         clearInterval(loop);
