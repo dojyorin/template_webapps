@@ -45,6 +45,10 @@
             return new DataView(b)[`getUint${w * 8}`](0);
         }
 
+        async function fileEntry(files){
+            return Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})));
+        }
+
         async function packEncode(files){
             if(files.length > ((0x100 ** packConfigMeta().count) - 1) || files.some(({name, data: {byteLength}}) => (byteLength > ((0x100 ** packConfigHeader().size) - 1)) || (name.length > packConfigHeader().name))){
                 throw "";
@@ -88,7 +92,7 @@
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            const encode = await packEncode(await Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()}))));
+            const encode = await packEncode(await fileEntry(files));
             const decode = await packDecode(encode);
 
             console.log(encode);

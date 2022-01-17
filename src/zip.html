@@ -16,6 +16,10 @@
     </body>
 
     <script async type="module">
+        async function fileEntry(files){
+            return Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})));
+        }
+
         async function zipEncode(files){
             return files.reduce((ctx, {name, data}) => ctx.file(name, data), new JSZip()).generateAsync({
                 compression: "DEFLATE",
@@ -28,7 +32,7 @@
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            console.log(await zipEncode(await Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})))));
+            console.log(await zipEncode(await fileEntry(files)));
         });
 
         document.getElementById("archive").addEventListener("change", async({target: {files}})=>{
