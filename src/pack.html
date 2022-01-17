@@ -59,7 +59,7 @@
             archive.set(new Uint8Array(dvSet(files.length, packConfigMeta().count)), 0);
 
             for(let i = 0, offset = packConfigMeta().count; i < files.length; i++){
-                const {name, data} = files?.at(i);
+                const {name, data} = files.at(i);
 
                 archive.set(new Uint8Array(dvSet(data.byteLength, packConfigHeader().size)), offset);
                 archive.set(new Uint8Array(await wcHashDigest(data)), offset += packConfigHeader().size);
