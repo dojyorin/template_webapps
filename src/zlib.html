@@ -13,27 +13,30 @@
     <body></body>
 
     <script async type="module">
-        Object.defineProperty(globalThis, "$zlib", {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            async value(data, encode, gzip){
-                return new Response(new Blob([data]).stream().pipeThrough(new (encode ? CompressionStream : DecompressionStream)(gzip ? "gzip" : "deflate"))).arrayBuffer();
-            }
-        });
+        async function deflateEncode(data, gzip){
+            return new Response(new Blob([data]).stream().pipeThrough(new CompressionStream(gzip ? "gzip" : "deflate"))).arrayBuffer();
+        }
+
+        async function deflateDecode(data, gzip){
+            return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream(gzip ? "gzip" : "deflate"))).arrayBuffer();
+        }
 
         const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
 
-        const enc = await $zlib(sample, true, true);
-        const dec = pako.inflate(enc);
+        const encode1 = await deflateEncode(sample, false);
+        const decode1 = await deflateDecode(encode1, false);
+        const encode2 = pako.deflate(sample);
+        const decode2 = pako.inflate(encode2);
 
         console.log("---------- Raw Data ----------");
         console.log(sample);
 
         console.log("---------- Decoded Data ----------");
-        console.log(dec);
+        console.log(decode1);
+        console.log(decode2);
 
         console.log("---------- Encoded Data ----------");
-        console.log(new Uint8Array(enc));
+        console.log(new Uint8Array(encode1));
+        console.log(new Uint8Array(encode2));
     </script>
 </html>

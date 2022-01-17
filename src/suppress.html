@@ -11,41 +11,31 @@
     <body></body>
 
     <script async type="module">
-        Object.defineProperty(globalThis, "$deepFreeze", {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value(o){
-                Object.freeze(o);
+        function deepFreeze(o){
+            Object.freeze(o);
 
-                for(const k of Object.keys(o)){
-                    if(!Object.isFrozen(o[k]) && o.hasOwnProperty(k) && typeof o[k] === "object" && o[k] !== null){
-                        $deepFreeze(o[k]);
-                    }
+            for(const k of Object.keys(o)){
+                if(!Object.isFrozen(o[k]) && o.hasOwnProperty(k) && typeof o[k] === "object" && o[k] !== null){
+                    $deepFreeze(o[k]);
                 }
-
-                return o;
             }
-        });
 
-        Object.defineProperty(globalThis, "$deepSeal", {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value(o){
-                Object.seal(o);
+            return o;
+        }
 
-                for(const k of Object.keys(o)){
-                    if(!Object.isSealed(o[k]) && o.hasOwnProperty(k) && typeof o[k] === "object" && o[k] !== null){
-                        $deepSeal(o[k]);
-                    }
+        function deepSeal(o){
+            Object.seal(o);
+
+            for(const k of Object.keys(o)){
+                if(!Object.isSealed(o[k]) && o.hasOwnProperty(k) && typeof o[k] === "object" && o[k] !== null){
+                    $deepSeal(o[k]);
                 }
-
-                return o;
             }
-        });
 
-        const freeze = $deepFreeze({
+            return o;
+        }
+
+        const freeze = deepFreeze({
             stage1: {
                 stage2: {
                     stage3: true
@@ -53,7 +43,7 @@
             }
         });
 
-        const seal = $deepSeal({
+        const seal = deepSeal({
             stage1: {
                 stage2: {
                     stage3: true
