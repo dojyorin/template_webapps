@@ -5,27 +5,26 @@
         <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <title>WebCrypto</title>
+        <title></title>
     </head>
 
-    <body>
-        Web Crypto API
-    </body>
+    <body></body>
 
     <script async type="module">
         function bufferJoin(...sources){
-            return sources.reduce((sum, source)=>{
-                sum.byte.set(new Uint8Array(source?.buffer ?? source), sum.offset);
-                sum.offset += source.byteLength;
-                return sum;
-            }, {
-                byte: new Uint8Array(sources.reduce((sum, {byteLength}) => sum += byteLength, 0)),
-                offset: 0
-            }).byte.buffer;
+            const data = new Uint8Array(sources.reduce((a, {byteLength}) => a += byteLength, 0));
+            let offset = 0;
+
+            for(const source of sources){
+                data.set(new Uint8Array(source?.buffer ?? source), offset);
+                offset += source.byteLength;
+            }
+
+            return data.buffer;
         }
 
-        async function toHex(buffer){
-            return Array.from(new Uint8Array(await wcHashDigest(buffer))).map(n => n.toString(16)).join("");
+        function toHex(data){
+            return Array.from(new Uint8Array(data?.buffer ?? data)).map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
         }
 
         function wcConfigPBKDF2(v){
@@ -151,9 +150,9 @@
         console.log(new TextDecoder().decode(decode));
 
         console.log("---------- Raw Hash ----------");
-        console.log(await toHex(raw));
+        console.log(toHex(await wcHashDigest(raw)));
 
         console.log("---------- Decoded Hash ----------");
-        console.log(await toHex(decode));
+        console.log(toHex(await wcHashDigest(decode)));
     </script>
 </html>

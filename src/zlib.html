@@ -7,20 +7,18 @@
 
         <script src="https://cdn.jsdelivr.net/npm/pako@latest/dist/pako.min.js"></script>
 
-        <title>ZLIB</title>
+        <title></title>
     </head>
 
-    <body>
-        Compression Streams API / Pako
-    </body>
+    <body></body>
 
     <script async type="module">
         Object.defineProperty(globalThis, "$zlib", {
             enumerable: false,
             configurable: false,
             writable: false,
-            async value(data, gzip, encode){
-                return new Response(new Blob([data]).stream().pipeThrough(new (!!encode ? CompressionStream : DecompressionStream)(!!gzip ? "gzip" : "deflate"))).arrayBuffer();
+            async value(data, encode, gzip){
+                return new Response(new Blob([data]).stream().pipeThrough(new (encode ? CompressionStream : DecompressionStream)(gzip ? "gzip" : "deflate"))).arrayBuffer();
             }
         });
 

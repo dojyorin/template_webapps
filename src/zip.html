@@ -7,7 +7,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/jszip@latest/dist/jszip.min.js"></script>
 
-        <title>ZIP</title>
+        <title></title>
     </head>
 
     <body>
@@ -17,22 +17,22 @@
 
     <script async type="module">
         async function zipEncode(files){
-            return files.reduce((ctx, [name, data]) => ctx.file(name, data), new JSZip()).generateAsync({
+            return files.reduce((ctx, {name, data}) => ctx.file(name, data), new JSZip()).generateAsync({
                 compression: "DEFLATE",
                 type: "arraybuffer"
             });
         }
 
         async function zipDecode(archive){
-            return Promise.all(Object.values((await new JSZip().loadAsync(archive)).files).map(async file => [file.name, await file.async("arraybuffer")]));
+            return Promise.all(Object.values((await new JSZip().loadAsync(archive)).files).map(async f => ({name: f.name, data: await f.async("arraybuffer")})));
         }
 
-        document.getElementById("files").addEventListener("change", async({target})=>{
-            console.log(await zipEncode(Array.from(target.files).map(f => [f.name, f])));
+        document.getElementById("files").addEventListener("change", async({target: {files}})=>{
+            console.log(await zipEncode(await Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})))));
         });
 
-        document.getElementById("archive").addEventListener("change", async({target})=>{
-            console.log(await zipDecode(target.files[0]));
+        document.getElementById("archive").addEventListener("change", async({target: {files}})=>{
+            console.log(await zipDecode(files.item(0)));
         });
     </script>
 </html>

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
         <meta name="referrer" content="no-referrer">
 
-        <title>WebRTC</title>
+        <title></title>
     </head>
 
     <body>
@@ -18,8 +18,12 @@
             return new Promise(done => setTimeout(done, time));
         }
 
-        async function generateHash(data){
-            return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-512", data))).map(n => n.toString(16).toUpperCase()).join("");
+        async function wcHashDigest(data){
+            return crypto.subtle.digest("SHA-512", data);
+        }
+
+        function toHex(data){
+            return Array.from(new Uint8Array(data?.buffer ?? data)).map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
         }
 
         document.getElementById("offer").addEventListener("click", async({target})=>{
@@ -50,7 +54,7 @@
             const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
             let offset = 0;
 
-            ch.send(`${"test"}:${sample.byteLength}:${await generateHash(sample)}`);
+            ch.send(`${"test"}:${sample.byteLength}:${toHex(await wcHashDigest(sample))}`);
 
             while(offset < sample.byteLength){
                 while(ch.bufferedAmount > 0x200000){
@@ -99,7 +103,7 @@
                     else{
                         ch.close();
 
-                        if(hash !== await generateHash(byte)){
+                        if(hash !== toHex(await wcHashDigest(byte))){
                             throw "HASH not matched.";
                         }
 

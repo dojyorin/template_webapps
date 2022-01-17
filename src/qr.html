@@ -8,7 +8,7 @@
         <script src="https://cdn.jsdelivr.net/npm/qrcode@latest/build/qrcode.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/jsqr@latest/dist/jsQR.min.js"></script>
 
-        <title>QR</title>
+        <title></title>
     </head>
 
     <body>
@@ -42,8 +42,8 @@
             return new Promise((res, rej) => QRCode.toCanvas(new OffscreenCanvas(1, 1), data, {}, (err, canvas) => !err ? res(canvas) : rej(err)));
         }
 
-        document.getElementById("data").addEventListener("change", async({target})=>{
-            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await generateQr(target.value)).transferToImageBitmap());
+        document.getElementById("data").addEventListener("change", async({target: {value}})=>{
+            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await generateQr(value)).transferToImageBitmap());
         });
 
         const video = document.getElementById("video");
