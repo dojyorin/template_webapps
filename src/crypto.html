@@ -13,14 +13,21 @@
     <script async type="module">
         function bufferJoin(...sources){
             const data = new Uint8Array(sources.reduce((a, {byteLength}) => a += byteLength, 0));
-            let offset = 0;
 
+            let offset = 0;
             for(const source of sources){
                 data.set(new Uint8Array(source?.buffer ?? source), offset);
                 offset += source.byteLength;
             }
 
             return data.buffer;
+        }
+
+        function bufferEqual(source1, source2){
+            const dv1 = new DataView(source1?.buffer ?? source1);
+            const dv2 = new DataView(source2?.buffer ?? source2);
+
+            return dv1.byteLength !== dv2.byteLength || new Array(dv1.byteLength).fill(null).every((_, i) => dv1.getUint8(i) === dv2.getUint8(i));
         }
 
         function toHex(data){
@@ -154,5 +161,8 @@
 
         console.log("---------- Decoded Hash ----------");
         console.log(toHex(await wcHashDigest(decode)));
+
+        console.log("---------- Compare Hash ----------");
+        console.log(bufferEqual(raw, decode));
     </script>
 </html>

@@ -13,10 +13,26 @@
     </body>
 
     <script async type="module">
-        function packConfigMeta(){
-            return {
-                count: 2
-            };
+        function bufferEqual(source1, source2){
+            const dv1 = new DataView(source1?.buffer ?? source1);
+            const dv2 = new DataView(source2?.buffer ?? source2);
+
+            return dv1.byteLength !== dv2.byteLength || new Array(dv1.byteLength).fill(null).every((_, i) => dv1.getUint8(i) === dv2.getUint8(i));
+        }
+
+        async function wcHashDigest(data){
+            return crypto.subtle.digest("SHA-512", data);
+        }
+
+        function dvSetQuad(n){
+            const dv = new DataView(new ArrayBuffer(4));
+            dv.setUint32(0, n);
+
+            return dv.buffer;
+        }
+
+        function dvGetQuad(b){
+            return new DataView(b).getUint32(0);
         }
 
         function packConfigHeader(){
@@ -27,46 +43,25 @@
             };
         }
 
-        async function wcHashDigest(data){
-            return crypto.subtle.digest("SHA-512", data);
-        }
-
-        function toHex(data){
-            return Array.from(new Uint8Array(data?.buffer ?? data)).map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
-        }
-
-        function dvSet(n, w){
-            const dv = new DataView(new ArrayBuffer(w));
-            dv[`setUint${w * 8}`](0, n);
-            return dv.buffer;
-        }
-
-        function dvGet(b, w){
-            return new DataView(b)[`getUint${w * 8}`](0);
-        }
-
-        async function fileEntry(files){
-            return Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})));
-        }
-
         async function packEncode(files){
-            if(files.length > ((0x100 ** packConfigMeta().count) - 1) || files.some(({name, data: {byteLength}}) => (byteLength > ((0x100 ** packConfigHeader().size) - 1)) || (name.length > packConfigHeader().name))){
+            if(files.some(({size, name: {length}}) => size > ((0x100 ** packConfigHeader().size) - 1) || length > packConfigHeader().name)){
                 throw "";
             }
 
-            const archive = new Uint8Array(packConfigMeta().count + (Object.values(packConfigHeader()).reduce((a, b) => a + b, 0) * files.length) + files.reduce((a, {data: {byteLength}}) => a + byteLength, 0));
+            const archive = new Uint8Array(Object.values(packConfigHeader()).reduce((a, b) => a + b, 0) * files.length + files.reduce((a, {size}) => a + size, 0));
 
-            archive.set(new Uint8Array(dvSet(files.length, packConfigMeta().count)), 0);
+            let offset = 0;
+            for(const file of files){
+                const data = await file.arrayBuffer();
 
-            for(let i = 0, offset = packConfigMeta().count; i < files.length; i++){
-                const {name, data} = files.at(i);
-
-                archive.set(new Uint8Array(dvSet(data.byteLength, packConfigHeader().size)), offset);
-                archive.set(new Uint8Array(await wcHashDigest(data)), offset += packConfigHeader().size);
-                archive.set(new TextEncoder().encode(name), offset += packConfigHeader().hash);
-                archive.set(new Uint8Array(data), offset += packConfigHeader().name);
-
-                offset += data.byteLength;
+                archive.set(new Uint8Array(dvSetQuad(file.size)), offset);
+                offset += packConfigHeader().size;
+                archive.set(new Uint8Array(await wcHashDigest(data)), offset);
+                offset += packConfigHeader().hash
+                archive.set(new TextEncoder().encode(file.name), offset);
+                offset += packConfigHeader().name
+                archive.set(new Uint8Array(data), offset);
+                offset += file.size;
             }
 
             return archive.buffer;
@@ -75,24 +70,25 @@
         async function packDecode(archive){
             const files = [];
 
-            for(let i = 0, offset = packConfigMeta().count; i < dvGet(archive.slice(0, packConfigMeta().count), packConfigMeta().count); i++){
-                const size = dvGet(archive.slice(offset, offset += packConfigHeader().size), packConfigHeader().size);
-                const hash = toHex(archive.slice(offset, offset += packConfigHeader().hash));
+            let offset = 0;
+            while(offset < archive.byteLength){
+                const size = dvGetQuad(archive.slice(offset, offset += packConfigHeader().size));
+                const hash = archive.slice(offset, offset += packConfigHeader().hash);
                 const name = new TextDecoder().decode(archive.slice(offset, offset += packConfigHeader().name)).replace(/\0+$/, "");
                 const data = archive.slice(offset, offset += size);
 
-                if(hash !== toHex(await wcHashDigest(data))){
+                if(!bufferEqual(hash, await wcHashDigest(data))){
                     throw "";
                 }
 
-                files.push({name, data});
+                files.push(new File([data], name));
             }
 
             return files;
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            const encode = await packEncode(await fileEntry(files));
+            const encode = await packEncode(Array.from(files));
             const decode = await packDecode(encode);
 
             console.log(encode);

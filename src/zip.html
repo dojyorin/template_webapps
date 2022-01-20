@@ -12,31 +12,36 @@
 
     <body>
         <input multiple type="file" id="files">
-        <input type="file" accept=".zip" id="archive">
     </body>
 
     <script async type="module">
-        async function fileEntry(files){
-            return Promise.all(Array.from(files).map(async f => ({name: f.name, data: await f.arrayBuffer()})));
-        }
-
         async function zipEncode(files){
-            return files.reduce((ctx, {name, data}) => ctx.file(name, data), new JSZip()).generateAsync({
-                compression: "DEFLATE",
+            const zip = new JSZip();
+
+            for(const file of files){
+                zip.file(file.name, file, {
+                    binary: true
+                });
+            }
+
+            return zip.generateAsync({
+                compression: "deflate",
                 type: "arraybuffer"
             });
         }
 
         async function zipDecode(archive){
-            return Promise.all(Object.values((await new JSZip().loadAsync(archive)).files).map(async f => ({name: f.name, data: await f.async("arraybuffer")})));
+            const zip = new JSZip();
+
+            return Promise.all(Object.values((await zip.loadAsync(archive)).files).filter(({dir}) => !dir).map(async f => new File([await f.async("blob")], f.name)));
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            console.log(await zipEncode(await fileEntry(files)));
-        });
+            const encode = await zipEncode(Array.from(files));
+            const decode = await zipDecode(encode);
 
-        document.getElementById("archive").addEventListener("change", async({target: {files}})=>{
-            console.log(await zipDecode(files.item(0)));
+            console.log(encode);
+            console.log(decode);
         });
     </script>
 </html>
