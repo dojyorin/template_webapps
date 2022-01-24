@@ -44,7 +44,7 @@
         }
 
         async function packEncode(files){
-            if(files.some(({size, name: {length}}) => size > ((0x100 ** packConfigHeader().size) - 1) || length > packConfigHeader().name)){
+            if(files.some(({size, name: {length}}) => size > (0x100 ** packConfigHeader().size) || length > packConfigHeader().name)){
                 throw "";
             }
 

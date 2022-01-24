@@ -16,10 +16,10 @@
             configurable: false,
             writable: false,
             async value(path, option){
-                const response = await fetch(Object.entries(option?.params ?? {}).reduce((url, [key, value])=>{
-                    url.searchParams.append(key, value);
-                    return url;
-                }, new URL(path, /^http(s|):\/\//i.test(path) ? undefined : location.href)), {
+                const {origin, pathname} = /^https*:\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
+                const query = new URLSearchParams(Object.entries(option?.query ?? {})).toString();
+
+                const response = await fetch(`${origin}${pathname === "/" ? "": pathname}${query === "" ? "" : `?${query}`}`.toLowerCase(), {
                     method: option?.method ?? "get",
                     credentials: option?.credentials ?? "omit",
                     mode: option?.mode ?? "cors",
