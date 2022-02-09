@@ -27,7 +27,17 @@
             const dv1 = new DataView(source1?.buffer ?? source1);
             const dv2 = new DataView(source2?.buffer ?? source2);
 
-            return dv1.byteLength !== dv2.byteLength || new Array(dv1.byteLength).fill(null).every((_, i) => dv1.getUint8(i) === dv2.getUint8(i));
+            if(dv1.byteLength !== dv2.byteLength){
+                return false;
+            }
+
+            for(let i = 0; i < dv1.byteLength; i++){
+                if(dv1.getUint8(i) !== dv2.getUint8(i)){
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         function toHex(data){
