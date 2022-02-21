@@ -1,1 +1,1 @@
-# Web Application Templates
+# **Web Application Templates**

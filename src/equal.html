@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no">
+        <meta name="referrer" content="no-referrer">
+
+        <title></title>
+    </head>
+
+    <body></body>
+
+    <script async type="module">
+        function deepEqual(d1, d2){
+            function toKV(o){
+                return Object.entries(o).sort(([k1], [k2])=>{
+                    let i = 0;
+
+                    while(k1.at(i) === k2.at(i)){
+                        if(k1.at(i) === undefined && k2.at(i) === undefined){
+                            throw "Same property name.";
+                        }
+
+                        i++;
+                    }
+
+                    return (k1.codePointAt(i) ?? 0) - (k2.codePointAt(i) ?? 0);
+                });
+            }
+
+            if(d1 === d2){
+                return true;
+            }
+
+            if(typeof d1 !== "object" || typeof d2 !== "object" || d1 === null || d2 === null){
+                return false;
+            }
+
+            const kv1 = toKV(d1);
+            const kv2 = toKV(d2);
+
+            if(kv1.length !== kv2.length){
+                return false;
+            }
+
+            for(let i = 0; i < kv1.length; i++){
+                const [k1, v1] = kv1.at(i);
+                const [k2, v2] = kv2.at(i);
+
+                if(k1 !== k2 || !deepEqual(v1, v2)){
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        const o1 = {
+            key1: "foo",
+            key2: "bar",
+            key3: {
+                key31: null,
+                key32: 32
+            }
+        };
+
+        const o2 = {
+            key1: "foo",
+            key2: "bar",
+            key3: {
+                key31: null,
+                key32: 32
+            }
+        };
+
+        const o3 = {
+            key1: "aaa",
+            key2: "bbb",
+            key3: {
+                key31: null,
+                key32: 32
+            }
+        };
+
+        console.log(deepEqual(o1, o2));
+        console.log(deepEqual(o1, o3));
+    </script>
+</html>
