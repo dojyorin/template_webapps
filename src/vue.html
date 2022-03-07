@@ -18,23 +18,23 @@
     <body>
         <template id="vue">
             <v-app>
-                <v-snackbar dark top centered :color="notify.color" v-model="notify.visible">
+                <v-snackbar dark top centered :color="vNotifyColor" v-model="vNotifyVisible">
                     <v-icon left>mdi-bell-ring-outline</v-icon>
-                    <span>{{notify.message}}</span>
+                    <span>{{vNotifyMessage}}</span>
                     <template #action>
-                        <v-btn icon @click="notify.visible = false">
+                        <v-btn icon @click="vNotifyVisible = false">
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
                     </template>
                 </v-snackbar>
 
-                <v-overlay dark z-index="9" opacity="0.9" v-model="loading.visible">
+                <v-overlay dark z-index="9" opacity="0.9" v-model="vLoadingVisible">
                     <v-progress-circular indeterminate size="128" width="6" color="blue">
                         <span class="white--text">Loading...</span>
                     </v-progress-circular>
                 </v-overlay>
 
-                <v-navigation-drawer app temporary v-model="drawer.visible">
+                <v-navigation-drawer app temporary v-model="vDrawerVisible">
                     <v-toolbar dark color="blue" :height="$vuetify.application.top">
                         <v-btn icon @click="vDrawer(false)">
                             <v-icon large>mdi-close</v-icon>
@@ -44,7 +44,7 @@
                     </v-toolbar>
 
                     <v-list>
-                        <template v-for="content in drawer.contents">
+                        <template v-for="content in vDrawerContents">
                             <v-list-item @click="vRouter(content.to), vDrawer(false)">
                                 <v-list-item-icon>
                                     <v-icon>{{content.icon}}</v-icon>
@@ -64,8 +64,8 @@
                 </v-app-bar>
 
                 <v-main>
-                    <v-window class="fill-height" v-model="router.path">
-                        <v-window-item value="/">
+                    <v-window class="fill-height" v-model="vRouterPath">
+                        <v-window-item class="fill-height" value="/">
                             <v-container fluid>
                                 <v-row justify="center">
                                     <v-col cols>
@@ -77,7 +77,7 @@
                             </v-container>
                         </v-window-item>
 
-                        <v-window-item value="/sub">
+                        <v-window-item class="fill-height" value="/sub">
                             <v-container fluid>
                                 <v-row justify="center">
                                     <v-col cols>
@@ -107,50 +107,42 @@
 
             data(){
                 return {
-                    notify: {
-                        visible: false,
-                        message: "",
-                        color: ""
-                    },
-                    loading: {
-                        visible: false
-                    },
-                    drawer: {
-                        visible: false,
-                        contents: [{
-                            title: "Main",
-                            to: "/",
-                            icon: "mdi-home"
-                        }, {
-                            title: "Sub",
-                            to: "/sub",
-                            icon: "mdi-account-circle"
-                        }]
-                    },
-                    router: {
-                        path: "/"
-                    }
+                    vNotifyVisible: false,
+                    vNotifyMessage: "",
+                    vNotifyColor: "",
+                    vLoadingVisible: false,
+                    vDrawerVisible: false,
+                    vDrawerContents: [{
+                        title: "Main",
+                        to: "/",
+                        icon: "mdi-home"
+                    }, {
+                        title: "Sub",
+                        to: "/sub",
+                        icon: "mdi-account-circle"
+                    }],
+                    vRouterPath: "/"
                 };
             },
 
             methods: {
                 vNotify(message, color){
-                    this.notify.visible = false;
-                    this.notify.message = message ?? "";
-                    this.notify.color = color ?? "info";
-                    this.notify.visible = true;
+                    this.vNotifyVisible = false;
+                    this.vNotifyMessage = message ?? "";
+                    this.vNotifyColor = color ?? "info";
+                    this.vNotifyVisible = true;
                 },
 
                 vLoading(state){
-                    this.loading.visible = state ?? false;
+                    this.vLoadingVisible = state ?? false;
                 },
 
                 vDrawer(state){
-                    this.drawer.visible = state ?? false;
+                    this.vDrawerVisible = state ?? false;
                 },
 
                 vRouter(path){
-                    this.router.path = path ?? "/";
+                    this.vRouterPath = path ?? "/";
                 }
             },
 
