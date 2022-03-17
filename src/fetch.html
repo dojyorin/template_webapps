@@ -12,8 +12,8 @@
 
     <script async type="module">
         async function fetchExtend(path, option){
-            const {origin, pathname} = /^https*:\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
-            const query = (option?.query instanceof URLSearchParams ? option.query : new URLSearchParams(option?.query instanceof Array ? option.query : Object.entries(option?.query ?? {}))).toString();
+            const {origin, pathname} = /^https{0,1}:\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
+            const query = new URLSearchParams(option?.query ?? {}).toString();
 
             const response = await fetch(`${origin}${pathname}${query && "?"}${query}`, {
                 method: option?.method ?? "GET",
