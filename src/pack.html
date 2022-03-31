@@ -88,7 +88,7 @@
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            const encode = await packEncode(Array.from(files));
+            const encode = await packEncode([...files]);
             const decode = await packDecode(encode);
 
             console.log(encode);

@@ -11,98 +11,24 @@
     <body></body>
 
     <script async type="module">
-        class WebSocketReconnect{
-            #ctx = null;
-            #path = "";
-            #reconnect = 0;
-            #interval = 0;
+        const socket = new WebSocket(`ws://${location.host}/ws`);
 
-            constructor(path, reconnect, interval){
-                this.#path = path;
-                this.#reconnect = reconnect ?? 3;
-                this.#interval = interval ?? 5000;
-            }
+        socket.addEventListener("error", ()=>{
+            socket.close();
+            console.log("ERROR");
+        });
 
-            async post(data){
-                const byte = new Uint8Array(data?.buffer ?? data);
-                let offset = 0;
+        socket.addEventListener("close", ()=>{
+            console.log("CLOSE");
+        });
 
-                while(offset < byte.byteLength){
-                    while(this.#ctx.bufferedAmount > 0x100000){
-                        await new Promise(done => setTimeout(done, 10));
-                    }
-
-                    this.#ctx.send(byte.subarray(offset, offset += 0x2000));
-                }
-            }
-
-            async connect(){
-                this.#ctx = new WebSocket(this.#path);
-                this.#ctx.binaryType = "arraybuffer";
-
-                try{
-                    await new Promise((res, rej)=>{
-                        setTimeout(()=>{
-                            this.#ctx = null;
-                            rej();
-                        }, this.#interval);
-
-                        this.#ctx.onopen = ()=>{
-                            this.#ctx.onopen = null;
-                            res();
-                        };
-                    });
-
-                    if(this.#reconnect){
-                        this.#ctx.onclose = async()=>{
-                            for(let i = 0; i < this.#reconnect && !this.ready; i++){
-                                console.log("Connection closed. Reconnecting now.");
-                                await this.connect();
-                            }
-
-                            if(!this.ready){
-                                console.error("Connection lost.");
-                            }
-                        }
-                    }
-                }
-                catch{}
-            }
-
-            disconnect(){
-                this.#ctx.close();
-                this.#ctx = null;
-            }
-
-            addEventListener(...args){
-                this.#ctx.addEventListener(...args);
-            }
-
-            removeEventListener(...args){
-                this.#ctx.removeEventListener(...args);
-            }
-
-            dispatchEvent(...args){
-                this.#ctx.dispatchEvent(...args);
-            }
-
-            get context(){
-                return this.#ctx;
-            }
-
-            get ready(){
-                return this.#ctx?.readyState === 1;
-            }
-        }
-
-        const socket = new WebSocketReconnect(`ws://${location.host}/./ws`);
-
-        await socket.connect();
+        socket.addEventListener("open", ()=>{
+            await socket.post("test");
+            console.log("OPEN");
+        });
 
         socket.addEventListener("message", ({data})=>{
             console.log(data);
         });
-
-        await socket.post("test");
     </script>
 </html>

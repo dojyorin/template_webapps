@@ -37,7 +37,7 @@
         }
 
         document.getElementById("files").addEventListener("change", async({target: {files}})=>{
-            const encode = await zipEncode(Array.from(files));
+            const encode = await zipEncode([...files]);
             const decode = await zipDecode(encode);
 
             console.log(encode);

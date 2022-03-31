@@ -41,7 +41,7 @@
         }
 
         function toHex(data){
-            return Array.from(new Uint8Array(data?.buffer ?? data)).map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
+            return [...new Uint8Array(data?.buffer ?? data)].map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
         }
 
         function wcConfigPBKDF2(v){
