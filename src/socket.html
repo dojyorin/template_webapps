@@ -23,7 +23,7 @@
         });
 
         socket.addEventListener("open", ()=>{
-            await socket.post("test");
+            socket.send("test");
             console.log("OPEN");
         });
 
