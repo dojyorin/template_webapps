@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script async type="module">
+        function toUnixTime(date){
+            return Math.floor((date ?? new Date()).getTime() / 1000);
+        }
+
+        function toDate(time){
+            return new Date(time * 1000);
+        }
+
+        function parseUnixTime(ds, rx){
+            const [y, mo, d, h, mi, s] = ds.split(rx).map(s => Number(s));
+
+            return toUnixTime(new Date(y, mo - 1, d, h, mi, s));
+        }
+    </script>
+</html>
