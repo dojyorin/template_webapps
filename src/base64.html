@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script async type="module">
+        function base64encode(data){
+            return btoa([...data].map(n => String.fromCharCode(n)).join(""));
+        }
+
+        function base64decode(data){
+            return new Uint8Array([...atob(data)].map(s => s.charCodeAt(0)));
+        }
+    </script>
+</html>
