@@ -17,14 +17,14 @@
             return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate"))).arrayBuffer();
         }
 
-        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+        const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
 
         const encode1 = await deflateEncode(sample);
         const decode1 = await deflateDecode(encode1);
         const encode2 = pako.deflate(sample);
         const decode2 = pako.inflate(encode2);
 
-        console.log("---------- Raw Data ----------");
+        console.log("---------- Sample Data ----------");
         console.log(sample);
 
         console.log("---------- Decoded Data ----------");
@@ -32,7 +32,7 @@
         console.log(decode2);
 
         console.log("---------- Encoded Data ----------");
-        console.log(new Uint8Array(encode1));
-        console.log(new Uint8Array(encode2));
+        console.log(encode1);
+        console.log(encode2);
     </script>
 </html>

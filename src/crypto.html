@@ -7,70 +7,21 @@
     <body></body>
 
     <script async type="module">
-        function bufferJoin(...sources){
-            const data = new Uint8Array(sources.reduce((a, {byteLength}) => a += byteLength, 0));
-
-            let offset = 0;
-            for(const source of sources){
-                data.set(new Uint8Array(source?.buffer ?? source), offset);
-                offset += source.byteLength;
-            }
-
-            return data.buffer;
-        }
-
-        function bufferEqual(source1, source2){
-            const dv1 = new DataView(source1?.buffer ?? source1);
-            const dv2 = new DataView(source2?.buffer ?? source2);
-
-            if(dv1.byteLength !== dv2.byteLength){
-                return false;
-            }
-
-            for(let i = 0; i < dv1.byteLength; i++){
-                if(dv1.getUint8(i) !== dv2.getUint8(i)){
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function toHex(data){
-            return [...new Uint8Array(data?.buffer ?? data)].map(n => n.toString(16).padStart(2, "0").toUpperCase()).join("");
-        }
-
-        function wcConfigPBKDF2(v){
-            return {
-                name: "PBKDF2",
-                hash: "SHA-512",
-                iterations: 0xFFFF,
-                salt: v
-            };
-        }
-
-        function wcConfigECC(){
+        function cryptoConfigECDH(){
             return {
                 name: "ECDH",
                 namedCurve: "P-521"
             };
         }
 
-        function wcConfigECDH(v){
+        function cryptoConfigECDSA(){
             return {
-                name: "ECDH",
-                public: v
+                name: "ECDSA",
+                namedCurve: "P-521"
             };
         }
 
-        function wcConfigAES(){
-            return {
-                name: "AES-GCM",
-                length: 256
-            };
-        }
-
-        function wcConfigGCM(v){
+        function cryptoConfigGCM(v){
             return {
                 name: "AES-GCM",
                 tagLength: 128,
@@ -78,97 +29,137 @@
             };
         }
 
-        async function wcHashDigest(data){
+        function cryptoConfigDSA(){
+            return {
+                name: "ECDSA",
+                hash: {
+                    name: "SHA-512"
+                }
+            };
+        }
+
+        async function bufferConcat(...buffers){
+            return new Blob(buffers).arrayBuffer();
+        }
+
+        async function cryptoDigest(data){
             return crypto.subtle.digest("SHA-512", data);
         }
 
-        async function wcDerivePassword(pw, salt){
-            return crypto.subtle.deriveKey(wcConfigPBKDF2(salt), await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]), wcConfigAES(), false, ["wrapKey", "unwrapKey"]);
-        }
-
-        async function wcExportKey(pw){
-            const iv = crypto.getRandomValues(new Uint8Array(12));
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-
-            const {publicKey, privateKey} = await crypto.subtle.generateKey(wcConfigECC(), true, ["deriveKey"]);
+        async function cryptoExportDerive(){
+            const {publicKey, privateKey} = await crypto.subtle.generateKey(cryptoConfigECDH(), true, ["deriveKey"]);
 
             return {
                 pub: await crypto.subtle.exportKey("spki", publicKey),
-                sec: bufferJoin(iv, salt, await crypto.subtle.wrapKey("pkcs8", privateKey, await wcDerivePassword(pw, salt), wcConfigGCM(iv)))
+                sec: await crypto.subtle.exportKey("pkcs8", privateKey)
             };
         }
 
-        async function wcImportKey(pub, sec, pw){
-            const vpub = new Uint8Array(pub?.buffer ?? pub);
-            const vsec = new Uint8Array(sec?.buffer ?? sec);
+        async function cryptoExportSign(){
+            const {publicKey, privateKey} = await crypto.subtle.generateKey(cryptoConfigECDSA(), true, ["sign", "verify"]);
 
             return {
-                pub: await crypto.subtle.importKey("spki", vpub, wcConfigECC(), false, []),
-                sec: await crypto.subtle.unwrapKey("pkcs8", vsec.subarray(28), await wcDerivePassword(pw, vsec.subarray(12, 28)), wcConfigGCM(vsec.subarray(0, 12)), wcConfigECC(), false, ["deriveKey"])
+                pub: await crypto.subtle.exportKey("spki", publicKey),
+                sec: await crypto.subtle.exportKey("pkcs8", privateKey)
             };
         }
 
-        async function wcDeriveKey(pub, sec){
-            return crypto.subtle.deriveKey(wcConfigECDH(pub), sec, wcConfigAES(), false, ["encrypt", "decrypt"]);
+        async function cryptoDerive(pub, sec){
+            const _pub = await crypto.subtle.importKey("spki", pub, cryptoConfigECDH(), false, []);
+            const _sec = await crypto.subtle.importKey("pkcs8", sec, cryptoConfigECDH(), false, ["deriveKey"]);
+
+            const algorithm = {
+                name: "ECDH",
+                public: _pub
+            };
+
+            const type = {
+                name: "AES-GCM",
+                length: 256
+            };
+
+            return crypto.subtle.deriveKey(algorithm, _sec, type, false, ["encrypt", "decrypt"]);
         }
 
-        async function wcEncryptData(com, data){
+        async function cryptoEncrypt(com, data){
             const iv = crypto.getRandomValues(new Uint8Array(12));
 
-            return bufferJoin(iv, await crypto.subtle.encrypt(wcConfigGCM(iv), com, data));
+            return bufferConcat(iv, await crypto.subtle.encrypt(cryptoConfigGCM(iv), com, data));
         }
 
-        async function wcDecryptData(com, data){
-            const vdata = new Uint8Array(data?.buffer ?? data);
+        async function cryptoDecrypt(com, data){
+            const _data = new Uint8Array(data);
 
-            return crypto.subtle.decrypt(wcConfigGCM(vdata.subarray(0, 12)), com, vdata.subarray(12));
+            return crypto.subtle.decrypt(cryptoConfigGCM(_data.subarray(0, 12)), com, _data.subarray(12));
         }
 
-        const raw = new TextEncoder().encode("hogehoge");
+        async function cryptoSign(sec, data){
+            const _sec = await crypto.subtle.importKey("pkcs8", sec, cryptoConfigECDSA(), false, ["sign"]);
 
-        const key1o = await wcExportKey("foobar");
-        const key1i = await wcImportKey(key1o.pub, key1o.sec, "foobar");
-
-        const key2o = await wcExportKey("foobar");
-        const key2i = await wcImportKey(key2o.pub, key2o.sec, "foobar");
-
-        const key1pub2sec = await wcDeriveKey(key1i.pub, key2i.sec);
-        const key2pub1sec = await wcDeriveKey(key2i.pub, key1i.sec);
-
-        const encode = await wcEncryptData(key1pub2sec, raw);
-        const decode = await wcDecryptData(key2pub1sec, encode);
-
-        console.log("---------- Exported Keys ----------");
-        for(const key of [key1o.pub, key1o.sec, key2o.pub, key2o.sec]){
-            console.log(key);
+            return crypto.subtle.sign(cryptoConfigDSA(), _sec, data);
         }
 
-        console.log("---------- Imported Keys ----------");
-        for(const key of [key1i.pub, key1i.sec, key2i.pub, key2i.sec]){
-            console.log(key);
+        async function cryptoVerify(pub, sign, data){
+            const _pub = await crypto.subtle.importKey("spki", pub, cryptoConfigECDSA(), false, ["verify"]);
+
+            return crypto.subtle.verify(cryptoConfigDSA(), _pub, sign, data);
         }
 
-        console.log("---------- Derived Keys ----------");
-        for(const key of [key1pub2sec, key2pub1sec]){
-            console.log(key);
+        function toHex(buffer){
+            return [...new Uint8Array(buffer)].map(n => n.toString(16).toUpperCase().padStart(2, "0")).join("");
         }
+
+        const sample = new TextEncoder().encode("hogehoge");
+
+        const keyDerive1 = await cryptoExportDerive();
+        const keyDerive2 = await cryptoExportDerive();
+        const keySign = await cryptoExportSign();
+
+        const keyCommon1P2S = await cryptoDerive(keyDerive1.pub, keyDerive2.sec);
+        const keyCommon2P1S = await cryptoDerive(keyDerive2.pub, keyDerive1.sec);
+
+        const encode = await cryptoEncrypt(keyCommon1P2S, sample);
+        const decode = await cryptoDecrypt(keyCommon2P1S, encode);
+
+        const sign = await cryptoSign(keySign.sec, sample);
+        const verify = await cryptoVerify(keySign.pub, sign, decode);
+
+        const hash1 = await cryptoDigest(sample);
+        const hash2 = await cryptoDigest(decode);
+
+        console.log("---------- Exported Derive Keys ----------");
+        console.log(keyDerive1.pub);
+        console.log(keyDerive1.sec);
+        console.log(keyDerive2.pub);
+        console.log(keyDerive2.sec);
+
+        console.log("---------- Exported Sign Keys ----------");
+        console.log(keySign.pub);
+        console.log(keySign.sec);
+
+        console.log("---------- Derived Common Keys ----------");
+        console.log(keyCommon1P2S);
+        console.log(keyCommon2P1S);
+
+        console.log("---------- Sample Data ----------");
+        console.log(new TextDecoder().decode(sample));
 
         console.log("---------- Encoded Data ----------");
         console.log(new TextDecoder().decode(encode));
 
-        console.log("---------- Raw Data ----------");
-        console.log(new TextDecoder().decode(raw));
-
         console.log("---------- Decoded Data ----------");
         console.log(new TextDecoder().decode(decode));
 
+        console.log("---------- Data Signature ----------");
+        console.log(sign);
+
+        console.log("---------- Signature Verify Result ----------");
+        console.log(verify);
+
         console.log("---------- Raw Hash ----------");
-        console.log(toHex(await wcHashDigest(raw)));
+        console.log(toHex(hash1));
 
         console.log("---------- Decoded Hash ----------");
-        console.log(toHex(await wcHashDigest(decode)));
-
-        console.log("---------- Compare Hash ----------");
-        console.log(bufferEqual(raw, decode));
+        console.log(toHex(hash2));
     </script>
 </html>
