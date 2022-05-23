@@ -9,7 +9,7 @@
     </body>
 
     <script async type="module">
-        function packConfigHS(){
+        function packConfigHEADER(){
             return {
                 size: 4,
                 hash: 64,
@@ -17,25 +17,26 @@
             };
         }
 
-        function bufferEqual(buffer1, buffer2){
+        function bufferEquals(buffer1, buffer2){
             const dv1 = new DataView(buffer1);
             const dv2 = new DataView(buffer2);
 
             return dv1.byteLength === dv2.byteLength && new Array(dv1.byteLength).fill(null).every((_, i) => dv1.getUint8(i) === dv2.getUint8(i));
         }
 
-        async function cryptoHashDigest(data){
+        async function cryptoDigest(data){
             return crypto.subtle.digest("SHA-512", data);
         }
 
         async function packEncode(files){
-            if(files.some(({size, name}) => size > (0x100 ** packConfigHS().size) || new TextEncoder().encode(name).byteLength > packConfigHS().name)){
-                throw "";
+            if(files.some(({size, name}) => size > (0x100 ** packConfigHEADER().size) || new TextEncoder().encode(name).byteLength > packConfigHEADER().name)){
+                throw null;
             }
 
-            const archive = new Uint8Array(Object.values(packConfigHS()).reduce((a, b) => a + b, 0) * files.length + files.reduce((a, {size}) => a + size, 0));
+            const archive = new Uint8Array(Object.values(packConfigHEADER()).reduce((a, b) => a + b, 0) * files.length + files.reduce((a, {size}) => a + size, 0));
 
             let offset = 0;
+
             for(const file of files){
                 const data = await file.arrayBuffer();
 
@@ -43,11 +44,11 @@
                 dv.setUint32(0, file.size);
 
                 archive.set(new Uint8Array(dv.buffer), offset);
-                offset += packConfigHS().size;
-                archive.set(new Uint8Array(await cryptoHashDigest(data)), offset);
-                offset += packConfigHS().hash
+                offset += packConfigHEADER().size;
+                archive.set(new Uint8Array(await cryptoDigest(data)), offset);
+                offset += packConfigHEADER().hash
                 archive.set(new TextEncoder().encode(file.name), offset);
-                offset += packConfigHS().name
+                offset += packConfigHEADER().name
                 archive.set(new Uint8Array(data), offset);
                 offset += file.size;
             }
@@ -59,14 +60,15 @@
             const files = [];
 
             let offset = 0;
+
             while(offset < archive.byteLength){
-                const size = new DataView(archive.slice(offset, offset += packConfigHS().size)).getUint32(0);
-                const hash = archive.slice(offset, offset += packConfigHS().hash);
-                const name = new TextDecoder().decode(archive.slice(offset, offset += packConfigHS().name)).replace(/\0+$/, "");
+                const size = new DataView(archive.slice(offset, offset += packConfigHEADER().size)).getUint32(0);
+                const hash = archive.slice(offset, offset += packConfigHEADER().hash);
+                const name = new TextDecoder().decode(archive.slice(offset, offset += packConfigHEADER().name)).replace(/\0+$/, "");
                 const data = archive.slice(offset, offset += size);
 
-                if(!bufferEqual(hash, await cryptoHashDigest(data))){
-                    throw "";
+                if(!bufferEquals(hash, await cryptoDigest(data))){
+                    throw null;
                 }
 
                 files.push(new File([data], name));
