@@ -15,11 +15,11 @@
     </body>
 
     <script async type="module">
-        async function parseQr(video){
+        async function qrParse(video){
             const canvas = new OffscreenCanvas(240, 320);
             const render = canvas.getContext("2d");
 
-            return new Promise((res)=>{
+            return new Promise((resolve)=>{
                 const loop = setInterval(()=>{
                     render.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -28,18 +28,18 @@
 
                     if(result){
                         clearInterval(loop);
-                        return res(result.data);
+                        return resolve(result.data);
                     }
                 }, 100);
             });
         }
 
-        async function generateQr(data){
-            return new Promise((res, rej) => QRCode.toCanvas(new OffscreenCanvas(1, 1), data, {}, (err, canvas) => !err ? res(canvas) : rej(err)));
+        async function qrGenerate(data){
+            return new Promise((resolve, reject) => QRCode.toCanvas(new OffscreenCanvas(1, 1), data, {}, (err, canvas) => !err ? resolve(canvas) : reject(err)));
         }
 
         document.getElementById("data").addEventListener("change", async({target: {value}})=>{
-            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await generateQr(value)).transferToImageBitmap());
+            document.getElementById("canvas").getContext("bitmaprenderer").transferFromImageBitmap((await qrGenerate(value)).transferToImageBitmap());
         });
 
         const video = document.getElementById("video");
@@ -50,6 +50,6 @@
             }
         });
 
-        document.getElementById("result").value = await parseQr(video);
+        document.getElementById("result").value = await qrParse(video);
     </script>
 </html>
