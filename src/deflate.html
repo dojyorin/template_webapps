@@ -10,11 +10,11 @@
 
     <script async type="module">
         async function deflateEncode(data){
-            return new Response(new Blob([data]).stream().pipeThrough(new CompressionStream("deflate"))).arrayBuffer();
+            return new Response(new Blob([data]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
         }
 
         async function deflateDecode(data){
-            return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate"))).arrayBuffer();
+            return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
         }
 
         const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
