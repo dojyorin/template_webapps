@@ -100,7 +100,7 @@
                         ch.close();
 
                         if(hash !== toHex(await wcHashDigest(byte))){
-                            throw "HASH not matched.";
+                            throw new Error();
                         }
 
                         console.log(meta, byte.buffer);
