@@ -7,25 +7,50 @@
     <body></body>
 
     <script async type="module">
-        function toScriptURL(...functions){
-            return URL.createObjectURL(new Blob([functions.map(f => f.toString().replace(/^.+?\{/s, "").replace(/\}$/s, "")).join(";")]));
+        class WorkerExtend extends Worker{
+            static #fnStart = /^.+?\{/s;
+            static #fnEnd = /\}$/s;
+
+            #path = "";
+
+            /**
+            * @param {Function[]} fns;
+            **/
+            constructor(...fns){
+                const srcs = fns.map(fn => fn.toString());
+
+                if(srcs.some(src => !WorkerExtend.#fnEnd.test(src))){
+                    throw new Error();
+                }
+
+                const path = URL.createObjectURL(new Blob([srcs.map(src => src.replace(WorkerExtend.#fnStart, "").replace(WorkerExtend.#fnEnd, "")).join(";")]));
+
+                super(path, {
+                    type: "module"
+                });
+
+                this.#path = path;
+            }
+
+            terminate(){
+                super.terminate();
+                URL.revokeObjectURL(this.#path);
+            }
         }
 
-        const script = toScriptURL(()=>{
-            globalThis.addEventListener("message", ({data})=>{
+        const worker = new WorkerExtend(()=>{
+            globalThis.onmessage = ({data})=>{
                 const sample = data.map(n => n * 2);
                 globalThis.postMessage(sample, [sample.buffer]);
-            });
+            };
         });
 
-        const worker = new Worker(script);
-
-        worker.addEventListener("message", ({data})=>{
+        worker.onmessage = ({data})=>{
             console.log(data);
             worker.terminate();
-        });
+        };
 
-        const sample = new Uint8Array(new Float32Array(16 / 4 * 0x100000).map(() => Math.random()).buffer);
+        const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
         worker.postMessage(sample, [sample.buffer]);
     </script>
 </html>
