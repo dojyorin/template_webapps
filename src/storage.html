@@ -26,7 +26,14 @@
         * @returns {JsonStruct};
         **/
         function storageRead(key){
-            return JSON.parse(localStorage.getItem(key));
+            return JSON.parse(localStorage.getItem(key) ?? undefined);
+        }
+
+        /**
+        * @param {string} key;
+        **/
+        function storageDelete(key){
+            localStorage.removeItem(key);
         }
 
         /**
