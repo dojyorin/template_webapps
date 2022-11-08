@@ -2,37 +2,48 @@
 <html>
     <head>
         <meta charset="utf-8">
-
-        <script src="https://cdn.jsdelivr.net/npm/pako@latest/dist/pako.min.js"></script>
     </head>
 
     <body></body>
 
     <script async type="module">
-        async function deflateEncode(data){
-            return new Response(new Blob([data]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
+        /**
+        * @param {Uint8Array} data;
+        * @param {TransformStream<Uint8Array,Uint8Array>} ts;
+        * @returns {Uint8Array};
+        **/
+        async function transform(data, ts){
+            return new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(ts)).arrayBuffer());
         }
 
-        async function deflateDecode(data){
-            return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+        /**
+        * @param {Uint8Array} data;
+        * @returns {Uint8Array};
+        **/
+        export async function deflateEncode(data){
+            return await transform(data, new CompressionStream("deflate-raw"));
+        }
+
+        /**
+        * @param {Uint8Array} data;
+        * @returns {Uint8Array};
+        **/
+        export async function deflateDecode(data){
+            return await transform(data, new DecompressionStream("deflate-raw"));
         }
 
         const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
 
-        const encode1 = await deflateEncode(sample);
-        const decode1 = await deflateDecode(encode1);
-        const encode2 = pako.deflate(sample);
-        const decode2 = pako.inflate(encode2);
+        const encode = await deflateEncode(sample);
+        const decode = await deflateDecode(encode);
 
         console.log("---------- Sample Data ----------");
         console.log(sample);
 
         console.log("---------- Decoded Data ----------");
-        console.log(decode1);
-        console.log(decode2);
+        console.log(decode);
 
         console.log("---------- Encoded Data ----------");
-        console.log(encode1);
-        console.log(encode2);
+        console.log(encode);
     </script>
 </html>

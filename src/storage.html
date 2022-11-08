@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+
+    <body></body>
+
+    <script async type="module">
+        /**
+        * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct;
+        * @typedef {JsonStruct[]} JsonArray;
+        * @typedef {{[key: string]: JsonStruct}} JsonObject;
+        **/
+
+        /**
+        * @param {string} key;
+        * @param {JsonStruct} data;
+        **/
+        function storageWrite(key, data){
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        /**
+        * @param {string} key;
+        * @returns {JsonStruct};
+        **/
+        function storageRead(key){
+            return JSON.parse(localStorage.getItem(key));
+        }
+
+        /**
+        * @param {string} key;
+        * @returns {boolean};
+        **/
+        function storageHas(key){
+            return localStorage.getItem(key) !== null;
+        }
+    </script>
+</html>
