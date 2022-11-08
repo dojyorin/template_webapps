@@ -109,10 +109,29 @@
     </body>
 
     <script async type="module">
+        /**
+        * @typedef {object} VueData
+        * @property {boolean} vNotifyVisible
+        * @property {string} vNotifyMessage
+        * @property {string} vNotifyColor
+        * @property {boolean} vLoadingVisible
+        * @property {string} vRouterPath
+        * @property {boolean} vDrawerVisible
+        **/
+
+        /**
+        * @typedef {object} VueMethods
+        * @property {(message: string, color:string) => void} vNotify
+        * @property {(state: boolean) => void} vLoading
+        * @property {(path: string) => void} vRouter
+        * @property {(state: boolean) => void} vDrawer
+        **/
+
         const vue = new Vue({
             el: "#vue",
             vuetify: new Vuetify(),
 
+            /** @return {VueData} **/
             data(){
                 return {
                     vNotifyVisible: false,
@@ -124,30 +143,36 @@
                 };
             },
 
+            /** @type {VueMethods} **/
             methods: {
+                /** @this {VueData & VueMethods} **/
                 vNotify(message, color){
                     this.vNotifyVisible = false;
-                    this.vNotifyMessage = message ?? "";
-                    this.vNotifyColor = color ?? "info";
+                    this.vNotifyMessage = message;
+                    this.vNotifyColor = color;
                     this.vNotifyVisible = true;
                 },
 
+                /** @this {VueData & VueMethods} **/
                 vLoading(state){
-                    this.vLoadingVisible = state ?? false;
+                    this.vLoadingVisible = state;
                 },
 
+                /** @this {VueData & VueMethods} **/
                 vRouter(path){
-                    this.vRouterPath = path ?? "/";
+                    this.vRouterPath = path;
                 },
 
+                /** @this {VueData & VueMethods} **/
                 vDrawer(state){
-                    this.vDrawerVisible = state ?? false;
+                    this.vDrawerVisible = state;
                 }
             },
 
+            /** @this {VueData & VueMethods} **/
             async mounted(){
                 this.vLoading(true);
-                await new Promise(res => setTimeout(res, 1000));
+                await new Promise(done => setTimeout(done, 1000));
                 this.vLoading(false);
 
                 this.vNotify("Loading...");

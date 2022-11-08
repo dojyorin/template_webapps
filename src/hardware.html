@@ -88,19 +88,13 @@
         * @property {(option:BluetoothLEScanOptions) => Promise<BluetoothLEScan>} requestLEScan
         **/
 
-        /**
-        * @type {?Serial}
-        **/
+        /** @type {?Serial} **/
         const NavSerial = navigator?.serial;
 
-        /**
-        * @type {?USB}
-        **/
+        /** @type {?USB} **/
         const NavUsb = navigator?.usb;
 
-        /**
-        * @type {?Bluetooth}
-        **/
+        /** @type {?Bluetooth} **/
         const NavBluetooth = navigator?.bluetooth;
 
         document.getElementById("usb").onclick = async()=>{
