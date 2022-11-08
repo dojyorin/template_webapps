@@ -14,7 +14,7 @@
             #path;
 
             /**
-            * @param {Function[]} fns
+            * @param {...Function} fns
             **/
             constructor(...fns){
                 const srcs = fns.map(fn => fn.toString());
@@ -25,9 +25,7 @@
 
                 const path = URL.createObjectURL(new Blob([srcs.map(src => src.replace(WorkerExtend.#fnStart, "").replace(WorkerExtend.#fnEnd, "")).join(";")]));
 
-                super(path, {
-                    type: "module"
-                });
+                super(path);
 
                 this.#path = path;
             }
