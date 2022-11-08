@@ -8,9 +8,9 @@
 
     <script async type="module">
         /**
-        * @typedef {object} ExportKeyPair;
-        * @property {Uint8Array} pub;
-        * @property {Uint8Array} sec;
+        * @typedef {object} ExportKeyPair
+        * @property {Uint8Array} pub
+        * @property {Uint8Array} sec
         **/
 
         const configEc = {
@@ -30,8 +30,8 @@
         };
 
         /**
-        * @param {Uint8Array[]} bytes;
-        * @returns {Uint8Array};
+        * @param {Uint8Array[]} bytes
+        * @return {Uint8Array}
         **/
         function byteConcat(...bytes){
             const memory = new Uint8Array(bytes.reduce((a, {byteLength}) => a + byteLength, 0));
@@ -47,17 +47,17 @@
         }
 
         /**
-        * @param {Uint8Array} data;
-        * @returns {Promise<Uint8Array>};
+        * @param {Uint8Array} data
+        * @return {Promise<Uint8Array>}
         **/
         async function sha2(data){
             return new Uint8Array(await crypto.subtle.digest("SHA-512", data));
         }
 
         /**
-        * @param {"ECDH" | "ECDSA"} name;
-        * @param {readonly KeyUsage[]} usage;
-        * @returns {Promise<ExportKeyPair>};
+        * @param {"ECDH" | "ECDSA"} name
+        * @param {readonly KeyUsage[]} usage
+        * @return {Promise<ExportKeyPair>}
         **/
         async function exportKey(name, usage){
             const {publicKey, privateKey} = await crypto.subtle.generateKey({...configEc, name}, true, usage);
@@ -69,34 +69,34 @@
         }
 
         /**
-        * @returns {Promise<ExportKeyPair>};
+        * @return {Promise<ExportKeyPair>}
         **/
         async function wcExportDerive(){
             return await exportKey("ECDH", ["deriveKey"]);
         }
 
         /**
-        * @returns {Promise<ExportKeyPair>};
+        * @return {Promise<ExportKeyPair>}
         **/
         async function wcExportSign(){
             return await exportKey("ECDSA", ["sign", "verify"]);
         }
 
         /**
-        * @param {Uint8Array} key;
-        * @param {"ECDH" | "ECDSA"} name;
-        * @param {KeyFormat} format;
-        * @param {readonly KeyUsage[]} usage;
-        * @returns {Promise<CryptoKey>};
+        * @param {Uint8Array} key
+        * @param {"ECDH" | "ECDSA"} name
+        * @param {KeyFormat} format
+        * @param {readonly KeyUsage[]} usage
+        * @return {Promise<CryptoKey>}
         **/
         async function importKey(key, name, format, usage){
             return await crypto.subtle.importKey(format, key, {...configEc, name}, false, usage);
         }
 
         /**
-        * @param {Uint8Array} pub;
-        * @param {Uint8Array} sec;
-        * @returns {Promise<CryptoKey>};
+        * @param {Uint8Array} pub
+        * @param {Uint8Array} sec
+        * @return {Promise<CryptoKey>}
         **/
         async function wcImportDerive(pub, sec){
             return await crypto.subtle.deriveKey({
@@ -109,9 +109,9 @@
         }
 
         /**
-        * @param {Uint8Array} key;
-        * @param {KeyType} type;
-        * @returns {Promise<CryptoKey>};
+        * @param {Uint8Array} key
+        * @param {KeyType} type
+        * @return {Promise<CryptoKey>}
         **/
         async function wcImportSign(key, type){
             switch(type){
@@ -122,9 +122,9 @@
         }
 
         /**
-        * @param {CryptoKey} com;
-        * @param {Uint8Array} data;
-        * @returns {Promise<Uint8Array>};
+        * @param {CryptoKey} com
+        * @param {Uint8Array} data
+        * @return {Promise<Uint8Array>}
         **/
         async function wcEncrypt(com, data){
             const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -133,9 +133,9 @@
         }
 
         /**
-        * @param {CryptoKey} com;
-        * @param {Uint8Array} data;
-        * @returns {Promise<Uint8Array>};
+        * @param {CryptoKey} com
+        * @param {Uint8Array} data
+        * @return {Promise<Uint8Array>}
         **/
         async function wcDecrypt(com, data){
             const iv = data.subarray(0, 12);
@@ -144,27 +144,27 @@
         }
 
         /**
-        * @param {Uint8Array} sec;
-        * @param {Uint8Array} data;
-        * @returns {Promise<Uint8Array>};
+        * @param {Uint8Array} sec
+        * @param {Uint8Array} data
+        * @return {Promise<Uint8Array>}
         **/
         async function wcSign(sec, data){
             return new Uint8Array(crypto.subtle.sign(configSign, await wcImportSign(sec, "private"), data));
         }
 
         /**
-        * @param {Uint8Array} sign;
-        * @param {Uint8Array} pub;
-        * @param {Uint8Array} data;
-        * @returns {Promise<boolean>};
+        * @param {Uint8Array} sign
+        * @param {Uint8Array} pub
+        * @param {Uint8Array} data
+        * @return {Promise<boolean>}
         **/
         async function wcVerify(sign, pub, data){
             return crypto.subtle.verify(configSign, await wcImportSign(pub, "public"), sign, data);
         }
 
         /**
-        * @param {Uint8Array} data;
-        * @returns {string};
+        * @param {Uint8Array} data
+        * @return {string}
         **/
         function b2h(data){
             return [...data].map(n => n.toString(16).toUpperCase().padStart(2, "0")).join("");
