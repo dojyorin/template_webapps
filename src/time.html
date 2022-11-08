@@ -33,5 +33,13 @@
 
             return toUnixTime(new Date(y, mo - 1, d, h, mi, s));
         }
+
+        const result1 = toUnixTime();
+        const result2 = toDate(result1);
+        const result3 = parseUnixTime("2022/01/01 11:11:11", /\/| |:/);
+
+        console.log(result1);
+        console.log(result2);
+        console.log(result3);
     </script>
 </html>

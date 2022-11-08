@@ -44,5 +44,13 @@
         function storageHas(key){
             return localStorage.getItem(key) !== null;
         }
+
+        storageWrite("test", {foo: 123});
+        const result1 = storageRead("test");
+        storageDelete("test");
+        const result2 = storageHas("test");
+
+        console.log(result1);
+        console.log(result2);
     </script>
 </html>

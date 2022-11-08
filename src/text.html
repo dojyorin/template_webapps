@@ -14,5 +14,8 @@
         function trimExtend(data){
             return data.trim().replace(/\r/g, "").replace(/\t/g, " ").replace(/ +/g, " ").replace(/ +$/mg, "");
         }
+
+        const result = trimExtend("test    aaa\t \r\r bbb ");
+        console.log(result);
     </script>
 </html>
