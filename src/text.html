@@ -7,6 +7,10 @@
     <body></body>
 
     <script async type="module">
+        /**
+        * @param {string} data;
+        * @returns {string};
+        **/
         function trimExtend(data){
             return data.trim().replace(/\r/g, "").replace(/\t/g, " ").replace(/ +/g, " ").replace(/ +$/mg, "");
         }
