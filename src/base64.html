@@ -22,5 +22,19 @@
         function base64Decode(data){
             return new Uint8Array([...atob(data)].map(s => s.charCodeAt(0)));
         }
+
+        const sample = new Uint8Array(new Float32Array(0xFF).map(() => Math.random()).buffer);
+
+        const encode = await base64Encode(sample);
+        const decode = await base64Decode(encode);
+
+        console.log("---------- Sample Data ----------");
+        console.log(sample);
+
+        console.log("---------- Decoded Data ----------");
+        console.log(decode);
+
+        console.log("---------- Encoded Data ----------");
+        console.log(encode);
     </script>
 </html>

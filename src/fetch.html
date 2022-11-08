@@ -16,11 +16,10 @@
         /**
         * @typedef {Exclude<HeadersInit, Headers> | URLSearchParams} QueryInit
         * @typedef {Omit<RequestInit, "window"> & {query?: QueryInit}} FetchInit
-        * @typedef {keyof FetchResponseMap} FetchResponseLabel
         **/
 
         /**
-        * @typedef {object} FetchResponseMap
+        * @typedef {object} FetchResponseType
         * @property {string} text
         * @property {JsonStruct} json
         * @property {FormData} form
@@ -32,16 +31,11 @@
         **/
 
         /**
-        * @template {FetchResponseLabel} T
-        * @typedef {FetchResponseMap[T] extends infer U ? U : never} FetchResponseType<T>
-        **/
-
-        /**
-        * @template {FetchResponseLabel} T
+        * @template {keyof FetchResponseType} T
         * @param {string} path
         * @param {T} type
-        * @param {?FetchInit} option
-        * @return {Promise<FetchResponseType<T>>}
+        * @param {FetchInit} [option]
+        * @return {Promise<FetchResponseType[T]>}
         **/
         async function fetchExtend(path, type, option){
             const {origin, pathname} = /^http(s|):\/\//i.test(path) ? new URL(path) : new URL(path, location.href);

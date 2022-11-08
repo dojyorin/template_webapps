@@ -11,10 +11,10 @@
             static #fnStart = /^.+?\{/s;
             static #fnEnd = /\}$/s;
 
-            #path = "";
+            #path;
 
             /**
-            * @param {Function[]} fns;
+            * @param {Function[]} fns
             **/
             constructor(...fns){
                 const srcs = fns.map(fn => fn.toString());

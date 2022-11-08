@@ -12,17 +12,17 @@
 
     <script async type="module">
         /**
-        * @param {string} id;
-        * @returns {HTMLElement};
+        * @param {string} id
+        * @return {HTMLElement}
         **/
         function $id(id){
             return document.getElementById(id);
         }
 
         /**
-        * @param {?boolean} multiple;
-        * @param {?string} accept;
-        * @returns {Promise<File[]>};
+        * @param {boolean} [multiple]
+        * @param {string} [accept]
+        * @return {Promise<File[]>}
         **/
         async function fsRead(multiple, accept){
             const input = document.createElement("input");
@@ -30,15 +30,15 @@
             input.multiple = multiple ?? false;
             input.accept = accept ?? "";
 
-            return new Promise((resolve)=>{
+            return await new Promise((resolve)=>{
                 input.oninput = () => resolve([...input.files]);
                 input.click();
             });
         }
 
         /**
-        * @param {string} name;
-        * @param {BlobPart} data;
+        * @param {string} name
+        * @param {BlobPart} data
         **/
         function fsWrite(name, data){
             const anchor = document.createElement("a");
@@ -90,8 +90,8 @@
         }
 
         /**
-        * @param {string} message;
-        * @param {?number} color;
+        * @param {string} message
+        * @param {number} [color]
         **/
         function dialogNotify(message, color){
             const dialog = document.createElement("dialog");
@@ -112,21 +112,21 @@
             document.body.appendChild(dialog);
         }
 
-        $id("read").addEventListener("click", async()=>{
+        $id("read").onclick = async()=>{
             console.log(await fsRead());
             console.log(await fsNativeRead());
             dialogNotify("Loaded!");
-        });
+        };
 
-        $id("write").addEventListener("click", async()=>{
+        $id("write").onclick = async()=>{
             console.log(await fsWrite("test.txt", "test"));
             console.log(await fsNativeWrite(null, "test"));
             dialogNotify("Saved!");
-        });
+        };
 
-        $id("directory").addEventListener("click", async()=>{
+        $id("directory").onclick = async()=>{
             console.log(await fsNativeDirectory());
             dialogNotify("Loaded!");
-        });
+        };
     </script>
 </html>

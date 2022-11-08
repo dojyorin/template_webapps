@@ -8,37 +8,38 @@
 
     <script async type="module">
         /**
-        * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct;
-        * @typedef {JsonStruct[]} JsonArray;
-        * @typedef {{[key: string]: JsonStruct}} JsonObject;
+        * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct
+        * @typedef {JsonStruct[]} JsonArray
+        * @typedef {{[key: string]: JsonStruct}} JsonObject
         **/
 
         /**
-        * @param {string} key;
-        * @param {JsonStruct} data;
+        * @param {string} key
+        * @param {JsonStruct} data
         **/
         function storageWrite(key, data){
             localStorage.setItem(key, JSON.stringify(data));
         }
 
         /**
-        * @param {string} key;
-        * @returns {JsonStruct};
+        * @template {JsonStruct} T
+        * @param {string} key
+        * @return {T}
         **/
         function storageRead(key){
             return JSON.parse(localStorage.getItem(key) ?? undefined);
         }
 
         /**
-        * @param {string} key;
+        * @param {string} key
         **/
         function storageDelete(key){
             localStorage.removeItem(key);
         }
 
         /**
-        * @param {string} key;
-        * @returns {boolean};
+        * @param {string} key
+        * @return {boolean}
         **/
         function storageHas(key){
             return localStorage.getItem(key) !== null;
