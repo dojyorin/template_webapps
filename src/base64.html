@@ -7,11 +7,19 @@
     <body></body>
 
     <script async type="module">
-        function base64encode(data){
+        /**
+        * @param {Uint8Array} data;
+        * @returns {string};
+        **/
+        function base64Encode(data){
             return btoa([...data].map(n => String.fromCharCode(n)).join(""));
         }
 
-        function base64decode(data){
+        /**
+        * @param {string} data;
+        * @returns {Uint8Array};
+        **/
+        function base64Decode(data){
             return new Uint8Array([...atob(data)].map(s => s.charCodeAt(0)));
         }
     </script>
