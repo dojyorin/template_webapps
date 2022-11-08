@@ -20,7 +20,7 @@
         * @param {Uint8Array} data;
         * @returns {Uint8Array};
         **/
-        export async function deflateEncode(data){
+        async function deflateEncode(data){
             return await transform(data, new CompressionStream("deflate-raw"));
         }
 
@@ -28,7 +28,7 @@
         * @param {Uint8Array} data;
         * @returns {Uint8Array};
         **/
-        export async function deflateDecode(data){
+        async function deflateDecode(data){
             return await transform(data, new DecompressionStream("deflate-raw"));
         }
 

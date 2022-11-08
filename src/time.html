@@ -7,14 +7,27 @@
     <body></body>
 
     <script async type="module">
+        /**
+        * @param {?Date} date;
+        * @returns {number};
+        **/
         function toUnixTime(date){
             return Math.floor((date ?? new Date()).getTime() / 1000);
         }
 
+        /**
+        * @param {number} time;
+        * @returns {Date};
+        **/
         function toDate(time){
             return new Date(time * 1000);
         }
 
+        /**
+        * @param {string} ds;
+        * @param {RegExp} rx;
+        * @returns {number};
+        **/
         function parseUnixTime(ds, rx){
             const [y, mo, d, h, mi, s] = ds.split(rx).map(s => Number(s));
 

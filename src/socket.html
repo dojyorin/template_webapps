@@ -7,30 +7,17 @@
     <body></body>
 
     <script async type="module">
-        const socket = new WebSocket(`ws://${location.host}/socket`);
+        const ws = new WebSocket(`ws://${location.host}/ws`);
 
-        socket.addEventListener("error", ()=>{
-            socket.close();
-            console.log("ERROR");
-        }, {
-            once: true
-        });
+        ws.onerror = () => ws.close();
+        ws.onclose = () => console.log("CLOSE WebSocket");
+        ws.onopen = () => console.log("OPEN WebSocket");
 
-        socket.addEventListener("close", ()=>{
-            console.log("CLOSE");
-        }, {
-            once: true
-        });
-
-        socket.addEventListener("open", ()=>{
-            socket.send("test");
-            console.log("OPEN");
-        }, {
-            once: true
-        });
-
-        socket.addEventListener("message", ({data})=>{
+        /**
+        * @param {MessageEvent<Uint8Array | string>} {data};
+        **/
+        ws.onmessage = async({data})=>{
             console.log(data);
-        });
+        };
     </script>
 </html>
