@@ -7,30 +7,76 @@
     <body></body>
 
     <script async type="module">
-        async function fetchExtend(path, option){
-            const {origin, pathname} = /^https{0,1}:\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
-            const query = new URLSearchParams(option?.query ?? {}).toString();
+        /**
+        * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct;
+        * @typedef {JsonStruct[]} JsonArray;
+        * @typedef {{[key: string]: JsonStruct}} JsonObject;
+        **/
+
+        /**
+        * @typedef {Exclude<HeadersInit, Headers> | URLSearchParams} QueryInit;
+        * @typedef {Omit<RequestInit, "window"> & {query?: QueryInit}} FetchInit;
+        * @typedef {keyof FetchResponseMap} FetchResponseLabel;
+        **/
+
+        /**
+        * @typedef {object} FetchResponseMap;
+        * @property {string} text;
+        * @property {JsonStruct} json;
+        * @property {FormData} form;
+        * @property {Uint8Array} byte;
+        * @property {ArrayBuffer} buffer;
+        * @property {Blob} blob;
+        * @property {boolean} ok;
+        * @property {Response} response;
+        **/
+
+        /**
+        * @template {FetchResponseLabel} T;
+        * @typedef {FetchResponseMap[T] extends infer U ? U : never} FetchResponseType<T>;
+        **/
+
+        /**
+        * @template {FetchResponseLabel} T;
+        * @param {string} path;
+        * @param {T} type;
+        * @param {?FetchInit} option;
+        * @returns {Promise<FetchResponseType<T>>};
+        **/
+        async function fetchExtend(path, type, option){
+            const {origin, pathname} = /^http(s|):\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
+            const query = new URLSearchParams(option?.query).toString();
 
             const response = await fetch(`${origin}${pathname}${query && "?"}${query}`, {
                 method: option?.method ?? "GET",
                 credentials: option?.credentials ?? "omit",
                 mode: option?.mode ?? "cors",
                 cache: option?.cache ?? "no-cache",
-                referrerPolicy: option?.referrerPolicy ?? "no-referrer",
-                referrer: option?.referrer ?? "",
                 redirect: option?.redirect ?? "follow",
                 keepalive: option?.keepalive ?? false,
-                integrity: "",
-                signal: null,
-                window: null,
+                referrerPolicy: option?.referrerPolicy ?? "no-referrer",
+                referrer: option?.referrer ?? "",
+                integrity: option?.integrity ?? "",
+                signal: option?.signal ?? null,
                 headers: option?.headers ?? {},
-                body: option?.body ?? null
+                body: option?.body ?? null,
+                window: null
             });
 
-            return option?.type === "response" ? response : response[option?.type ?? "json"]();
+            switch(type){
+                case "text": return await response.text();
+                case "json": return await response.json();
+                case "form": return await response.formData();
+                case "byte": return new Uint8Array(await response.arrayBuffer());
+                case "buffer": return await response.arrayBuffer();
+                case "blob": return await response.blob();
+                case "ok": return response.ok;
+                case "response": return response;
+                default: throw new Error();
+            }
         }
 
-        const result = await fetchExtend("http://worldclockapi.com/api/json/utc/now");
+        const result = await fetchExtend("http://worldclockapi.com/api/json/utc/now", "json");
         console.log(result);
     </script>
 </html>
