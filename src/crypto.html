@@ -13,22 +13,6 @@
         * @property {Uint8Array} sec
         **/
 
-        const configEc = {
-            namedCurve: "P-521"
-        };
-
-        const configEncrypt = {
-            name: "AES-GCM",
-            tagLength: 128
-        };
-
-        const configSign = {
-            name: "ECDSA",
-            hash: {
-                name: "SHA-512"
-            }
-        };
-
         /**
         * @param {...Uint8Array} bytes
         * @return {Uint8Array}
@@ -50,7 +34,7 @@
         * @param {Uint8Array} data
         * @return {Promise<Uint8Array>}
         **/
-        async function sha2(data){
+        async function wcHash(data){
             return new Uint8Array(await crypto.subtle.digest("SHA-512", data));
         }
 
@@ -60,7 +44,10 @@
         * @return {Promise<ExportKeyPair>}
         **/
         async function exportKey(name, usage){
-            const {publicKey, privateKey} = await crypto.subtle.generateKey({...configEc, name}, true, usage);
+            const {publicKey, privateKey} = await crypto.subtle.generateKey({
+                namedCurve: "P-521",
+                name: name
+            }, true, usage);
 
             return {
                 pub: new Uint8Array(await crypto.subtle.exportKey("spki", publicKey)),
@@ -90,7 +77,10 @@
         * @return {Promise<CryptoKey>}
         **/
         async function importKey(key, name, format, usage){
-            return await crypto.subtle.importKey(format, key, {...configEc, name}, false, usage);
+            return await crypto.subtle.importKey(format, key, {
+                namedCurve: "P-521",
+                name: name
+            }, false, usage);
         }
 
         /**
@@ -129,7 +119,10 @@
         async function wcEncrypt(com, data){
             const iv = crypto.getRandomValues(new Uint8Array(12));
 
-            return byteConcat(iv, await crypto.subtle.encrypt({...configEncrypt, iv}, com, data));
+            return byteConcat(iv, new Uint8Array(await crypto.subtle.encrypt({
+                name: "AES-GCM",
+                iv: iv
+            }, com, data)));
         }
 
         /**
@@ -138,9 +131,10 @@
         * @return {Promise<Uint8Array>}
         **/
         async function wcDecrypt(com, data){
-            const iv = data.subarray(0, 12);
-
-            return new Uint8Array(await crypto.subtle.decrypt({...configEncrypt, iv}, com, data.subarray(12)));
+            return new Uint8Array(await crypto.subtle.decrypt({
+                name: "AES-GCM",
+                iv: data.subarray(0, 12)
+            }, com, data.subarray(12)));
         }
 
         /**
@@ -149,7 +143,12 @@
         * @return {Promise<Uint8Array>}
         **/
         async function wcSign(sec, data){
-            return new Uint8Array(crypto.subtle.sign(configSign, await wcImportSign(sec, "private"), data));
+            return new Uint8Array(await crypto.subtle.sign({
+                name: "ECDSA",
+                hash: {
+                    name: "SHA-512"
+                }
+            }, await wcImportSign(sec, "private"), data));
         }
 
         /**
@@ -159,7 +158,28 @@
         * @return {Promise<boolean>}
         **/
         async function wcVerify(sign, pub, data){
-            return crypto.subtle.verify(configSign, await wcImportSign(pub, "public"), sign, data);
+            return crypto.subtle.verify({
+                name: "ECDSA",
+                hash: {
+                    name: "SHA-512"
+                }
+            }, await wcImportSign(pub, "public"), sign, data);
+        }
+
+        /**
+        * @param {string} data
+        * @return {Uint8Array}
+        **/
+        function s2b(data){
+            return new TextEncoder().encode(data);
+        }
+
+        /**
+        * @param {Uint8Array} data
+        * @return {string}
+        **/
+        function b2s(data){
+            return new TextDecoder().decode(data);
         }
 
         /**
@@ -170,7 +190,7 @@
             return [...data].map(n => n.toString(16).toUpperCase().padStart(2, "0")).join("");
         }
 
-        const sample = new TextEncoder().encode("hogehoge");
+        const sample = s2b("hogehoge");
 
         const keyDerive1 = await wcExportDerive();
         const keyDerive2 = await wcExportDerive();
@@ -183,10 +203,10 @@
         const decode = await wcDecrypt(keyCommon2P1S, encode);
 
         const sign = await wcSign(keySign.sec, sample);
-        const verify = await wcVerify(keySign.pub, sign, decode);
+        const verify = await wcVerify(sign, keySign.pub, decode);
 
-        const hash1 = await sha2(sample);
-        const hash2 = await sha2(decode);
+        const hash1 = await wcHash(sample);
+        const hash2 = await wcHash(decode);
 
         console.log("---------- Exported Derive Keys ----------");
         console.log(keyDerive1.pub);
@@ -203,13 +223,13 @@
         console.log(keyCommon2P1S);
 
         console.log("---------- Sample Data ----------");
-        console.log(new TextDecoder().decode(sample));
+        console.log(b2s(sample));
 
         console.log("---------- Encoded Data ----------");
-        console.log(new TextDecoder().decode(encode));
+        console.log(b2s(encode));
 
         console.log("---------- Decoded Data ----------");
-        console.log(new TextDecoder().decode(decode));
+        console.log(b2s(decode));
 
         console.log("---------- Data Signature ----------");
         console.log(sign);
