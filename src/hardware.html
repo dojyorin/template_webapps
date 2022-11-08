@@ -107,6 +107,8 @@
             const usb = await NavUsb.requestDevice({
                 filters: []
             });
+
+            console.log(usb);
         };
 
         document.getElementById("serial").onclick = async()=>{
@@ -120,12 +122,16 @@
                 bufferSize: 512,
                 flowControl: "none"
             });
+
+            console.log(serial);
         };
 
         document.getElementById("bluetooth").onclick = async()=>{
             const bluetooth = await NavBluetooth.requestDevice({
                 acceptAllDevices: true
             });
+
+            console.log(bluetooth);
         };
     </script>
 </html>
