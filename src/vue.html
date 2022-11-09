@@ -110,6 +110,17 @@
 
     <script async type="module">
         /**
+        * @typedef {object} VuetifySystem
+        * @property {object} $vuetify
+        **/
+
+        /**
+        * @typedef {object} VueSystem
+        * @property {HTMLElement[]} $refs
+        * @property {VueData} $data
+        **/
+
+        /**
         * @typedef {object} VueData
         * @property {boolean} vNotifyVisible
         * @property {string} vNotifyMessage
@@ -125,6 +136,10 @@
         * @property {(state: boolean) => void} vLoading
         * @property {(path: string) => void} vRouter
         * @property {(state: boolean) => void} vDrawer
+        **/
+
+        /**
+        * @typedef {VueSystem & VuetifySystem & VueData & VueMethods} VueThis
         **/
 
         const vue = new Vue({
