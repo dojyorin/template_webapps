@@ -11,7 +11,7 @@
         * @param {Uint8Array} data
         * @param {TransformStream<Uint8Array, Uint8Array>} ts
         * @return {Uint8Array}
-        **/
+        */
         async function byteConvert(data, ts){
             return new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(ts)).arrayBuffer());
         }
@@ -19,7 +19,7 @@
         /**
         * @param {Uint8Array} data
         * @return {Uint8Array}
-        **/
+        */
         async function deflateEncode(data){
             return await byteConvert(data, new CompressionStream("deflate-raw"));
         }
@@ -27,7 +27,7 @@
         /**
         * @param {Uint8Array} data
         * @return {Uint8Array}
-        **/
+        */
         async function deflateDecode(data){
             return await byteConvert(data, new DecompressionStream("deflate-raw"));
         }

@@ -17,7 +17,7 @@
         * @property {() => void} ondisconnect
         * @property {() => Promise<SerialPort[]>} getPorts
         * @property {(option:SerialPortRequestOptions) => Promise<SerialPort>} requestPort
-        **/
+        */
 
         /**
         * @typedef {object} SerialPort
@@ -31,7 +31,7 @@
         * @property {() => SerialPortInfo} getInfo
         * @property {(signals:SerialOutputSignals) => Promise<void>} setSignals
         * @property {() => Promise<SerialInputSignals>} getSignals
-        **/
+        */
 
         /**
         * @typedef {object} SerialOptions
@@ -41,25 +41,25 @@
         * @property {"none" | "even" | "odd"} parity
         * @property {number} bufferSize
         * @property {"none" | "hardware"} flowControl
-        **/
+        */
 
         /**
         * @typedef {object} SerialPortRequestOptions
         * @property {SerialPortInfo[]} filters
-        **/
+        */
 
         /**
         * @typedef {object} SerialPortInfo
         * @property {number} usbVendorId
         * @property {number} usbProductId
-        **/
+        */
 
         /**
         * @typedef {object} SerialOutputSignals
         * @property {boolean} dataTerminalReady
         * @property {boolean} requestToSend
         * @property {boolean} break
-        **/
+        */
 
         /**
         * @typedef {object} SerialInputSignals
@@ -67,7 +67,7 @@
         * @property {boolean} dataCarrierDetect
         * @property {boolean} dataSetReady
         * @property {boolean} ringIndicator
-        **/
+        */
 
         /**
         * @typedef {object} USB
@@ -75,7 +75,7 @@
         * @property {() => void} ondisconnect
         * @property {() => Promise<USBDevice[]>} getDevices
         * @property {(option:USBDeviceRequestOptions) => Promise<USBDevice>} requestDevice
-        **/
+        */
 
         /**
         * @typedef {object} Bluetooth
@@ -86,15 +86,15 @@
         * @property {(option:RequestDeviceOptions) => Promise<BluetoothDevice>} requestDevice
         * @property {() => Promise<boolean>} getAvailability
         * @property {(option:BluetoothLEScanOptions) => Promise<BluetoothLEScan>} requestLEScan
-        **/
+        */
 
-        /** @type {?Serial} **/
+        /** @type {?Serial} */
         const NavSerial = navigator?.serial;
 
-        /** @type {?USB} **/
+        /** @type {?USB} */
         const NavUsb = navigator?.usb;
 
-        /** @type {?Bluetooth} **/
+        /** @type {?Bluetooth} */
         const NavBluetooth = navigator?.bluetooth;
 
         document.getElementById("usb").onclick = async()=>{

@@ -11,12 +11,12 @@
         * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct
         * @typedef {JsonStruct[]} JsonArray
         * @typedef {{[key: string]: JsonStruct}} JsonObject
-        **/
+        */
 
         /**
         * @typedef {Exclude<HeadersInit, Headers> | URLSearchParams} QueryInit
         * @typedef {Omit<RequestInit, "window"> & {query?: QueryInit}} FetchInit
-        **/
+        */
 
         /**
         * @typedef {object} FetchResponseType
@@ -28,7 +28,7 @@
         * @property {Blob} blob
         * @property {boolean} ok
         * @property {Response} response
-        **/
+        */
 
         /**
         * @template {keyof FetchResponseType} T
@@ -36,7 +36,7 @@
         * @param {T} type
         * @param {FetchInit} [option]
         * @return {Promise<FetchResponseType[T]>}
-        **/
+        */
         async function fetchExtend(path, type, option){
             const {origin, pathname} = /^http(s|):\/\//i.test(path) ? new URL(path) : new URL(path, location.href);
             const query = new URLSearchParams(option?.query).toString();

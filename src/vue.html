@@ -116,7 +116,7 @@
         * @property {object} $options
         * @property {() => VueData} $options.data
         * @property {VueMethods} $options.methods
-        **/
+        */
 
         /**
         * @typedef {object} VuetifySystem
@@ -158,17 +158,17 @@
         * @property {boolean} $vuetify.breakpoint.xlOnly
         * @property {boolean} $vuetify.breakpoint.xs
         * @property {boolean} $vuetify.breakpoint.xsOnly
-        **/
+        */
 
         /**
         * @typedef {object} VueRefs
         * @property {{$el: HTMLElement}} test
-        **/
+        */
 
         /**
         * @typedef {object} VueProps
         * @property {number} test
-        **/
+        */
 
         /**
         * @typedef {object} VueData
@@ -178,7 +178,7 @@
         * @property {boolean} vLoadingVisible
         * @property {string} vRouterPath
         * @property {boolean} vDrawerVisible
-        **/
+        */
 
         /**
         * @typedef {object} VueMethods
@@ -186,17 +186,17 @@
         * @property {(state: boolean) => void} vLoading
         * @property {(path: string) => void} vRouter
         * @property {(state: boolean) => void} vDrawer
-        **/
+        */
 
         /**
         * @typedef {VueSystem & VuetifySystem & VueData & VueMethods} VueThis
-        **/
+        */
 
         const vue = new Vue({
             el: "#vue",
             vuetify: new Vuetify(),
 
-            /** @return {VueData} **/
+            /** @return {VueData} */
             data(){
                 return {
                     vNotifyVisible: false,
@@ -208,9 +208,9 @@
                 };
             },
 
-            /** @type {VueMethods} **/
+            /** @type {VueMethods} */
             methods: {
-                /** @this {VueThis} **/
+                /** @this {VueThis} */
                 vNotify(message, color){
                     this.vNotifyVisible = false;
                     this.vNotifyMessage = message;
@@ -218,23 +218,23 @@
                     this.vNotifyVisible = true;
                 },
 
-                /** @this {VueThis} **/
+                /** @this {VueThis} */
                 vLoading(state){
                     this.vLoadingVisible = state;
                 },
 
-                /** @this {VueThis} **/
+                /** @this {VueThis} */
                 vRouter(path){
                     this.vRouterPath = path;
                 },
 
-                /** @this {VueThis} **/
+                /** @this {VueThis} */
                 vDrawer(state){
                     this.vDrawerVisible = state;
                 }
             },
 
-            /** @this {VueThis} **/
+            /** @this {VueThis} */
             async mounted(){
                 this.vLoading(true);
                 await new Promise(done => setTimeout(done, 1000));

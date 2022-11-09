@@ -20,7 +20,7 @@
         /**
         * @param {Uint8Array} data
         * @return {Uint8Array}
-        **/
+        */
         async function sha2(data){
             return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
         }
@@ -28,7 +28,7 @@
         /**
         * @param {string} data
         * @return {Uint8Array}
-        **/
+        */
         function s2b(data){
             return new TextEncoder().encode(data);
         }
@@ -36,7 +36,7 @@
         /**
         * @param {Uint8Array} data
         * @return {string}
-        **/
+        */
         function b2s(data){
             return new TextDecoder().decode(data);
         }
@@ -44,7 +44,7 @@
         /**
         * @param {File[]} files
         * @return {Uint8Array}
-        **/
+        */
         async function minipackEncode(files){
             const archive = new Uint8Array(files.reduce((a, {size: s, name: n}) => a + sizeTotal + s2b(n).byteLength + s, 0));
 
@@ -76,9 +76,9 @@
         /**
         * @param {Uint8Array} archive
         * @return {File[]}
-        **/
+        */
         async function minipackDecode(archive){
-            /** @type {File[]} **/
+            /** @type {File[]} */
             const files = [];
 
             let offset = 0;
