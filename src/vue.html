@@ -110,14 +110,14 @@
 
     <script async type="module">
         /**
-        * @typedef {object} VuetifySystem
-        * @property {object} $vuetify
-        **/
-
-        /**
         * @typedef {object} VueSystem
         * @property {HTMLElement[]} $refs
         * @property {VueData} $data
+        **/
+
+        /**
+        * @typedef {object} VuetifySystem
+        * @property {object} $vuetify
         **/
 
         /**
@@ -160,7 +160,7 @@
 
             /** @type {VueMethods} **/
             methods: {
-                /** @this {VueData & VueMethods} **/
+                /** @this {VueThis} **/
                 vNotify(message, color){
                     this.vNotifyVisible = false;
                     this.vNotifyMessage = message;
@@ -168,30 +168,38 @@
                     this.vNotifyVisible = true;
                 },
 
-                /** @this {VueData & VueMethods} **/
+                /** @this {VueThis} **/
                 vLoading(state){
                     this.vLoadingVisible = state;
                 },
 
-                /** @this {VueData & VueMethods} **/
+                /** @this {VueThis} **/
                 vRouter(path){
                     this.vRouterPath = path;
                 },
 
-                /** @this {VueData & VueMethods} **/
+                /** @this {VueThis} **/
                 vDrawer(state){
                     this.vDrawerVisible = state;
                 }
             },
 
-            /** @this {VueData & VueMethods} **/
+            /** @this {VueThis} **/
             async mounted(){
                 this.vLoading(true);
                 await new Promise(done => setTimeout(done, 1000));
                 this.vLoading(false);
 
-                this.vNotify("Loading...");
+                this.vNotify("Loading...", "success");
             }
+        });
+
+        // ConsoleDebug
+        Object.defineProperty(globalThis, "__vue", {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: vue
         });
     </script>
 
