@@ -115,6 +115,7 @@
         * @property {VueData} $data
         * @property {object} $options
         * @property {() => VueData} $options.data
+        * @property {VueComputed} $options.computed
         * @property {VueMethods} $options.methods
         */
 
@@ -171,6 +172,11 @@
         */
 
         /**
+        * @typedef {object} VueComputed
+        * @property {string} test
+        */
+
+        /**
         * @typedef {object} VueData
         * @property {boolean} vNotifyVisible
         * @property {string} vNotifyMessage
@@ -189,7 +195,7 @@
         */
 
         /**
-        * @typedef {VueSystem & VuetifySystem & VueData & VueMethods} VueThis
+        * @typedef {VueSystem & VuetifySystem & VueComputed & VueData & VueMethods} VueThis
         */
 
         const vue = new Vue({
@@ -206,6 +212,14 @@
                     vRouterPath: "/",
                     vDrawerVisible: false
                 };
+            },
+
+            /** @type {VueComputed} */
+            computed: {
+                /** @this {VueThis} */
+                test(){
+                    return this.vNotifyColor;
+                }
             },
 
             /** @type {VueMethods} */
