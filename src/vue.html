@@ -7,7 +7,7 @@
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5/css/materialdesignicons.min.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?display=swap&family=Kosugi+Maru:wght@400">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:wght@100;300;400;500;700;900">
 
         <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.js"></script>
@@ -33,6 +33,38 @@
                         <span class="white--text">Loading...</span>
                     </v-progress-circular>
                 </v-overlay>
+
+                <v-navigation-drawer app temporary v-model="vDrawerVisible">
+                    <v-toolbar dark color="blue" :height="$vuetify.application.top">
+                        <v-btn icon @click="vDrawer(false)">
+                            <v-icon large>mdi-close</v-icon>
+                        </v-btn>
+
+                        <v-toolbar-title>Menu</v-toolbar-title>
+                    </v-toolbar>
+
+                    <v-list>
+                        <v-list-item @click="vRouter('/'), vDrawer(false)">
+                            <v-list-item-icon>
+                                <v-icon>mdi-home</v-icon>
+                            </v-list-item-icon>
+
+                            <v-list-item-content>
+                                <v-list-item-title>HOME</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+
+                        <v-list-item @click="vRouter('/sub'), vDrawer(false)">
+                            <v-list-item-icon>
+                                <v-icon>mdi-account-circle</v-icon>
+                            </v-list-item-icon>
+
+                            <v-list-item-content>
+                                <v-list-item-title>SUB</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list>
+                </v-navigation-drawer>
 
                 <v-app-bar app dark color="blue" height="52">
                     <v-app-bar-nav-icon @click="vDrawer(true)"></v-app-bar-nav-icon>
@@ -68,42 +100,8 @@
                 </v-main>
 
                 <v-footer app dark tile padless color="blue">
-                    <v-row no-gutters justify="center">
-                        Copyright
-                    </v-row>
+                    <v-row no-gutters justify="center">Copyright</v-row>
                 </v-footer>
-
-                <v-navigation-drawer app temporary v-model="vDrawerVisible">
-                    <v-toolbar dark color="blue" :height="$vuetify.application.top">
-                        <v-btn icon @click="vDrawer(false)">
-                            <v-icon large>mdi-close</v-icon>
-                        </v-btn>
-
-                        <v-toolbar-title>Menu</v-toolbar-title>
-                    </v-toolbar>
-
-                    <v-list>
-                        <v-list-item @click="vRouter('/'), vDrawer(false)">
-                            <v-list-item-icon>
-                                <v-icon>mdi-home</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>HOME</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-
-                        <v-list-item @click="vRouter('/sub'), vDrawer(false)">
-                            <v-list-item-icon>
-                                <v-icon>mdi-account-circle</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>SUB</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list>
-                </v-navigation-drawer>
             </v-app>
         </template>
     </body>
@@ -111,13 +109,65 @@
     <script async type="module">
         /**
         * @typedef {object} VueSystem
-        * @property {HTMLElement[]} $refs
+        * @property {HTMLElement} $el
+        * @property {VueRefs} $refs
+        * @property {VueProps} $props
         * @property {VueData} $data
+        * @property {object} $options
+        * @property {() => VueData} $options.data
+        * @property {VueMethods} $options.methods
         **/
 
         /**
         * @typedef {object} VuetifySystem
         * @property {object} $vuetify
+        * @property {object} $vuetify.application
+        * @property {number} $vuetify.application.bar
+        * @property {number} $vuetify.application.bottom
+        * @property {number} $vuetify.application.footer
+        * @property {number} $vuetify.application.insetFooter
+        * @property {number} $vuetify.application.left
+        * @property {number} $vuetify.application.right
+        * @property {number} $vuetify.application.top
+        * @property {object} $vuetify.breakpoint
+        * @property {number} $vuetify.breakpoint.height
+        * @property {boolean} $vuetify.breakpoint.lg
+        * @property {boolean} $vuetify.breakpoint.lgAndDown
+        * @property {boolean} $vuetify.breakpoint.lgAndUp
+        * @property {boolean} $vuetify.breakpoint.lgOnly
+        * @property {boolean} $vuetify.breakpoint.md
+        * @property {boolean} $vuetify.breakpoint.mdAndDown
+        * @property {boolean} $vuetify.breakpoint.mdAndUp
+        * @property {boolean} $vuetify.breakpoint.mdOnly
+        * @property {boolean} $vuetify.breakpoint.mobile
+        * @property {number} $vuetify.breakpoint.mobileBreakpoint
+        * @property {string} $vuetify.breakpoint.name
+        * @property {number} $vuetify.breakpoint.resizeTimeout
+        * @property {number} $vuetify.breakpoint.scrollBarWidth
+        * @property {boolean} $vuetify.breakpoint.sm
+        * @property {boolean} $vuetify.breakpoint.smAndDown
+        * @property {boolean} $vuetify.breakpoint.smAndUp
+        * @property {boolean} $vuetify.breakpoint.smOnly
+        * @property {object} $vuetify.breakpoint.thresholds
+        * @property {number} $vuetify.breakpoint.thresholds.lg
+        * @property {number} $vuetify.breakpoint.thresholds.md
+        * @property {number} $vuetify.breakpoint.thresholds.sm
+        * @property {number} $vuetify.breakpoint.thresholds.xs
+        * @property {number} $vuetify.breakpoint.width
+        * @property {boolean} $vuetify.breakpoint.xl
+        * @property {boolean} $vuetify.breakpoint.xlOnly
+        * @property {boolean} $vuetify.breakpoint.xs
+        * @property {boolean} $vuetify.breakpoint.xsOnly
+        **/
+
+        /**
+        * @typedef {object} VueRefs
+        * @property {{$el: HTMLElement}} test
+        **/
+
+        /**
+        * @typedef {object} VueProps
+        * @property {number} test
         **/
 
         /**
@@ -208,7 +258,7 @@
             display: none !important;
         }
         *{
-            font-family: "Kosugi Maru" !important;
+            font-family: "Noto Sans JP" !important;
         }
         .v-btn{
             text-transform: none !important;
