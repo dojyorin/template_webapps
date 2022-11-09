@@ -12,7 +12,7 @@
         * @param {TransformStream<Uint8Array, Uint8Array>} ts
         * @return {Uint8Array}
         **/
-        async function transform(data, ts){
+        async function byteConvert(data, ts){
             return new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(ts)).arrayBuffer());
         }
 
@@ -21,7 +21,7 @@
         * @return {Uint8Array}
         **/
         async function deflateEncode(data){
-            return await transform(data, new CompressionStream("deflate-raw"));
+            return await byteConvert(data, new CompressionStream("deflate-raw"));
         }
 
         /**
@@ -29,7 +29,7 @@
         * @return {Uint8Array}
         **/
         async function deflateDecode(data){
-            return await transform(data, new DecompressionStream("deflate-raw"));
+            return await byteConvert(data, new DecompressionStream("deflate-raw"));
         }
 
         const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
