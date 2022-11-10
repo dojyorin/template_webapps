@@ -11,33 +11,48 @@
     </body>
 
     <script async type="module">
+        /**
+        * @param {File[]} files
+        * @return {Uint8Array}
+        */
         async function zipEncode(files){
-            const zip = new JSZip();
+            const ctx = new JSZip();
 
             for(const file of files){
-                zip.file(file.name, file, {
+                ctx.file(file.name, file, {
                     binary: true
                 });
             }
 
-            return zip.generateAsync({
+            return await ctx.generateAsync({
+                type: "uint8array",
                 compression: "deflate",
-                type: "arraybuffer"
+                compressionOptions: {
+                    level: 9
+                }
             });
         }
 
+        /**
+        * @param {Uint8Array} archive
+        * @return {File[]}
+        */
         async function zipDecode(archive){
-            const zip = new JSZip();
+            const ctx = new JSZip();
 
-            return Promise.all(Object.values((await zip.loadAsync(archive)).files).filter(({dir}) => !dir).map(async f => new File([await f.async("blob")], f.name)));
+            const {files} = await ctx.loadAsync(archive, {
+                checkCRC32: true
+            });
+
+            return await Promise.all(Object.values(files).filter(({dir}) => !dir).map(async file => new File([await file.async("blob")], file.name)));
         }
 
-        document.getElementById("files").addEventListener("change", async({target: {files}})=>{
+        document.getElementById("files").onchange = async({target: {files}})=>{
             const encode = await zipEncode([...files]);
             const decode = await zipDecode(encode);
 
             console.log(encode);
             console.log(decode);
-        });
+        };
     </script>
 </html>
