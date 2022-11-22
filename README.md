@@ -7,10 +7,10 @@ You can also import deno web browser compatible utilities. (External repository.
 See also https://github.com/dojyorin/deno_simple_utility
 
 ## Bundle
-You can bundle from TypeScript to JavaScript with the deno command.
+You can bundle from TypeScript to JavaScript with the `deno` and `esbuild` commands.
 
 ```sh
-deno bundle https://deno.land/x/simple_utility@v0.0.4/mod.compatible.ts ./simple_utility.js
+deno bundle https://deno.land/x/simple_utility@v0.0.4/mod.compatible.ts | esbuild --minify | head -c -1 | tee ./simple_utility.min.js
 ```
 
 ## Types
