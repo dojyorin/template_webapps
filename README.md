@@ -34,6 +34,15 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
+* @typedef {[string, Uint8Array]} FileInit
+*/
+
+/**
+* @typedef {Uint8Array} PortableCryptoKey
+* @typedef {Record<keyof CryptoKeyPair, PortableCryptoKey>} PortableCryptoKeyPair
+*/
+
+/**
 * @typedef {object} FetchResponseType
 * @property {string} text
 * @property {JsonStruct} json
@@ -57,6 +66,48 @@ Since type information is lost in bundling, we provide complementary type defini
 * @function base64Decode
 * @param {string} data
 * @return {Uint8Array}
+*/
+
+/**
+* @function cryptoHash
+* @param {boolean} is512
+* @param {Uint8Array} data
+* @return {Promise<Uint8Array>}
+*/
+
+/**
+* @function cryptoGenerateKey
+* @param {boolean} isECDH
+* @return {Promise<PortableCryptoKeyPair>}
+*/
+
+/**
+* @function cryptoEncrypt
+* @param {PortableCryptoKeyPair} kp
+* @param {Uint8Array} data
+* @return {Promise<Uint8Array>}
+*/
+
+/**
+* @function cryptoDecrypt
+* @param {PortableCryptoKeyPair} kp
+* @param {Uint8Array} data
+* @return {Promise<Uint8Array>}
+*/
+
+/**
+* @function cryptoSign
+* @param {PortableCryptoKey} k
+* @param {Uint8Array} data
+* @return {Promise<Uint8Array>}
+*/
+
+/**
+* @function cryptoVerify
+* @param {Uint8Array} signature
+* @param {PortableCryptoKey} k
+* @param {Uint8Array} data
+* @return {Promise<boolean>}
 */
 
 /**
@@ -100,14 +151,14 @@ Since type information is lost in bundling, we provide complementary type defini
 
 /**
 * @function minipackEncode
-* @param {[string, Uint8Array][]} files
+* @param {FileInit[]} files
 * @return {Promise<Uint8Array>}
 */
 
 /**
 * @function minipackDecode
 * @param {Uint8Array} archive
-* @return {Promise<[string, Uint8Array][]>}
+* @return {Promise<FileInit[]>}
 */
 
 /**
