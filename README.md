@@ -7,10 +7,10 @@ You can also import deno web browser compatible utilities. (External repository.
 See also https://github.com/dojyorin/deno_simple_utility
 
 ## Bundle
-You can bundle from TypeScript to JavaScript with the `deno` and `esbuild` commands.
+You can bundling from TypeScript to one JavaScript with the `deno bundle` command.
 
 ```sh
-deno bundle https://deno.land/x/simple_utility@v0.0.4/mod.compatible.ts | esbuild --minify | head -c -1 | tee ./simple_utility.min.js
+deno bundle https://deno.land/x/simple_utility@v0.0.7/mod.compatible.ts > ./simple_utility.esm.js
 ```
 
 ## Types
@@ -25,7 +25,7 @@ Since type information is lost in bundling, we provide complementary type defini
 /**
 * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct
 * @typedef {JsonStruct[]} JsonArray
-* @typedef {{[key: string]: JsonStruct;}} JsonObject
+* @typedef {{[key in string]: JsonStruct}} JsonObject
 */
 
 /**
