@@ -12,6 +12,20 @@
 
     <script async type="module">
         /**
+        * @typedef {[string, Uint8Array]} FileInit
+        */
+
+        /**
+        * @param {File[]|FileList|HTMLInputElement} element
+        * @return {Promise<FileInit[]>}
+        */
+        async function parseFileList(element){
+            const files = element instanceof HTMLInputElement ? element.files : element;
+
+            return Promise.all([...files ?? []].map(async f => [f.name, new Uint8Array(await f.arrayBuffer())]));
+        }
+
+        /**
         * @param {boolean} [multiple]
         * @param {string} [accept]
         * @return {Promise<File[]>}
