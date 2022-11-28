@@ -12,14 +12,6 @@
 
     <script async type="module">
         /**
-        * @param {string} id
-        * @return {HTMLElement}
-        */
-        function $id(id){
-            return document.getElementById(id);
-        }
-
-        /**
         * @param {boolean} [multiple]
         * @param {string} [accept]
         * @return {Promise<File[]>}
@@ -89,42 +81,19 @@
             };
         }
 
-        /**
-        * @param {string} message
-        * @param {number} [color]
-        */
-        function dialogNotify(message, color){
-            const dialog = document.createElement("dialog");
-            dialog.style.position = "fixed";
-            dialog.style.top = "10px";
-            dialog.style.transition = "all 0.1s";
-            dialog.style.border = "0";
-            dialog.style.borderRadius = "8px";
-            dialog.style.padding = "10px 15px";
-            dialog.style.color = "#FFFFFF";
-            dialog.style.backgroundColor = `#${(color ?? 0x00CACACA).toString(16).padStart(6, "0")}`;
-            dialog.style.boxShadow = "2px 3px 4px 0 #0000004D";
-            dialog.textContent = `\u{1F514} ${message}`;
-
-            dialog.show();
-
-            setTimeout(() => dialog.remove(), 5000);
-            document.body.appendChild(dialog);
-        }
-
-        $id("read").onclick = async()=>{
+        document.getElementById("read").onclick = async()=>{
             console.log(await fsRead());
             console.log(await fsNativeRead());
             dialogNotify("Loaded!");
         };
 
-        $id("write").onclick = async()=>{
+        document.getElementById("write").onclick = async()=>{
             console.log(await fsWrite("test.txt", "test"));
             console.log(await fsNativeWrite(null, "test"));
             dialogNotify("Saved!");
         };
 
-        $id("directory").onclick = async()=>{
+        document.getElementById("directory").onclick = async()=>{
             console.log(await fsNativeDirectory());
             dialogNotify("Loaded!");
         };
