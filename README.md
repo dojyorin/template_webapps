@@ -69,6 +69,12 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
+* @function cryptoRandom
+* @param {number} size
+* @return {Promise<Uint8Array>}
+*/
+
+/**
 * @function cryptoHash
 * @param {boolean} is512
 * @param {Uint8Array} data
