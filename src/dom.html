@@ -5,7 +5,7 @@
     </head>
 
     <body>
-        <input type="radio" name="abc" id="abc-1" value="1" checked>
+        <input checked type="radio" name="abc" id="abc-1" value="1">
         <label for="abc-1"></label>
 
         <input type="radio" name="abc" id="abc-2" value="2">
@@ -24,6 +24,22 @@
         */
         function $id(id){
             return document.getElementById(id);
+        }
+
+        /**
+        * @param {string} name
+        * @return {HTMLElement[]}
+        */
+        function $nn(name){
+            return [...document.getElementsByName(name)];
+        }
+
+        /**
+        * @param {string} name
+        * @return {Element[]}
+        */
+        function $cn(name){
+            return [...document.getElementsByClassName(name)];
         }
 
         /**
@@ -54,7 +70,7 @@
         * @return {HTMLInputElement?}
         */
         function radioActive(name){
-            return [...document.getElementsByName(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
+            return [...$nn(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
         }
 
         $id("active").onclick = ()=>{
