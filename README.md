@@ -10,7 +10,7 @@ See also https://github.com/dojyorin/deno_simple_utility
 You can bundling from TypeScript to one JavaScript with the `deno bundle` command.
 
 ```sh
-deno bundle https://deno.land/x/simple_utility@v0.0.7/mod.compatible.ts > ./simple_utility.esm.js
+deno bundle https://deno.land/x/simple_utility@v0.0.9/mod.compatible.ts > ./simple_utility.js
 ```
 
 ## Types
