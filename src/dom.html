@@ -54,10 +54,7 @@
         * @return {HTMLInputElement?}
         */
         function radioActive(name){
-            /** @type {HTMLInputElement[]} */
-            const elements = [...document.getElementsByName(name)];
-
-            return elements.find(({checked}) => checked);
+            return [...document.getElementsByName(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
         }
 
         $id("active").onclick = ()=>{
