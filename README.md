@@ -10,7 +10,7 @@ See also https://github.com/dojyorin/deno_simple_utility
 You can bundling from TypeScript to one JavaScript with the `deno bundle` command.
 
 ```sh
-deno bundle https://deno.land/x/simple_utility@(version)/mod.compatible.ts > ./simple_utility.esm.js
+deno bundle https://deno.land/x/simple_utility@(version)/mod.compatible.ts > ./simple_utility.js
 ```
 
 ## Types
@@ -69,9 +69,14 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
+* @function cryptoUuid
+* @return {string}
+*/
+
+/**
 * @function cryptoRandom
 * @param {number} size
-* @return {Promise<Uint8Array>}
+* @return {Uint8Array}
 */
 
 /**
