@@ -20,25 +20,25 @@
     <body>
         <template id="vue">
             <v-app>
-                <v-snackbar dark top centered :color="vNotifyColor" v-model="vNotifyVisible">
+                <v-snackbar dark top centered :color="notifyColor" v-model="notifyVisible">
                     <v-icon left>mdi-bell-ring-outline</v-icon>
-                    <span>{{vNotifyMessage}}</span>
+                    <span>{{notifyMessage}}</span>
                     <template #action>
-                        <v-btn icon @click="vNotifyVisible = false">
+                        <v-btn icon @click="notifyVisible = false">
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
                     </template>
                 </v-snackbar>
 
-                <v-overlay dark z-index="999" opacity="0.9" v-model="vLoadingVisible">
+                <v-overlay dark z-index="999" opacity="0.9" v-model="loadingVisible">
                     <v-progress-circular indeterminate size="128" width="6" color="blue">
                         <span class="white--text">Loading...</span>
                     </v-progress-circular>
                 </v-overlay>
 
-                <v-navigation-drawer app temporary v-model="vDrawerVisible">
-                    <v-toolbar dark color="blue" :height="$vuetify.application.top">
-                        <v-btn icon @click="vDrawer(false)">
+                <v-navigation-drawer app temporary v-model="navVisible">
+                    <v-toolbar dark dense :color="themeColor">
+                        <v-btn icon @click="navVisible = false">
                             <v-icon large>mdi-close</v-icon>
                         </v-btn>
 
@@ -46,7 +46,7 @@
                     </v-toolbar>
 
                     <v-list>
-                        <v-list-item @click="vRouter('/'), vDrawer(false)">
+                        <v-list-item @click="routerSet('/')">
                             <v-list-item-icon>
                                 <v-icon>mdi-home</v-icon>
                             </v-list-item-icon>
@@ -56,7 +56,7 @@
                             </v-list-item-content>
                         </v-list-item>
 
-                        <v-list-item @click="vRouter('/sub'), vDrawer(false)">
+                        <v-list-item @click="routerSet('/sub')">
                             <v-list-item-icon>
                                 <v-icon>mdi-account-circle</v-icon>
                             </v-list-item-icon>
@@ -68,13 +68,13 @@
                     </v-list>
                 </v-navigation-drawer>
 
-                <v-app-bar app dark color="blue" height="52">
-                    <v-app-bar-nav-icon @click="vDrawer(true)"></v-app-bar-nav-icon>
+                <v-app-bar app dark dense :color="themeColor">
+                    <v-app-bar-nav-icon @click="navVisible = true"></v-app-bar-nav-icon>
                     <v-toolbar-title>Application</v-toolbar-title>
                 </v-app-bar>
 
                 <v-main>
-                    <v-window touchless class="fill-height" v-model="vRouterPath">
+                    <v-window touchless class="fill-height" v-model="routerPath">
                         <v-window-item class="fill-height" value="/">
                             <v-container fluid>
                                 <v-row justify="center">
@@ -101,7 +101,7 @@
                     </v-window>
                 </v-main>
 
-                <v-footer app dark tile padless color="blue">
+                <v-footer app dark tile padless :color="themeColor">
                     <v-row no-gutters justify="center">Copyright</v-row>
                 </v-footer>
             </v-app>
@@ -180,20 +180,19 @@
 
         /**
         * @typedef {object} VueData
-        * @property {boolean} vNotifyVisible
-        * @property {string} vNotifyMessage
-        * @property {string} vNotifyColor
-        * @property {boolean} vLoadingVisible
-        * @property {string} vRouterPath
-        * @property {boolean} vDrawerVisible
+        * @property {boolean} notifyVisible
+        * @property {string} notifyMessage
+        * @property {string} notifyColor
+        * @property {boolean} loadingVisible
+        * @property {boolean} navVisible
+        * @property {string} routerPath
+        * @property {string} themeColor
         */
 
         /**
         * @typedef {object} VueMethods
-        * @property {(message: string, color: string) => void} vNotify
-        * @property {(state: boolean) => void} vLoading
-        * @property {(path: string) => void} vRouter
-        * @property {(state: boolean) => void} vDrawer
+        * @property {(message: string, color: string) => void} notifyContent
+        * @property {(path: string) => void} routerSet
         */
 
         /**
@@ -207,12 +206,13 @@
             /** @return {VueData} */
             data(){
                 return {
-                    vNotifyVisible: false,
-                    vNotifyMessage: "",
-                    vNotifyColor: "",
-                    vLoadingVisible: false,
-                    vRouterPath: "/",
-                    vDrawerVisible: false
+                    notifyVisible: false,
+                    notifyMessage: "",
+                    notifyColor: "",
+                    loadingVisible: false,
+                    navVisible: false,
+                    routerPath: "/",
+                    themeColor: "blue"
                 };
             },
 
@@ -220,43 +220,34 @@
             computed: {
                 /** @this {VueThis} */
                 test(){
-                    return this.vNotifyColor;
+                    return this.notifyColor;
                 }
             },
 
             /** @type {VueMethods} */
             methods: {
                 /** @this {VueThis} */
-                vNotify(message, color){
-                    this.vNotifyVisible = false;
-                    this.vNotifyMessage = message;
-                    this.vNotifyColor = color;
-                    this.vNotifyVisible = true;
+                notifyContent(message, color){
+                    this.notifyVisible = false;
+                    this.notifyMessage = message;
+                    this.notifyColor = color;
+                    this.notifyVisible = true;
                 },
 
                 /** @this {VueThis} */
-                vLoading(state){
-                    this.vLoadingVisible = state;
-                },
-
-                /** @this {VueThis} */
-                vRouter(path){
-                    this.vRouterPath = path;
-                },
-
-                /** @this {VueThis} */
-                vDrawer(state){
-                    this.vDrawerVisible = state;
+                routerSet(path){
+                    this.routerPath = path;
+                    this.navVisible = false;
                 }
             },
 
             /** @this {VueThis} */
             async mounted(){
-                this.vLoading(true);
+                this.loadingVisible = true;
                 await new Promise(done => setTimeout(done, 1000));
-                this.vLoading(false);
+                this.loadingVisible = false;
 
-                this.vNotify("Loading...", "success");
+                this.notifyContent("Loading...", "success");
             }
         });
 
