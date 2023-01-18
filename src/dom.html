@@ -67,7 +67,7 @@
 
         /**
         * @param {string} name
-        * @return {HTMLInputElement?}
+        * @return {HTMLInputElement=}
         */
         function radioActive(name){
             return [...$nn(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
