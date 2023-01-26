@@ -122,24 +122,6 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
-* @function dateEncode
-* @param {Date} [date]
-* @return {number}
-*/
-
-/**
-* @function dateDecode
-* @param {number} time
-* @return {Date}
-*/
-
-/**
-* @function dateParse
-* @param {string} dt
-* @return {number}
-*/
-
-/**
 * @function deflateEncode
 * @param {Uint8Array} data
 * @return {Promise<Uint8Array>}
@@ -194,6 +176,24 @@ Since type information is lost in bundling, we provide complementary type defini
 * @function trimExtend
 * @param {string} data
 * @return {string}
+*/
+
+/**
+* @function unixtimeEncode
+* @param {Date} [date]
+* @return {number}
+*/
+
+/**
+* @function unixtimeDecode
+* @param {number} time
+* @return {Date}
+*/
+
+/**
+* @function unixtimeParse
+* @param {string} dt
+* @return {number}
 */
 ```
 
