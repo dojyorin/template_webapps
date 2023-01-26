@@ -4,14 +4,10 @@ A collection of features that help you create web applications.
 # Deno Browser Compatible Module
 You can also import deno web browser compatible utilities. (External repository.)
 
-See also https://github.com/dojyorin/deno_simple_utility
+See below:
 
-## Bundle
-You can bundling from TypeScript to one JavaScript with the `deno bundle` command.
-
-```sh
-deno bundle https://deno.land/x/simple_utility@(version)/mod.universal.ts > ./simple_utility.js
-```
+- https://github.com/dojyorin/deno_simple_utility
+- https://github.com/dojyorin/deno_simple_utility/releases/latest/download/mod.universal.min.js
 
 ## Types
 Since type information is lost in bundling, we provide complementary type definitions in JSDoc format.
