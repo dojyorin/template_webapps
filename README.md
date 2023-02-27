@@ -169,6 +169,12 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
+* @function hexDecode
+* @param {string} data
+* @return {Uint8Array}
+*/
+
+/**
 * @function trimExtend
 * @param {string} data
 * @return {string}
