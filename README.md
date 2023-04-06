@@ -21,7 +21,7 @@ Since type information is lost in bundling, we provide complementary type defini
 /**
 * @typedef {string | number | boolean | null | JsonArray | JsonObject} JsonStruct
 * @typedef {JsonStruct[]} JsonArray
-* @typedef {{[key in string]: JsonStruct}} JsonObject
+* @typedef {{[key: string]: JsonStruct}} JsonObject
 */
 
 /**
