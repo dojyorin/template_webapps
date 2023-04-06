@@ -181,6 +181,12 @@ Since type information is lost in bundling, we provide complementary type defini
 */
 
 /**
+* @function accurateSegment
+* @param {string} data
+* @return {string[]}
+*/
+
+/**
 * @function unixtimeEncode
 * @param {Date} [date]
 * @return {number}
