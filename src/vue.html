@@ -1,279 +1,217 @@
 <!doctype html>
-<html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height,width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-        <meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="height=device-height,width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no">
 
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:100px;'>📡</text></svg>">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FFFFFF">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5/css/materialdesignicons.min.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=M+PLUS+1+Code:wght@100;200;300;400;500;600;700">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:100px;'>📡</text></svg>">
 
-        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@2/dist/vuetify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=M+PLUS+1+Code:wght@100;200;300;400;500;600;700">
 
-        <title>Application</title>
-    </head>
+<title>Application</title>
 
-    <body>
-        <template id="vue">
-            <v-app>
-                <v-snackbar dark top centered :color="notifyColor" v-model="notifyVisible">
-                    <v-icon left>mdi-bell-ring-outline</v-icon>
-                    <span>{{notifyMessage}}</span>
-                    <template #action>
-                        <v-btn icon @click="notifyVisible = false">
-                            <v-icon>mdi-close</v-icon>
-                        </v-btn>
-                    </template>
-                </v-snackbar>
+<script type="importmap">
+    {
+        "imports": {
+            "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js",
+            "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js",
+            "vuex": "https://cdn.jsdelivr.net/npm/vuex@4/dist/vuex.esm-browser.prod.min.js",
+            "vuetify": "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js",
+            "@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@vue/devtools-api@6/lib/esm/index.min.js"
+        }
+    }
+</script>
 
-                <v-overlay dark z-index="999" opacity="0.9" v-model="loadingVisible">
-                    <v-progress-circular indeterminate size="128" width="6" color="blue">
-                        <span class="white--text">Loading...</span>
-                    </v-progress-circular>
-                </v-overlay>
+<script async type="module">
+    import {createApp, ref, computed, onMounted} from "vue";
+    import {createRouter, createWebHashHistory} from "vue-router";
+    import {createStore, useStore} from "vuex";
+    import {createVuetify, useTheme} from "vuetify";
 
-                <v-navigation-drawer app temporary v-model="navVisible">
-                    <v-toolbar dark dense :color="themeColor">
-                        <v-btn icon @click="navVisible = false">
-                            <v-icon large>mdi-close</v-icon>
-                        </v-btn>
+    const root = document.getElementById("vue");
 
-                        <v-toolbar-title>Menu</v-toolbar-title>
-                    </v-toolbar>
+    const vue = createApp({
+        setup(){
+            const store = useStore();
+            const theme = useTheme();
 
-                    <v-list>
-                        <v-list-item @click="routerSet('/')">
-                            <v-list-item-icon>
-                                <v-icon>mdi-home</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>HOME</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-
-                        <v-list-item @click="routerSet('/sub')">
-                            <v-list-item-icon>
-                                <v-icon>mdi-account-circle</v-icon>
-                            </v-list-item-icon>
-
-                            <v-list-item-content>
-                                <v-list-item-title>SUB</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list>
-                </v-navigation-drawer>
-
-                <v-app-bar app dark dense :color="themeColor">
-                    <v-app-bar-nav-icon @click="navVisible = true"></v-app-bar-nav-icon>
-                    <v-toolbar-title>Application</v-toolbar-title>
-                </v-app-bar>
-
-                <v-main>
-                    <v-window touchless class="fill-height" v-model="routerPath">
-                        <v-window-item class="fill-height" value="/">
-                            <v-container fluid>
-                                <v-row justify="center">
-                                    <v-col cols>
-                                        <v-card>
-                                            <v-card-title>Main</v-card-title>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </v-window-item>
-
-                        <v-window-item class="fill-height" value="/sub">
-                            <v-container fluid>
-                                <v-row justify="center">
-                                    <v-col cols>
-                                        <v-card>
-                                            <v-card-title>Sub</v-card-title>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </v-window-item>
-                    </v-window>
-                </v-main>
-
-                <v-footer app dark tile padless :color="themeColor">
-                    <v-row no-gutters justify="center">Copyright</v-row>
-                </v-footer>
-            </v-app>
-        </template>
-    </body>
-
-    <script async type="module">
-        /**
-        * @typedef {object} VueSystem
-        * @property {HTMLElement} $el
-        * @property {VueRefs} $refs
-        * @property {VueProps} $props
-        * @property {VueData} $data
-        * @property {object} $options
-        * @property {() => VueData} $options.data
-        * @property {VueComputed} $options.computed
-        * @property {VueMethods} $options.methods
-        */
-
-        /**
-        * @typedef {object} VuetifySystem
-        * @property {object} $vuetify
-        * @property {object} $vuetify.application
-        * @property {number} $vuetify.application.bar
-        * @property {number} $vuetify.application.bottom
-        * @property {number} $vuetify.application.footer
-        * @property {number} $vuetify.application.insetFooter
-        * @property {number} $vuetify.application.left
-        * @property {number} $vuetify.application.right
-        * @property {number} $vuetify.application.top
-        * @property {object} $vuetify.breakpoint
-        * @property {number} $vuetify.breakpoint.height
-        * @property {boolean} $vuetify.breakpoint.lg
-        * @property {boolean} $vuetify.breakpoint.lgAndDown
-        * @property {boolean} $vuetify.breakpoint.lgAndUp
-        * @property {boolean} $vuetify.breakpoint.lgOnly
-        * @property {boolean} $vuetify.breakpoint.md
-        * @property {boolean} $vuetify.breakpoint.mdAndDown
-        * @property {boolean} $vuetify.breakpoint.mdAndUp
-        * @property {boolean} $vuetify.breakpoint.mdOnly
-        * @property {boolean} $vuetify.breakpoint.mobile
-        * @property {number} $vuetify.breakpoint.mobileBreakpoint
-        * @property {string} $vuetify.breakpoint.name
-        * @property {number} $vuetify.breakpoint.resizeTimeout
-        * @property {number} $vuetify.breakpoint.scrollBarWidth
-        * @property {boolean} $vuetify.breakpoint.sm
-        * @property {boolean} $vuetify.breakpoint.smAndDown
-        * @property {boolean} $vuetify.breakpoint.smAndUp
-        * @property {boolean} $vuetify.breakpoint.smOnly
-        * @property {object} $vuetify.breakpoint.thresholds
-        * @property {number} $vuetify.breakpoint.thresholds.lg
-        * @property {number} $vuetify.breakpoint.thresholds.md
-        * @property {number} $vuetify.breakpoint.thresholds.sm
-        * @property {number} $vuetify.breakpoint.thresholds.xs
-        * @property {number} $vuetify.breakpoint.width
-        * @property {boolean} $vuetify.breakpoint.xl
-        * @property {boolean} $vuetify.breakpoint.xlOnly
-        * @property {boolean} $vuetify.breakpoint.xs
-        * @property {boolean} $vuetify.breakpoint.xsOnly
-        */
-
-        /**
-        * @typedef {object} VueRefs
-        * @property {{$el: HTMLElement}} test
-        */
-
-        /**
-        * @typedef {object} VueProps
-        * @property {number} test
-        */
-
-        /**
-        * @typedef {object} VueComputed
-        * @property {string} test
-        */
-
-        /**
-        * @typedef {object} VueData
-        * @property {boolean} notifyVisible
-        * @property {string} notifyMessage
-        * @property {string} notifyColor
-        * @property {boolean} loadingVisible
-        * @property {boolean} navVisible
-        * @property {string} routerPath
-        * @property {string} themeColor
-        */
-
-        /**
-        * @typedef {object} VueMethods
-        * @property {(message: string, color: string) => void} notifyContent
-        * @property {(path: string) => void} routerSet
-        */
-
-        /**
-        * @typedef {VueSystem & VuetifySystem & VueComputed & VueData & VueMethods} VueThis
-        */
-
-        const vue = new Vue({
-            el: "#vue",
-            vuetify: new Vuetify(),
-
-            /** @return {VueData} */
-            data(){
-                return {
-                    notifyVisible: false,
-                    notifyMessage: "",
-                    notifyColor: "",
-                    loadingVisible: false,
-                    navVisible: false,
-                    routerPath: "/",
-                    themeColor: "blue"
-                };
-            },
-
-            /** @type {VueComputed} */
-            computed: {
-                /** @this {VueThis} */
-                test(){
-                    return this.notifyColor;
-                }
-            },
-
-            /** @type {VueMethods} */
-            methods: {
-                /** @this {VueThis} */
-                notifyContent(message, color){
-                    this.notifyVisible = false;
-                    this.notifyMessage = message;
-                    this.notifyColor = color;
-                    this.notifyVisible = true;
+            const loading = computed({
+                get(){
+                    return store.getters.loading;
                 },
-
-                /** @this {VueThis} */
-                routerSet(path){
-                    this.routerPath = path;
-                    this.navVisible = false;
+                set(v){
+                    store.commit("overlay", v);
                 }
-            },
+            });
 
-            /** @this {VueThis} */
-            async mounted(){
-                this.loadingVisible = true;
-                await new Promise(done => setTimeout(done, 1000));
-                this.loadingVisible = false;
-
-                this.notifyContent("Loading...", "success");
+            function switchDark(){
+                theme.name.value = theme.current.value.dark ? "light" : "dark";
             }
-        });
 
-        // ConsoleDebug
-        Object.defineProperty(globalThis, "__vue", {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value: vue
-        });
-    </script>
+            onMounted(()=>{
+                root.removeAttribute("hidden");
+                store.commit("overlay", false);
+            });
 
-    <style>
-        ::-webkit-scrollbar{
-            display: none !important;
+            return {loading, switchDark};
         }
-        :focus{
-            outline: none !important;
+    });
+
+    const router = createRouter({
+        history: createWebHashHistory(),
+        routes: [{
+            path: "/",
+            component: {
+                template: document.getElementById("/"),
+                setup(){
+                    const store = useStore();
+                    const count = ref(0);
+                    const countx = computed(() => store.getters.count);
+
+                    function increment(){
+                        count.value++;
+                    }
+
+                    function incrementx(){
+                        store.commit("increment");
+                    }
+
+                    return {count, countx, increment, incrementx};
+                }
+            }
+        }, {
+            path: "/foo",
+            component: {
+                template: document.getElementById("/foo"),
+                setup(){
+                    const store = useStore();
+                    const countx = computed(() => store.getters.count);
+
+                    function resetx(){
+                        store.commit("reset");
+                    }
+
+                    return {countx, resetx};
+                }
+            }
+        }]
+    });
+
+    const store = createStore({
+        state(){
+            return {
+                count: 0,
+                loading: true
+            };
+        },
+
+        getters: {
+            count(s){
+                return s.count;
+            },
+            loading(s){
+                return s.loading;
+            }
+        },
+
+        mutations: {
+            increment(s){
+                s.count++;
+            },
+            reset(s){
+                s.count = 0;
+            },
+            overlay(s, v){
+                s.loading = v;
+            }
         }
-        *{
-            font-family: "M PLUS 1 Code" !important;
-        }
-        .v-btn{
-            text-transform: none !important;
-            letter-spacing: normal !important;
-            text-indent: 0 !important;
-        }
-    </style>
-</html>
+    });
+
+    const vuetify = createVuetify();
+
+    vue.use(router);
+    vue.use(store);
+    vue.use(vuetify);
+    vue.mount(root);
+</script>
+
+<style>
+    ::-webkit-scrollbar{
+        display: none !important;
+    }
+    :focus{
+        outline: none !important;
+    }
+    *{
+        font-family: "M PLUS 1 Code" !important;
+    }
+    .v-btn{
+        text-transform: none !important;
+        letter-spacing: normal !important;
+        text-indent: 0 !important;
+    }
+</style>
+
+<div hidden id="vue">
+    <v-app>
+        <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
+            <v-progress-circular indeterminate size="60" width="4" color="blue-darken-1"></v-progress-circular>
+        </v-overlay>
+
+        <v-app-bar density="compact" color="blue-darken-1">
+            <v-app-bar-title>Application</v-app-bar-title>
+            <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
+        </v-app-bar>
+
+        <v-main>
+            <router-view></router-view>
+        </v-main>
+
+        <v-footer app>
+            <v-row no-gutters justify="center">footer</v-row>
+        </v-footer>
+    </v-app>
+</div>
+
+<template id="/">
+    <v-container fluid>
+        <v-row justify="center">
+            <v-btn to="/foo">to /foo</v-btn>
+        </v-row>
+
+        <v-row justify="center">
+            <v-col cols sm="6">
+                <v-card>
+                    <v-card-title class="text-center">{{count}} : {{countx}}</v-card-title>
+                    <v-card-actions class="justify-center">
+                        <v-btn @click="increment">Increment</v-btn>
+                        <v-btn @click="incrementx">IncrementX</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+        </v-row>
+    </v-container>
+</template>
+
+<template id="/foo">
+    <v-container fluid>
+        <v-row justify="center">
+            <v-btn to="/">to /</v-btn>
+        </v-row>
+
+        <v-row justify="center">
+            <v-col cols sm="6">
+                <v-card>
+                    <v-card-title class="text-center">{{countx}}</v-card-title>
+                    <v-card-actions class="justify-center">
+                        <v-btn @click="resetx">ResetX</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+        </v-row>
+    </v-container>
+</template>
