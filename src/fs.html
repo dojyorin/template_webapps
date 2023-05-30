@@ -7,13 +7,11 @@
     */
 
     /**
-    * @param {File[]|FileList|HTMLInputElement} element
+    * @param {File[]|FileList|HTMLInputElement} input
     * @return {Promise<FileInit[]>}
     */
-    async function parseFileList(element){
-        const files = element instanceof HTMLInputElement ? element.files : element;
-
-        return Promise.all([...files ?? []].map(async f => [f.name, new Uint8Array(await f.arrayBuffer())]));
+    async function fileInit(input){
+        return await Promise.all([...input instanceof HTMLInputElement ? input.files ?? [] : input].map(async f => [f.name, new Uint8Array(await f.arrayBuffer())]));
     }
 
     /**
