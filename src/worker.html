@@ -1,54 +1,50 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-    </head>
+<meta charset="utf-8">
 
-    <body></body>
+<script async type="module">
+    class WorkerExtend extends Worker{
+        static #fnStart = /^.+?\{/s;
+        static #fnEnd = /\}$/s;
 
-    <script async type="module">
-        class WorkerExtend extends Worker{
-            static #fnStart = /^.+?\{/s;
-            static #fnEnd = /\}$/s;
+        #path = "";
 
-            #path = "";
+        /**
+        * @param {...VoidFunction} funcs
+        */
+        constructor(...funcs){
+            const srcs = funcs.map(fn => fn.toString());
 
-            /**
-            * @param {...VoidFunction} fns
-            */
-            constructor(...fns){
-                const srcs = fns.map(fn => fn.toString());
-
-                if(srcs.some(src => !WorkerExtend.#fnEnd.test(src))){
-                    throw new Error();
-                }
-
-                const path = URL.createObjectURL(new Blob([srcs.map(src => src.replace(WorkerExtend.#fnStart, "").replace(WorkerExtend.#fnEnd, "")).join(";")]));
-
-                super(path);
-
-                this.#path = path;
+            if(srcs.some(src => !WorkerExtend.#fnEnd.test(src))){
+                throw new Error();
             }
 
-            terminate(){
-                super.terminate();
-                URL.revokeObjectURL(this.#path);
-            }
+            const path = URL.createObjectURL(new Blob([srcs.map(src => src.replace(WorkerExtend.#fnStart, "").replace(WorkerExtend.#fnEnd, "")).join(";")]));
+
+            super(path);
+
+            this.#path = path;
         }
 
-        const worker = new WorkerExtend(()=>{
-            globalThis.onmessage = ({data})=>{
-                const sample = data.map(n => n * 2);
-                globalThis.postMessage(sample, [sample.buffer]);
-            };
-        });
+        terminate(){
+            super.terminate();
+            URL.revokeObjectURL(this.#path);
+        }
+    }
 
-        worker.onmessage = ({data})=>{
-            console.log(data);
-            worker.terminate();
+    const worker = new WorkerExtend(()=>{
+        globalThis.onmessage = ({data})=>{
+            const sample = data.map(n => n * 2);
+            globalThis.postMessage(sample, [sample.buffer]);
         };
+    });
 
-        const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
-        worker.postMessage(sample, [sample.buffer]);
-    </script>
-</html>
+    worker.onmessage = ({data})=>{
+        console.log(data);
+        worker.terminate();
+    };
+
+    const sample = new Uint8Array(new Float32Array(0x00400000).map(() => Math.random()).buffer);
+    worker.postMessage(sample, [sample.buffer]);
+</script>
+
+<main></main>

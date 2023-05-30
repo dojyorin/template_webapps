@@ -1,81 +1,77 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-    </head>
+<meta charset="utf-8">
 
-    <body>
-        <input checked type="radio" name="abc" id="abc-1" value="1">
-        <label for="abc-1"></label>
+<script async type="module">
+    /**
+    * @param {string} id
+    * @return {HTMLElement}
+    */
+    function $id(id){
+        return document.getElementById(id);
+    }
 
-        <input type="radio" name="abc" id="abc-2" value="2">
-        <label for="abc-2"></label>
+    /**
+    * @param {string} name
+    * @return {HTMLElement[]}
+    */
+    function $nn(name){
+        return [...document.getElementsByName(name)];
+    }
 
-        <input type="radio" name="abc" id="abc-3" value="3">
-        <label for="abc-3"></label>
+    /**
+    * @param {string} name
+    * @return {Element[]}
+    */
+    function $cn(name){
+        return [...document.getElementsByClassName(name)];
+    }
 
-        <button type="button" id="active">Active is...</button>
-    </body>
+    /**
+    * @param {string} message
+    * @param {number} [color]
+    */
+    function dialogNotify(message, color){
+        const dialog = document.createElement("dialog");
+        dialog.style.position = "fixed";
+        dialog.style.top = "10px";
+        dialog.style.transition = "all 0.1s";
+        dialog.style.border = "0";
+        dialog.style.borderRadius = "8px";
+        dialog.style.padding = "10px 15px";
+        dialog.style.color = "#FFFFFF";
+        dialog.style.backgroundColor = `#${(color ?? 0x00CACACA).toString(16).padStart(6, "0")}`;
+        dialog.style.boxShadow = "2px 3px 4px 0 #0000004D";
+        dialog.textContent = `\u{1F514} ${message}`;
 
-    <script async type="module">
-        /**
-        * @param {string} id
-        * @return {HTMLElement}
-        */
-        function $id(id){
-            return document.getElementById(id);
-        }
+        dialog.show();
 
-        /**
-        * @param {string} name
-        * @return {HTMLElement[]}
-        */
-        function $nn(name){
-            return [...document.getElementsByName(name)];
-        }
+        setTimeout(() => dialog.remove(), 5000);
+        document.body.appendChild(dialog);
+    }
 
-        /**
-        * @param {string} name
-        * @return {Element[]}
-        */
-        function $cn(name){
-            return [...document.getElementsByClassName(name)];
-        }
+    /**
+    * @param {string} name
+    * @return {HTMLInputElement=}
+    */
+    function radioActive(name){
+        return [...$nn(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
+    }
 
-        /**
-        * @param {string} message
-        * @param {number} [color]
-        */
-        function dialogNotify(message, color){
-            const dialog = document.createElement("dialog");
-            dialog.style.position = "fixed";
-            dialog.style.top = "10px";
-            dialog.style.transition = "all 0.1s";
-            dialog.style.border = "0";
-            dialog.style.borderRadius = "8px";
-            dialog.style.padding = "10px 15px";
-            dialog.style.color = "#FFFFFF";
-            dialog.style.backgroundColor = `#${(color ?? 0x00CACACA).toString(16).padStart(6, "0")}`;
-            dialog.style.boxShadow = "2px 3px 4px 0 #0000004D";
-            dialog.textContent = `\u{1F514} ${message}`;
+    $id("active").onclick = ()=>{
+        const active = radioActive("abc");
+        dialogNotify(active?.value, 0x000CB814);
+    };
+</script>
 
-            dialog.show();
+<main>
+    <input checked type="radio" name="abc" id="abc-1" value="1">
+    <label for="abc-1"></label>
 
-            setTimeout(() => dialog.remove(), 5000);
-            document.body.appendChild(dialog);
-        }
+    <input type="radio" name="abc" id="abc-2" value="2">
+    <label for="abc-2"></label>
 
-        /**
-        * @param {string} name
-        * @return {HTMLInputElement=}
-        */
-        function radioActive(name){
-            return [...$nn(name)].find(e => e instanceof HTMLInputElement && e.type === "radio" && e.checked);
-        }
+    <input type="radio" name="abc" id="abc-3" value="3">
+    <label for="abc-3"></label>
 
-        $id("active").onclick = ()=>{
-            const active = radioActive("abc");
-            dialogNotify(active?.value, 0x000CB814);
-        };
-    </script>
-</html>
+    <button type="button" id="active">Active is...</button>
+</main>

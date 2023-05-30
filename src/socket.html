@@ -1,23 +1,19 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-    </head>
+<meta charset="utf-8">
 
-    <body></body>
+<script async type="module">
+    const ws = new WebSocket(`ws://${location.host}/ws`);
 
-    <script async type="module">
-        const ws = new WebSocket(`ws://${location.host}/ws`);
+    ws.onerror = () => ws.close();
+    ws.onclose = () => console.log("CLOSE WebSocket");
+    ws.onopen = () => console.log("OPEN WebSocket");
 
-        ws.onerror = () => ws.close();
-        ws.onclose = () => console.log("CLOSE WebSocket");
-        ws.onopen = () => console.log("OPEN WebSocket");
+    /**
+    * @param {MessageEvent<Uint8Array | string>} event
+    */
+    ws.onmessage = async({data})=>{
+        console.log(data);
+    };
+</script>
 
-        /**
-        * @param {MessageEvent<Uint8Array | string>} event
-        */
-        ws.onmessage = async({data})=>{
-            console.log(data);
-        };
-    </script>
-</html>
+<main></main>
