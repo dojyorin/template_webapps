@@ -2,26 +2,16 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    class WorkerExtend extends Worker{
-        static #fnStart = /^.+?\{/s;
-        static #fnEnd = /\}$/s;
-
+    class InlineWorker extends Worker{
         #path = "";
 
         /**
-        * @param {...VoidFunction} funcs
+        * @param {VoidFunction} f
         */
-        constructor(...funcs){
-            const srcs = funcs.map(fn => fn.toString());
-
-            if(srcs.some(src => !WorkerExtend.#fnEnd.test(src))){
-                throw new Error();
-            }
-
-            const path = URL.createObjectURL(new Blob([srcs.map(src => src.replace(WorkerExtend.#fnStart, "").replace(WorkerExtend.#fnEnd, "")).join(";")]));
-
+        constructor(f){
+            const source = f.toString();
+            const path = URL.createObjectURL(new Blob([source.replace(/^.+?{/s, "").replace(/}$/s, "")]));
             super(path);
-
             this.#path = path;
         }
 
@@ -31,7 +21,7 @@
         }
     }
 
-    const worker = new WorkerExtend(()=>{
+    const worker = new InlineWorker(()=>{
         globalThis.onmessage = ({data})=>{
             const sample = data.map(n => n * 2);
             globalThis.postMessage(sample, [sample.buffer]);
