@@ -1,54 +1,51 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
 
-        <script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/xlsx.full.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/cpexcel.min.js"></script>
-    </head>
+<meta charset="utf-8">
 
-    <body>
-        <input type="file" accept=".xls,.xlsx" id="xlsx">
-    </body>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/cpexcel.min.js"></script>
 
-    <script async type="module">
-        /**
-        * @param {ExcelBook} book
-        * @return {Uint8Array}
-        */
-        function excelEncode(book){
-            /** @type {ArrayBuffer} */
-            const data = XLSX.write(book, {
-                type: "array",
-                codepage: 932,
-                bookType: "xlsx",
-                compression: true
-            });
+<script async type="module">
+    /**
+    * @param {ExcelBook} book
+    * @return {Uint8Array}
+    */
+    function excelEncode(book){
+        /** @type {ArrayBuffer} */
+        const data = XLSX.write(book, {
+            type: "array",
+            codepage: 932,
+            bookType: "xlsx",
+            compression: true
+        });
 
-            return new Uint8Array(data);
-        }
+        return new Uint8Array(data);
+    }
 
-        /**
-        * @param {Uint8Array} binary
-        * @return {ExcelBook}
-        */
-        function excelDecode(binary){
-            /** @type {ExcelBook} */
-            const data = XLSX.read(binary.buffer, {
-                type: "array",
-                codepage: 932,
-                raw: true
-            });
+    /**
+    * @param {Uint8Array} binary
+    * @return {ExcelBook}
+    */
+    function excelDecode(binary){
+        /** @type {ExcelBook} */
+        const data = XLSX.read(binary.buffer, {
+            type: "array",
+            codepage: 932,
+            raw: true
+        });
 
-            return data;
-        }
+        return data;
+    }
 
-        document.getElementById("xlsx").onchange = async({target: {files}})=>{
-            const decode = excelDecode(new Uint8Array(await files.item(0).arrayBuffer()));
-            const encode = excelEncode(decode);
+    document.getElementById("xlsx").onchange = async({target: {files}})=>{
+        const decode = excelDecode(new Uint8Array(await files.item(0).arrayBuffer()));
+        const encode = excelEncode(decode);
 
-            console.log(decode);
-            console.log(encode);
-        };
-    </script>
-</html>
+        console.log(decode);
+        console.log(encode);
+    };
+</script>
+
+<main>
+    <input type="file" accept=".xls,.xlsx" id="xlsx">
+</main>

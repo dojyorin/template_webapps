@@ -1,53 +1,47 @@
 <!doctype html>
-<html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="height=device-height,width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-        <meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="height=device-height,width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/theme/white.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/theme/white.min.css">
 
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/markdown/markdown.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/highlight/highlight.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/notes/notes.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/math/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/dist/reveal.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/notes/notes.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@latest/plugin/math/math.min.js"></script>
 
-        <title>Application</title>
-    </head>
+<script async type="module">
+    const reveal = await Reveal.initialize({
+        hash: true,
+        history: true,
+        hideCursorTime: 1000,
+        plugins: [
+            RevealMarkdown,
+            RevealHighlight,
+            RevealNotes,
+            RevealMath
+        ]
+    });
+</script>
 
-    <body>
-        <div class="reveal">
-            <div class="slides">
-                <section data-markdown>
-                    # Test Page 1
-                    - 1
-                    - 2
-                    - 3
-                </section>
+<main>
+    <div class="reveal">
+        <div class="slides">
+            <section data-markdown>
+                # Test Page 1
+                - 1
+                - 2
+                - 3
+            </section>
 
-                <section data-markdown>
-                    # Test Page 2
-                    - 4
-                    - 5
-                    - 6
-                </section>
-            </div>
+            <section data-markdown>
+                # Test Page 2
+                - 4
+                - 5
+                - 6
+            </section>
         </div>
-    </body>
-
-    <script async type="module">
-        const reveal = await Reveal.initialize({
-            hash: true,
-            history: true,
-            hideCursorTime: 1000,
-            plugins: [
-                RevealMarkdown,
-                RevealHighlight,
-                RevealNotes,
-                RevealMath
-            ]
-        });
-    </script>
-</html>
+    </div>
+</main>
