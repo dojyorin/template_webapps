@@ -3,12 +3,8 @@
 
 <script async type="module">
     /**
-    * @typedef {[string, Uint8Array]} FileInit
-    */
-
-    /**
     * @param {File[]|FileList|HTMLInputElement} input
-    * @return {Promise<FileInit[]>}
+    * @return {Promise<[string, Uint8Array][]>}
     */
     async function fileInit(input){
         return await Promise.all([...input instanceof HTMLInputElement ? input.files ?? [] : input].map(async f => [f.name, new Uint8Array(await f.arrayBuffer())]));

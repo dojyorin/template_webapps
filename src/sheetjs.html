@@ -7,7 +7,6 @@
 <script async type="module">
     /**
     * @param {ExcelBook} book
-    * @return {Uint8Array}
     */
     function excelEncode(book){
         /** @type {ArrayBuffer} */
@@ -23,7 +22,6 @@
 
     /**
     * @param {Uint8Array} binary
-    * @return {ExcelBook}
     */
     function excelDecode(binary){
         /** @type {ExcelBook} */
