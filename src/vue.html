@@ -69,6 +69,7 @@
                 template: document.getElementById("/"),
                 setup(){
                     const store = useStore();
+
                     const count = ref(0);
                     const countx = computed(() => store.getters.count);
 
@@ -89,6 +90,7 @@
                 template: document.getElementById("/foo"),
                 setup(){
                     const store = useStore();
+
                     const countx = computed(() => store.getters.count);
 
                     function resetx(){
