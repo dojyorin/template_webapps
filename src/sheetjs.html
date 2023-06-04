@@ -1,16 +1,18 @@
 <!doctype html>
 <meta charset="utf-8">
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@latest/dist/cpexcel.min.js"></script>
-
 <script async type="module">
+    import * as excel from "https://cdn.sheetjs.com/xlsx-latest/package/xlsx.mjs";
+    import * as excelcp from "https://cdn.sheetjs.com/xlsx-latest/package/dist/cpexcel.full.mjs";
+
+    excel.set_cptable(excelcp);
+
     /**
-    * @param {ExcelBook} book
+    * @param {ExcelWorkBook} book
     */
     function excelEncode(book){
         /** @type {ArrayBuffer} */
-        const data = XLSX.write(book, {
+        const data = excel.write(book, {
             type: "array",
             codepage: 932,
             bookType: "xlsx",
@@ -24,18 +26,18 @@
     * @param {Uint8Array} binary
     */
     function excelDecode(binary){
-        /** @type {ExcelBook} */
-        const data = XLSX.read(binary.buffer, {
+        /** @type {ExcelWorkBook} */
+        const book = excel.read(binary.buffer, {
             type: "array",
             codepage: 932,
             raw: true
         });
 
-        return data;
+        return book;
     }
 
-    document.getElementById("xlsx").onchange = async({target: {files}})=>{
-        const decode = excelDecode(new Uint8Array(await files.item(0).arrayBuffer()));
+    document.getElementById("excel").onchange = async({target: {files}})=>{
+        const decode = excelDecode(new Uint8Array(await files[0].arrayBuffer()));
         const encode = excelEncode(decode);
 
         console.log(decode);
@@ -44,5 +46,5 @@
 </script>
 
 <main>
-    <input type="file" accept=".xls,.xlsx" id="xlsx">
+    <input type="file" accept=".xls,.xlsx" id="excel">
 </main>
