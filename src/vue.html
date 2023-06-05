@@ -30,9 +30,8 @@
     import {createStore, useStore} from "vuex";
     import {createVuetify, useTheme} from "vuetify";
 
-    const root = document.getElementById("vue");
-
     const vue = createApp({
+        template: document.getElementById("root"),
         setup(){
             const store = useStore();
             const theme = useTheme();
@@ -51,7 +50,6 @@
             }
 
             onMounted(()=>{
-                root.removeAttribute("hidden");
                 store.commit("overlay", false);
             });
 
@@ -136,7 +134,7 @@
     vue.use(route);
     vue.use(store);
     vue.use(vuetify);
-    vue.mount(root);
+    vue.mount(document.getElementById("vue"));
 </script>
 
 <style>
@@ -161,7 +159,9 @@
 
 <title>Application</title>
 
-<div hidden id="vue">
+<div id="vue"></div>
+
+<template id="root">
     <v-app>
         <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
             <v-progress-circular indeterminate size="60" width="4" color="blue-darken-1"></v-progress-circular>
@@ -180,7 +180,7 @@
             <v-row no-gutters justify="center">footer</v-row>
         </v-footer>
     </v-app>
-</div>
+</template>
 
 <template id="/">
     <v-container fluid>
