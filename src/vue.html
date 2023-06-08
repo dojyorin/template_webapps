@@ -56,12 +56,8 @@
             const theme = useTheme();
 
             const loading = computed({
-                get(){
-                    return store.getters.loading;
-                },
-                set(v){
-                    store.commit("overlay", v);
-                }
+                get: () => store.getters.loading,
+                set: v => store.commit("overlay", v)
             });
 
             function switchDark(){
