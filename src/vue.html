@@ -37,7 +37,23 @@
                     <v-progress-circular indeterminate size="60" width="4" color="blue-darken-1"></v-progress-circular>
                 </v-overlay>
 
+                <v-navigation-drawer floating temporary v-model="nav">
+                    <v-toolbar density="compact" color="blue-darken-1">
+                        <v-btn icon="mdi-close" @click="nav = false"></v-btn>
+                    </v-toolbar>
+
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-title>Home</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-title>Sub</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-navigation-drawer>
+
                 <v-app-bar density="compact" color="blue-darken-1">
+                    <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
                     <v-app-bar-title>Application</v-app-bar-title>
                     <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
                 </v-app-bar>
@@ -60,6 +76,8 @@
                 set: v => store.commit("overlay", v)
             });
 
+            const nav = ref(false);
+
             function switchDark(){
                 theme.name.value = theme.current.value.dark ? "light" : "dark";
             }
@@ -68,7 +86,7 @@
                 store.commit("overlay", false);
             });
 
-            return {loading, switchDark};
+            return {loading, nav, switchDark};
         }
     };
 
