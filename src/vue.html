@@ -34,11 +34,11 @@
         template: /*html*/`
             <v-app>
                 <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
-                    <v-progress-circular indeterminate size="60" width="4" color="blue-darken-1"></v-progress-circular>
+                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
                 </v-overlay>
 
                 <v-navigation-drawer floating temporary v-model="nav">
-                    <v-toolbar density="compact" color="blue-darken-1">
+                    <v-toolbar density="compact" color="primary">
                         <v-btn icon="mdi-close" @click="nav = false"></v-btn>
                     </v-toolbar>
 
@@ -53,9 +53,11 @@
                     </v-list>
                 </v-navigation-drawer>
 
-                <v-app-bar density="compact" color="blue-darken-1">
+                <v-app-bar density="compact" color="primary">
                     <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
+
                     <v-app-bar-title>Application</v-app-bar-title>
+
                     <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
                 </v-app-bar>
 
@@ -63,7 +65,7 @@
                     <router-view></router-view>
                 </v-main>
 
-                <v-footer app color="blue-darken-1">
+                <v-footer app color="primary">
                     <v-row no-gutters justify="center">footer</v-row>
                 </v-footer>
             </v-app>
@@ -202,8 +204,28 @@
         }
     });
 
+    const vuetify = createVuetify({
+        theme: {
+            defaultTheme: "main",
+            themes: {
+                main: {
+                    dark: false,
+                    colors: {
+                        primary: "#03A9F4",
+                        secondary: "#9C27B0",
+                        surface: "#FFFFFF",
+                        background: "#FFFFFF",
+                        info: "#2196F3",
+                        success: "#4CAF50",
+                        warning: "#FFC107",
+                        error: "#FF5252"
+                    }
+                }
+            }
+        }
+    });
+
     const vue = createApp(sfc_main);
-    const vuetify = createVuetify();
 
     vue.use(route);
     vue.use(store);
