@@ -93,6 +93,28 @@
         }
     };
 
+    const sfc_component_notify = {
+        template: /*html*/`
+            <v-snackbar position="fixed" location="top" :color="color" v-model="enable">
+                <slot></slot>
+
+                <template #actions>
+                    <v-btn ripple density="comfortable" icon="mdi-close" @click="enable = false"></v-btn>
+                </template>
+            </v-snackbar>
+        `,
+        props: ["modelValue", "color", "icon"],
+        emits: ["update:modelValue"],
+        setup(props, context){
+            const enable = computed({
+                get: () => props.modelValue,
+                set: v => context.emit("update:modelValue", v)
+            });
+
+            return {enable};
+        }
+    };
+
     const sfc_page_index = {
         template: /*html*/`
             <v-container fluid>
@@ -234,11 +256,24 @@
         }
     });
 
+    const component = ((components)=>{
+        return {
+            install(vue){
+                for(const [k, v] of Object.entries(components)){
+                    vue.component(k, v);
+                }
+            }
+        };
+    })({
+        "x-notify": sfc_component_notify
+    });
+
     const vue = createApp(sfc_main);
 
     vue.use(route);
     vue.use(store);
     vue.use(vuetify);
+    vue.use(component);
 
     vue.mount("#vue");
 </script>
