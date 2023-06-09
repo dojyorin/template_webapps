@@ -163,6 +163,12 @@
         }
     };
 
+    const sfc_page_404 = {
+        template: /*html*/`
+            <v-row no-gutters justify="center" class="fill-height align-center text-h4">Page Not Found ...</v-row>
+        `
+    };
+
     const route = createRouter({
         history: createWebHashHistory(),
         routes: [{
@@ -171,6 +177,9 @@
         }, {
             path: "/sub",
             component: sfc_page_sub
+        }, {
+            path: "/:catchAll(.*)",
+            component: sfc_page_404
         }]
     });
 
