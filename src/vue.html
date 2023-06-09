@@ -37,59 +37,108 @@
                     <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
                 </v-overlay>
 
-                <v-navigation-drawer floating temporary v-model="nav">
-                    <v-toolbar density="compact" color="primary">
-                        <v-btn icon="mdi-close" @click="nav = false"></v-btn>
-                    </v-toolbar>
-
-                    <v-list>
-                        <v-list-item to="/">
-                            <v-list-item-title>Home</v-list-item-title>
-                        </v-list-item>
-
-                        <v-list-item to="/sub">
-                            <v-list-item-title>Sub</v-list-item-title>
-                        </v-list-item>
-                    </v-list>
-                </v-navigation-drawer>
-
-                <v-app-bar density="compact" color="primary">
-                    <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
-
-                    <v-app-bar-title>Application</v-app-bar-title>
-
-                    <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
-                </v-app-bar>
+                <x-navigation v-model:nav="nav"></x-navigation>
+                <x-header v-model:nav="nav"></x-header>
 
                 <v-main>
                     <router-view></router-view>
                 </v-main>
 
-                <v-footer app color="primary">
-                    <v-row no-gutters justify="center">footer</v-row>
-                </v-footer>
+                <x-footer></x-footer>
             </v-app>
         `,
+        components: {
+            "x-navigation": sfc_layout_navigation,
+            "x-header": sfc_layout_header,
+            "x-footer": sfc_layout_footer
+        },
         setup(){
             const store = useStore();
-            const theme = useTheme();
 
             const loading = computed({
                 get: () => store.getters.loading,
-                set: v => store.commit("overlay", v)
+                set: v => store.commit("loading", v)
             });
 
             const nav = ref(false);
+
+            onMounted(()=>{
+                store.commit("loading", false);
+            });
+
+            return {loading, nav};
+        }
+    };
+
+    const sfc_layout_header = {
+        template: /*html*/`
+            <v-app-bar density="compact" color="primary">
+                <template #prepend>
+                    <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
+                </template>
+
+                <v-app-bar-title>Application</v-app-bar-title>
+
+                <template #append>
+                    <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
+                </template>
+            </v-app-bar>
+        `,
+        props: ["nav"],
+        emits: ["update:nav"],
+        setup(props, context){
+            const theme = useTheme();
+
+            const nav = computed({
+                get: () => props.nav,
+                set: v => context.emit("update:nav", v)
+            });
 
             function switchDark(){
                 theme.name.value = theme.current.value.dark ? "main-light" : "dark";
             }
 
-            onMounted(()=>{
-                store.commit("overlay", false);
+            return {nav, switchDark};
+        }
+    };
+
+    const sfc_layout_footer = {
+        template: /*html*/`
+            <v-footer app color="primary">
+                <v-row no-gutters justify="center">footer</v-row>
+            </v-footer>
+        `
+    };
+
+    const sfc_layout_navigation = {
+        template: /*html*/`
+            <v-navigation-drawer floating temporary v-model="nav">
+                <template #prepend>
+                    <v-toolbar density="compact" color="primary">
+                        <v-btn icon="mdi-close" @click="nav = false"></v-btn>
+                    </v-toolbar>
+                </template>
+
+                <v-list>
+                    <v-list-item to="/">
+                        <v-list-item-title>Home</v-list-item-title>
+                    </v-list-item>
+
+                    <v-list-item to="/sub">
+                        <v-list-item-title>Sub</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+        `,
+        props: ["nav"],
+        emits: ["update:nav"],
+        setup(props, context){
+            const nav = computed({
+                get: () => props.nav,
+                set: v => context.emit("update:nav", v)
             });
 
-            return {loading, nav, switchDark};
+            return {nav};
         }
     };
 
@@ -229,7 +278,7 @@
             reset(s){
                 s.count = 0;
             },
-            overlay(s, v){
+            loading(s, v){
                 s.loading = v;
             }
         }
