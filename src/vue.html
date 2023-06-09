@@ -30,43 +30,25 @@
     import {createStore, useStore} from "vuex";
     import {createVuetify, useTheme} from "vuetify";
 
-    const sfc_main = {
+    const sfc_component_notify = {
         template: /*html*/`
-            <v-app>
-                <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
-                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
-                </v-overlay>
+            <v-snackbar position="fixed" location="top" :color="color" v-model="model">
+                <slot></slot>
 
-                <x-navigation v-model:nav="nav"></x-navigation>
-                <x-header v-model:nav="nav"></x-header>
-
-                <v-main>
-                    <router-view></router-view>
-                </v-main>
-
-                <x-footer></x-footer>
-            </v-app>
+                <template #actions>
+                    <v-btn ripple density="comfortable" icon="mdi-close" @click="model = false"></v-btn>
+                </template>
+            </v-snackbar>
         `,
-        components: {
-            "x-navigation": sfc_layout_navigation,
-            "x-header": sfc_layout_header,
-            "x-footer": sfc_layout_footer
-        },
-        setup(){
-            const store = useStore();
-
-            const loading = computed({
-                get: () => store.getters.loading,
-                set: v => store.commit("loading", v)
+        props: ["modelValue", "color", "icon"],
+        emits: ["update:modelValue"],
+        setup(props, context){
+            const model = computed({
+                get: () => props.modelValue,
+                set: v => context.emit("update:modelValue", v)
             });
 
-            const nav = ref(false);
-
-            onMounted(()=>{
-                store.commit("loading", false);
-            });
-
-            return {loading, nav};
+            return {model};
         }
     };
 
@@ -95,7 +77,7 @@
             });
 
             function switchDark(){
-                theme.name.value = theme.current.value.dark ? "main-light" : "dark";
+                theme.global.name.value = theme.global.name.value === "main-light" ? "dark" : "main-light";
             }
 
             return {nav, switchDark};
@@ -142,25 +124,43 @@
         }
     };
 
-    const sfc_component_notify = {
+    const sfc_main = {
         template: /*html*/`
-            <v-snackbar position="fixed" location="top" :color="color" v-model="enable">
-                <slot></slot>
+            <v-app>
+                <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
+                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
+                </v-overlay>
 
-                <template #actions>
-                    <v-btn ripple density="comfortable" icon="mdi-close" @click="enable = false"></v-btn>
-                </template>
-            </v-snackbar>
+                <x-navigation v-model:nav="nav"></x-navigation>
+                <x-header v-model:nav="nav"></x-header>
+
+                <v-main>
+                    <router-view></router-view>
+                </v-main>
+
+                <x-footer></x-footer>
+            </v-app>
         `,
-        props: ["modelValue", "color", "icon"],
-        emits: ["update:modelValue"],
-        setup(props, context){
-            const enable = computed({
-                get: () => props.modelValue,
-                set: v => context.emit("update:modelValue", v)
+        components: {
+            "x-header": sfc_layout_header,
+            "x-footer": sfc_layout_footer,
+            "x-navigation": sfc_layout_navigation
+        },
+        setup(){
+            const store = useStore();
+
+            const loading = computed({
+                get: () => store.getters.loading,
+                set: v => store.commit("loading", v)
             });
 
-            return {enable};
+            const nav = ref(false);
+
+            onMounted(()=>{
+                store.commit("loading", false);
+            });
+
+            return {loading, nav};
         }
     };
 
