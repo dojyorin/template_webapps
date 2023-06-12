@@ -26,7 +26,7 @@
 
 <script async type="module">
     import {createApp, ref, computed, onMounted} from "vue";
-    import {createRouter, createWebHashHistory} from "vue-router";
+    import {createRouter, createWebHashHistory, useRouter} from "vue-router";
     import {createStore, useStore} from "vuex";
     import {createVuetify, useTheme} from "vuetify";
 
@@ -40,7 +40,7 @@
                 </template>
             </v-snackbar>
         `,
-        props: ["modelValue", "color", "icon"],
+        props: ["modelValue", "color"],
         emits: ["update:modelValue"],
         setup(props, context){
             const model = computed({
@@ -55,39 +55,27 @@
     const sfc_layout_header = {
         template: /*html*/`
             <v-app-bar density="compact" color="primary">
-                <template #prepend>
-                    <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
-                </template>
+                <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
 
                 <v-app-bar-title>Application</v-app-bar-title>
-
-                <template #append>
-                    <v-btn icon="mdi-theme-light-dark" @click="switchDark"></v-btn>
-                </template>
             </v-app-bar>
         `,
         props: ["nav"],
         emits: ["update:nav"],
         setup(props, context){
-            const theme = useTheme();
-
             const nav = computed({
                 get: () => props.nav,
                 set: v => context.emit("update:nav", v)
             });
 
-            function switchDark(){
-                theme.global.name.value = theme.global.name.value === "main-light" ? "dark" : "main-light";
-            }
-
-            return {nav, switchDark};
+            return {nav};
         }
     };
 
     const sfc_layout_footer = {
         template: /*html*/`
             <v-footer app color="primary">
-                <v-row no-gutters justify="center">footer</v-row>
+                <v-row no-gutters justify="center">Copyright</v-row>
             </v-footer>
         `
     };
@@ -95,32 +83,30 @@
     const sfc_layout_navigation = {
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="model">
-                <template #prepend>
-                    <v-toolbar density="compact" color="primary">
-                        <v-btn icon="mdi-close" @click="model = false"></v-btn>
-                    </v-toolbar>
+                <v-toolbar density="compact" color="primary">
+                    <v-btn icon="mdi-close" @click="model = false"></v-btn>
+                </v-toolbar>
+
+                <template v-for="{path, name} in routes">
+                    <v-list-item :to="path">
+                        <v-list-item-title>{{name}}</v-list-item-title>
+                    </v-list-item>
                 </template>
-
-                <v-list>
-                    <v-list-item to="/">
-                        <v-list-item-title>Home</v-list-item-title>
-                    </v-list-item>
-
-                    <v-list-item to="/sub">
-                        <v-list-item-title>Sub</v-list-item-title>
-                    </v-list-item>
-                </v-list>
             </v-navigation-drawer>
         `,
         props: ["modelValue"],
         emits: ["update:modelValue"],
         setup(props, context){
+            const router = useRouter();
+
             const model = computed({
                 get: () => props.modelValue,
                 set: v => context.emit("update:modelValue", v)
             });
 
-            return {model};
+            const routes = router.getRoutes().toSpliced(-1, 1);
+
+            return {model, routes};
         }
     };
 
@@ -150,18 +136,18 @@
         setup(){
             const store = useStore();
 
+            const nav = ref(false);
+
             const loading = computed({
                 get: () => store.getters.loading,
                 set: v => store.commit("loading", v)
             });
 
-            const nav = ref(false);
-
             onMounted(()=>{
                 store.commit("loading", false);
             });
 
-            return {loading, nav};
+            return {nav, loading};
         }
     };
 
@@ -169,13 +155,12 @@
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
-                    <v-btn to="/sub">to /sub</v-btn>
-                </v-row>
-
-                <v-row justify="center">
-                    <v-col cols sm="6">
+                    <v-col cols>
                         <v-card>
-                            <v-card-title class="text-center">{{count}} : {{countx}}</v-card-title>
+                            <v-card-item>
+                                <v-card-title class="text-center">{{count}} : {{countx}}</v-card-title>
+                            </v-card-item>
+
                             <v-card-actions class="justify-center">
                                 <v-btn @click="increment">Increment</v-btn>
                                 <v-btn @click="incrementx">IncrementX</v-btn>
@@ -184,22 +169,28 @@
                     </v-col>
                 </v-row>
             </v-container>
+
+            <x-notify color="success" v-model="notify">Update!</x-notify>
         `,
         setup(){
             const store = useStore();
 
             const count = ref(0);
+            const notify = ref(false);
+
             const countx = computed(() => store.getters.count);
 
             function increment(){
                 count.value++;
+                notify.value = true;
             }
 
             function incrementx(){
                 store.commit("increment");
+                notify.value = true;
             }
 
-            return {count, countx, increment, incrementx};
+            return {count, notify, countx, increment, incrementx};
         }
     };
 
@@ -207,13 +198,12 @@
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
-                    <v-btn to="/">to /</v-btn>
-                </v-row>
-
-                <v-row justify="center">
-                    <v-col cols sm="6">
+                    <v-col cols>
                         <v-card>
-                            <v-card-title class="text-center">{{countx}}</v-card-title>
+                            <v-card-item>
+                                <v-card-title class="text-center">{{countx}}</v-card-title>
+                            </v-card-item>
+
                             <v-card-actions class="justify-center">
                                 <v-btn @click="resetx">ResetX</v-btn>
                             </v-card-actions>
@@ -245,12 +235,15 @@
         history: createWebHashHistory(),
         routes: [{
             path: "/",
+            name: "Home",
             component: sfc_page_index
         }, {
             path: "/sub",
+            name: "Sub",
             component: sfc_page_sub
         }, {
             path: "/:catchAll(.*)",
+            name: "NotFound",
             component: sfc_page_404
         }]
     });
