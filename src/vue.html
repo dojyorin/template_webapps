@@ -25,12 +25,12 @@
 </script>
 
 <script async type="module">
-    import {createApp, ref, computed, onMounted} from "vue";
+    import {createApp, defineComponent, ref, computed, onMounted} from "vue";
     import {createRouter, createWebHashHistory, useRouter} from "vue-router";
     import {createStore, useStore} from "vuex";
     import {createVuetify, useTheme} from "vuetify";
 
-    const sfc_component_notify = {
+    const sfc_component_notify = defineComponent({
         template: /*html*/`
             <v-snackbar position="fixed" location="top" :color="color" v-model="model">
                 <slot></slot>
@@ -50,9 +50,9 @@
 
             return {model};
         }
-    };
+    });
 
-    const sfc_layout_header = {
+    const sfc_layout_header = defineComponent({
         template: /*html*/`
             <v-app-bar density="compact" color="primary">
                 <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
@@ -70,28 +70,30 @@
 
             return {nav};
         }
-    };
+    });
 
-    const sfc_layout_footer = {
+    const sfc_layout_footer = defineComponent({
         template: /*html*/`
             <v-footer app color="primary">
                 <v-row no-gutters justify="center">Copyright</v-row>
             </v-footer>
         `
-    };
+    });
 
-    const sfc_layout_navigation = {
+    const sfc_layout_navigation = defineComponent({
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="model">
                 <v-toolbar density="compact" color="primary">
                     <v-btn icon="mdi-close" @click="model = false"></v-btn>
                 </v-toolbar>
 
-                <template v-for="{path, name} in routes">
-                    <v-list-item :to="path">
-                        <v-list-item-title>{{name}}</v-list-item-title>
-                    </v-list-item>
-                </template>
+                <v-list>
+                    <template v-for="{path, name} in routes">
+                        <v-list-item :to="path">
+                            <v-list-item-title>{{name}}</v-list-item-title>
+                        </v-list-item>
+                    </template>
+                </v-list>
             </v-navigation-drawer>
         `,
         props: ["modelValue"],
@@ -108,9 +110,9 @@
 
             return {model, routes};
         }
-    };
+    });
 
-    const sfc_main = {
+    const sfc_main = defineComponent({
         template: /*html*/`
             <v-app>
                 <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
@@ -149,9 +151,9 @@
 
             return {nav, loading};
         }
-    };
+    });
 
-    const sfc_page_index = {
+    const sfc_page_index = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -192,9 +194,9 @@
 
             return {count, notify, countx, increment, incrementx};
         }
-    };
+    });
 
-    const sfc_page_sub = {
+    const sfc_page_sub = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -223,13 +225,13 @@
 
             return {countx, resetx};
         }
-    };
+    });
 
-    const sfc_page_404 = {
+    const sfc_page_404 = defineComponent({
         template: /*html*/`
             <v-row no-gutters justify="center" class="fill-height align-center text-h4">Page Not Found ...</v-row>
         `
-    };
+    });
 
     const route = createRouter({
         history: createWebHashHistory(),
