@@ -16,9 +16,6 @@
     {
         "imports": {
             "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js",
-            "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js",
-            "vuex": "https://cdn.jsdelivr.net/npm/vuex@4/dist/vuex.esm-browser.prod.min.js",
-            "vuetify": "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js",
             "@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@vue/devtools-api@6/lib/esm/index.min.js"
         }
     }
@@ -30,26 +27,12 @@
     import {createStore, useStore} from "vuex";
     import {createVuetify, useTheme} from "vuetify";
 
-    const sfc_component_notify = defineComponent({
+    const sfc_component_reflect = defineComponent({
         template: /*html*/`
-            <v-snackbar position="fixed" location="top" :color="color" v-model="model">
+            <div class="x-reflect">
                 <slot></slot>
-
-                <template #actions>
-                    <v-btn ripple density="comfortable" icon="mdi-close" @click="model = false"></v-btn>
-                </template>
-            </v-snackbar>
-        `,
-        props: ["modelValue", "color"],
-        emits: ["update:modelValue"],
-        setup(props, context){
-            const model = computed({
-                get: () => props.modelValue,
-                set: v => context.emit("update:modelValue", v)
-            });
-
-            return {model};
-        }
+            </div>
+        `
     });
 
     const sfc_layout_header = defineComponent({
@@ -119,6 +102,16 @@
                     <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
                 </v-overlay>
 
+                <template v-for="({color, message}, i) in notifies">
+                    <v-snackbar model-value position="fixed" location="top" timeout="-1" :color="color">
+                        <span>{{message}}</span>
+
+                        <template #actions>
+                            <v-btn ripple density="comfortable" icon="mdi-close" @click="notifyPull(i)"></v-btn>
+                        </template>
+                    </v-snackbar>
+                </template>
+
                 <x-navigation v-model="nav"></x-navigation>
 
                 <x-header v-model:nav="nav"></x-header>
@@ -141,15 +134,21 @@
             const nav = ref(false);
 
             const loading = computed({
-                get: () => store.getters.loading,
-                set: v => store.commit("loading", v)
+                get: () => store.getters["overlay/loading"],
+                set: v => store.commit("overlay/loading", v)
             });
+
+            const notifies = computed(() => store.getters["overlay/notifies"]);
+
+            function notifyPull(i){
+                store.commit("overlay/notifyPull", i);
+            }
 
             onMounted(()=>{
-                store.commit("loading", false);
+                loading.value = false;
             });
 
-            return {nav, loading};
+            return {nav, loading, notifies, notifyPull};
         }
     });
 
@@ -164,35 +163,40 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <v-btn @click="increment">Increment</v-btn>
-                                <v-btn @click="incrementx">IncrementX</v-btn>
+                                <v-btn color="green" variant="flat" @click="increment">Increment</v-btn>
+                                <v-btn color="purple" variant="flat" @click="incrementx">IncrementX</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-col>
                 </v-row>
             </v-container>
-
-            <x-notify color="success" v-model="notify">Update!</x-notify>
         `,
         setup(){
             const store = useStore();
 
             const count = ref(0);
-            const notify = ref(false);
 
-            const countx = computed(() => store.getters.count);
+            const countx = computed(() => store.getters["user/count"]);
 
             function increment(){
                 count.value++;
-                notify.value = true;
+
+                store.commit("overlay/notifyPush", {
+                    color: "green",
+                    message: "Increment!"
+                });
             }
 
             function incrementx(){
-                store.commit("increment");
-                notify.value = true;
+                store.commit("user/increment");
+
+                store.commit("overlay/notifyPush", {
+                    color: "purple",
+                    message: "IncrementX!"
+                });
             }
 
-            return {count, notify, countx, increment, incrementx};
+            return {count, countx, increment, incrementx};
         }
     });
 
@@ -207,7 +211,9 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <v-btn @click="resetx">ResetX</v-btn>
+                                <x-reflect>
+                                    <v-btn color="orange-darken-1" variant="flat" @click="resetx">ResetX</v-btn>
+                                </x-reflect>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -217,10 +223,10 @@
         setup(){
             const store = useStore();
 
-            const countx = computed(() => store.getters.count);
+            const countx = computed(() => store.getters["user/count"]);
 
             function resetx(){
-                store.commit("reset");
+                store.commit("user/reset");
             }
 
             return {countx, resetx};
@@ -251,31 +257,66 @@
     });
 
     const store = createStore({
-        state(){
-            return {
-                count: 0,
-                loading: true
-            };
-        },
+        modules: {
+            overlay: {
+                namespaced: true,
 
-        getters: {
-            count(s){
-                return s.count;
-            },
-            loading(s){
-                return s.loading;
-            }
-        },
+                state(){
+                    return {
+                        loading: true,
+                        notifies: []
+                    };
+                },
 
-        mutations: {
-            increment(s){
-                s.count++;
+                getters: {
+                    loading(s){
+                        return s.loading;
+                    },
+
+                    notifies(s){
+                        return s.notifies;
+                    }
+                },
+
+                mutations: {
+                    loading(s, v){
+                        s.loading = v;
+                    },
+
+                    notifyPush(s, v){
+                        s.notifies.push(v);
+                    },
+
+                    notifyPull(s, v){
+                        s.notifies.splice(v);
+                    }
+                }
             },
-            reset(s){
-                s.count = 0;
-            },
-            loading(s, v){
-                s.loading = v;
+
+            user: {
+                namespaced: true,
+
+                state(){
+                    return {
+                        count: 0
+                    };
+                },
+
+                getters: {
+                    count(s){
+                        return s.count;
+                    }
+                },
+
+                mutations: {
+                    increment(s){
+                        s.count++;
+                    },
+
+                    reset(s){
+                        s.count = 0;
+                    }
+                }
             }
         }
     });
@@ -310,7 +351,7 @@
             }
         };
     })({
-        "x-notify": sfc_component_notify
+        "x-reflect": sfc_component_reflect
     });
 
     const vue = createApp(sfc_main);
@@ -340,6 +381,46 @@
         text-transform: none !important;
         letter-spacing: normal !important;
         text-indent: 0 !important;
+    }
+</style>
+
+<style>
+    @keyframes x-reflect-animation {
+        0% {
+            transform: scale(0) rotate(45deg);
+            opacity: 0;
+        }
+        80% {
+            transform: scale(0) rotate(45deg);
+            opacity: 0.5;
+        }
+        81% {
+            transform: scale(4) rotate(45deg);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(50) rotate(45deg);
+            opacity: 0;
+        }
+    }
+
+    .x-reflect {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .x-reflect::after {
+        content: "";
+        position: absolute;
+        display: block;
+        top: -180px;
+        left: 0;
+        height: 100%;
+        width: 30px;
+        opacity: 0;
+        background-color: #FFFFFF;
+        transform: rotate(45deg);
+        animation: x-reflect-animation 5s ease-in-out infinite;
     }
 </style>
 
