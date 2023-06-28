@@ -22,7 +22,7 @@
 </script>
 
 <script async type="module">
-    import {createApp, defineComponent, ref, computed, onMounted} from "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js";
+    import {createApp, defineComponent, ref, reactive, inject, computed, onMounted} from "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js";
     import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
     import {createStore, useStore} from "https://cdn.jsdelivr.net/npm/vuex@4/dist/vuex.esm-browser.prod.min.js";
     import {createVuetify, useTheme} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
@@ -43,13 +43,8 @@
                 <v-app-bar-title>Application</v-app-bar-title>
             </v-app-bar>
         `,
-        props: ["nav"],
-        emits: ["update:nav"],
-        setup(props, context){
-            const nav = computed({
-                get: () => props.nav,
-                set: v => context.emit("update:nav", v)
-            });
+        setup(){
+            const nav = inject("xg-navigation");
 
             return {nav};
         }
@@ -65,9 +60,9 @@
 
     const sfc_layout_navigation = defineComponent({
         template: /*html*/`
-            <v-navigation-drawer floating temporary v-model="model">
+            <v-navigation-drawer floating temporary v-model="nav">
                 <v-toolbar density="compact" color="primary">
-                    <v-btn icon="mdi-close" @click="model = false"></v-btn>
+                    <v-btn icon="mdi-close" @click="nav = false"></v-btn>
                 </v-toolbar>
 
                 <v-list>
@@ -79,42 +74,67 @@
                 </v-list>
             </v-navigation-drawer>
         `,
-        props: ["modelValue"],
-        emits: ["update:modelValue"],
-        setup(props, context){
+        setup(){
             const router = useRouter();
 
-            const model = computed({
-                get: () => props.modelValue,
-                set: v => context.emit("update:modelValue", v)
-            });
+            const nav = inject("xg-navigation");
 
             const routes = router.getRoutes().toSpliced(-1, 1);
 
-            return {model, routes};
+            return {nav, routes};
+        }
+    });
+
+    const sfc_layout_loading = defineComponent({
+        template: /*html*/`
+            <v-overlay persistent no-click-animation z-index="3000" class="justify-center align-center" v-model="loading">
+                <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
+            </v-overlay>
+        `,
+        setup(){
+            const loading = inject("xg-loading");
+
+            return {loading};
+        }
+    });
+
+    const sfc_layout_notify = defineComponent({
+        template: /*html*/`
+            <v-snackbar v-for="notify in notifies" model-value position="fixed" location="top" z-index="2100" :color="notify.color" timeout="-1" v-bind="notifyTimeout(notify, 5000)">
+                <span>{{notify.message}}</span>
+
+                <template #actions>
+                    <v-btn ripple density="comfortable" icon="mdi-close" @click="notifyTimeout(notify, 0)"></v-btn>
+                </template>
+            </v-snackbar>
+        `,
+        setup(){
+            const notifies = inject("xg-notifies");
+
+            async function notifyTimeout(notify, ms){
+                await new Promise(done => setTimeout(done, ms));
+
+                const i = notifies.findIndex(v => v === notify);
+
+                if(i === -1){
+                    return;
+                }
+
+                notifies.splice(i, 1);
+            }
+
+            return {notifies, notifyTimeout};
         }
     });
 
     const sfc_main = defineComponent({
         template: /*html*/`
             <v-app>
-                <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
-                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
-                </v-overlay>
+                <x-loading></x-loading>
+                <x-notify></x-notify>
+                <x-navigation></x-navigation>
 
-                <template v-for="({color, message}, i) in notifies">
-                    <v-snackbar model-value position="fixed" location="top" timeout="-1" :color="color">
-                        <span>{{message}}</span>
-
-                        <template #actions>
-                            <v-btn ripple density="comfortable" icon="mdi-close" @click="notifyPull(i)"></v-btn>
-                        </template>
-                    </v-snackbar>
-                </template>
-
-                <x-navigation v-model="nav"></x-navigation>
-
-                <x-header v-model:nav="nav"></x-header>
+                <x-header></x-header>
 
                 <v-main>
                     <router-view></router-view>
@@ -126,29 +146,18 @@
         components: {
             "x-header": sfc_layout_header,
             "x-footer": sfc_layout_footer,
+            "x-loading": sfc_layout_loading,
+            "x-notify": sfc_layout_notify,
             "x-navigation": sfc_layout_navigation
         },
         setup(){
-            const store = useStore();
-
-            const nav = ref(false);
-
-            const loading = computed({
-                get: () => store.getters["overlay/loading"],
-                set: v => store.commit("overlay/loading", v)
-            });
-
-            const notifies = computed(() => store.getters["overlay/notifies"]);
-
-            function notifyPull(i){
-                store.commit("overlay/notifyPull", i);
-            }
+            const loading = inject("xg-loading");
 
             onMounted(()=>{
                 loading.value = false;
             });
 
-            return {nav, loading, notifies, notifyPull};
+            return {};
         }
     });
 
@@ -163,8 +172,8 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <v-btn color="green" variant="flat" @click="increment">Increment</v-btn>
-                                <v-btn color="purple" variant="flat" @click="incrementx">IncrementX</v-btn>
+                                <v-btn color="green" variant="flat" @click="increment()">Increment</v-btn>
+                                <v-btn color="purple" variant="flat" @click="incrementx()">IncrementX</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -176,21 +185,23 @@
 
             const count = ref(0);
 
-            const countx = computed(() => store.getters["user/count"]);
+            const notifies = inject("xg-notifies");
+
+            const countx = computed(() => store.getters.count);
 
             function increment(){
                 count.value++;
 
-                store.commit("overlay/notifyPush", {
+                notifies.push({
                     color: "green",
                     message: "Increment!"
                 });
             }
 
             function incrementx(){
-                store.commit("user/increment");
+                store.commit("increment");
 
-                store.commit("overlay/notifyPush", {
+                notifies.push({
                     color: "purple",
                     message: "IncrementX!"
                 });
@@ -211,9 +222,10 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <x-reflect>
-                                    <v-btn color="orange-darken-1" variant="flat" @click="resetx">ResetX</v-btn>
-                                </x-reflect>
+                                <xg-reflect>
+                                    <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
+                                    <v-btn color="teal-darken-1" variant="flat" @click="resetdelayx()">ResetDelayX</v-btn>
+                                </xg-reflect>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -223,13 +235,32 @@
         setup(){
             const store = useStore();
 
-            const countx = computed(() => store.getters["user/count"]);
+            const loading = inject("xg-loading");
+            const notifies = inject("xg-notifies");
+
+            const countx = computed(() => store.getters.count);
 
             function resetx(){
-                store.commit("user/reset");
+                store.commit("reset");
+
+                notifies.push({
+                    color: "orange-darken-1",
+                    message: "ResetX!"
+                });
             }
 
-            return {countx, resetx};
+            async function resetdelayx(){
+                loading.value = true;
+                await store.dispatch("delayReset");
+                loading.value = false;
+
+                notifies.push({
+                    color: "teal-darken-1",
+                    message: "ResetDelayX!"
+                });
+            }
+
+            return {countx, resetx, resetdelayx};
         }
     });
 
@@ -257,66 +288,33 @@
     });
 
     const store = createStore({
-        modules: {
-            overlay: {
-                namespaced: true,
+        state(){
+            return {
+                count: 0
+            };
+        },
 
-                state(){
-                    return {
-                        loading: true,
-                        notifies: []
-                    };
-                },
+        getters: {
+            count(s){
+                return s.count;
+            }
+        },
 
-                getters: {
-                    loading(s){
-                        return s.loading;
-                    },
-
-                    notifies(s){
-                        return s.notifies;
-                    }
-                },
-
-                mutations: {
-                    loading(s, v){
-                        s.loading = v;
-                    },
-
-                    notifyPush(s, v){
-                        s.notifies.push(v);
-                    },
-
-                    notifyPull(s, v){
-                        s.notifies.splice(v);
-                    }
-                }
+        mutations: {
+            increment(s){
+                s.count++;
             },
 
-            user: {
-                namespaced: true,
+            reset(s){
+                s.count = 0;
+            }
+        },
 
-                state(){
-                    return {
-                        count: 0
-                    };
-                },
+        actions: {
+            async delayReset(context){
+                await new Promise(done => setTimeout(done, 1000));
 
-                getters: {
-                    count(s){
-                        return s.count;
-                    }
-                },
-
-                mutations: {
-                    increment(s){
-                        s.count++;
-                    },
-
-                    reset(s){
-                        s.count = 0;
-                    }
-                }
+                context.commit("reset");
             }
         }
     });
@@ -342,16 +340,30 @@
         }
     });
 
-    const component = ((components)=>{
+    const component = ((arg)=>{
         return {
-            install(vue){
-                for(const [k, v] of Object.entries(components)){
-                    vue.component(k, v);
+            install(context){
+                for(const [k, v] of Object.entries(arg)){
+                    context.component(k, v);
                 }
             }
         };
     })({
-        "x-reflect": sfc_component_reflect
+        "xg-reflect": sfc_component_reflect
+    });
+
+    const provide = ((arg)=>{
+        return {
+            install(context){
+                for(const [k, v] of Object.entries(arg)){
+                    context.provide(k, v);
+                }
+            }
+        };
+    })({
+        "xg-navigation": ref(false),
+        "xg-loading": ref(false),
+        "xg-notifies": reactive([])
     });
 
     const vue = createApp(sfc_main);
@@ -360,6 +372,7 @@
     vue.use(store);
     vue.use(vuetify);
     vue.use(component);
+    vue.use(provide);
 
     vue.mount("#vue");
 </script>
@@ -410,6 +423,7 @@
     }
 
     .x-reflect::after {
+        pointer-events: none;
         content: "";
         position: absolute;
         display: block;
