@@ -1,11 +1,11 @@
 # **Web Application Templates**
 Collection of features that help you create simple web applications.
 
-# External
-You can also import deno web browser compatible utilities.
+# Deno
+Collected only parts of this module that not use the `Deno` namespace and prepared as browser-compatible code.
 
-- https://github.com/dojyorin/deno_simple_utility
+You can use script from [esm.sh](https://esm.sh).
 
-```sh
-curl -L https://github.com/dojyorin/deno_simple_utility/releases/latest/download/mod.universal.min.js > ./deno_simple_utility.mod.universal.min.js
+```ts
+import {fetchExtend} from "https://esm.sh/gh/dojyorin/deno_simple_utility@version/mod.universal.ts?bundle&target=esnext";
 ```
