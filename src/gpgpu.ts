@@ -2,7 +2,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-// @deno-types="https://esm.sh/@webgpu/types@0.1.34/dist/index.d.ts"
+import type {} from "https://esm.sh/@webgpu/types@0.1.34/dist/index.d.ts";
 
 interface GPGPUArray{
     i32: Int32Array;
