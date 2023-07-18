@@ -1,11 +1,10 @@
 # **Web Application Templates**
 Collection of features that help you create simple web applications.
 
-# Deno
-Collected only parts of this module that not use the `Deno` namespace and prepared as browser-compatible code.
-
-You can use script from [esm.sh](https://esm.sh).
+# ESM
+You can directly load TypeScript ESM via [esm.sh](https://esm.sh).
 
 ```ts
 import {fetchExtend} from "https://esm.sh/gh/dojyorin/deno_simple_utility@version/mod.universal.ts?bundle&target=esnext";
+export {fsRead} from "https://esm.sh/gh/dojyorin/dom_shortcut_pack@version/mod.ts?bundle&target=esnext";
 ```
