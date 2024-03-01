@@ -144,12 +144,6 @@
         }
     });
 
-    const sfc_page_404 = defineComponent({
-        template: /*html*/`
-            <div class="fill-height d-flex justify-center align-center text-h4">Not Found</div>
-        `
-    });
-
     const sfc_page_home = defineComponent({
         template: /*html*/`
             <v-container fluid>
@@ -282,8 +276,7 @@
             component: sfc_page_third
         }, {
             path: "/:catchAll(.*)",
-            name: "404",
-            component: sfc_page_404
+            redirect: "/"
         }]
     });
 
