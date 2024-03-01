@@ -28,14 +28,24 @@
         const loading = inject("$$loading");
         const notifies = inject("$$notifies");
 
+        /**
+        * @param {boolean} [state]
+        */
         function toggleNav(state){
             nav.value = state ?? !nav.value;
         }
 
+        /**
+        * @param {boolean} [state]
+        */
         function toggleLoading(state){
             loading.value = state ?? !loading.value;
         }
 
+        /**
+        * @param {string} message
+        * @param {string} color
+        */
         function pushNotify(message, color){
             notifies.push({
                 message: message,
@@ -127,6 +137,10 @@
         setup(){
             const notifies = inject("$$notifies");
 
+            /**
+            * @param {Record<string, string>} notify
+            * @param {number} ms
+            */
             async function notifyTimeout(notify, ms){
                 await new Promise(done => setTimeout(done, ms));
 
