@@ -49,7 +49,7 @@
             </v-app-bar>
         `,
         setup(){
-            const nav = inject("@layout:navigation");
+            const nav = inject("$$nav");
 
             return {nav};
         }
@@ -62,7 +62,7 @@
             </v-overlay>
         `,
         setup(){
-            const loading = inject("@layout:loading");
+            const loading = inject("$$loading");
 
             return {loading};
         }
@@ -85,7 +85,7 @@
         setup(){
             const router = useRouter();
 
-            const nav = inject("@layout:navigation");
+            const nav = inject("$$nav");
 
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
@@ -104,7 +104,7 @@
             </v-snackbar>
         `,
         setup(){
-            const notifies = inject("@layout:notify");
+            const notifies = inject("$$notifies");
 
             async function notifyTimeout(notify, ms){
                 await new Promise(done => setTimeout(done, ms));
@@ -166,8 +166,8 @@
         setup(){
             const count = ref(0);
 
-            const notifies = inject("@layout:notify");
-            const countx = inject("@count");
+            const notifies = inject("$$notifies");
+            const countx = inject("$count");
 
             function increment(){
                 count.value++;
@@ -213,9 +213,9 @@
             </v-container>
         `,
         setup(){
-            const loading = inject("@layout:loading");
-            const notifies = inject("@layout:notify");
-            const countx = inject("@count");
+            const loading = inject("$$loading");
+            const notifies = inject("$$notifies");
+            const countx = inject("$count");
 
             function resetx(){
                 countx.value = 0;
@@ -309,20 +309,18 @@
 
     const provide = {
         install(context){
-            context.provide("@layout:navigation", ref(false));
-            context.provide("@layout:loading", ref(false));
-            context.provide("@layout:notify", reactive([]));
-            context.provide("@count", ref(0));
+            context.provide("$$nav", ref(false));
+            context.provide("$$loading", ref(false));
+            context.provide("$$notifies", reactive([]));
+            context.provide("$count", ref(0));
         }
     };
 
     const vue = createApp(sfc_layout_main);
-
     vue.use(router);
     vue.use(vuetify);
     vue.use(component);
     vue.use(provide);
-
     vue.mount("#vue");
 </script>
 
