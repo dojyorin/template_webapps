@@ -25,7 +25,7 @@
 
     const sfc_common_reflect = defineComponent({
         template: /*html*/`
-            <div class="x-reflect">
+            <div sfc_common_reflect class="x-reflect">
                 <slot></slot>
             </div>
         `
@@ -374,12 +374,12 @@
         }
     }
 
-    .x-reflect {
+    .x-reflect[sfc_common_reflect] {
         position: relative;
         overflow: hidden;
     }
 
-    .x-reflect::after {
+    .x-reflect[sfc_common_reflect]::after {
         pointer-events: none;
         content: "";
         position: absolute;
