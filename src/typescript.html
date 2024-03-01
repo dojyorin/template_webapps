@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.3.3?bundle&target=esnext";
+    import {minify} from "https://esm.sh/terser@5.28.1?bundle&target=esnext";
+
+    for(const {type, textContent} of document.getElementsByTagName("script")){
+        if(type !== "text/typescript" || !textContent){
+            continue;
+        }
+
+        const js = transpile(textContent, {
+            target: ScriptTarget.ESNext
+        });
+
+        const {code} = await minify(js, {
+            module: true
+        });
+
+        await import(`data:text/javascript;base64,${btoa(Array.from(new TextEncoder().encode(code), v => String.fromCharCode(v)).join(""))}`);
+    }
+</script>
+
+<script type="text/typescript">
+    console.log("TypeScript");
+</script>
+
+<main></main>
