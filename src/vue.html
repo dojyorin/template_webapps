@@ -214,10 +214,10 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <x-reflect>
+                                <x--reflect>
                                     <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
                                     <v-btn color="teal-darken-1" variant="flat" @click="delayresetx()">DelayResetX</v-btn>
-                                </x-reflect>
+                                </x--reflect>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -305,7 +305,7 @@
 
     const component = {
         install(context){
-            context.component("x-reflect", sfc_common_reflect);
+            context.component("x--reflect", sfc_common_reflect);
         }
     };
 
