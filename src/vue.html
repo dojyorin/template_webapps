@@ -23,6 +23,29 @@
     import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
     import {createVuetify, useDisplay, useLayout} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
 
+    function use$$(){
+        const nav = inject("$$nav");
+        const loading = inject("$$loading");
+        const notifies = inject("$$notifies");
+
+        function toggleNav(state){
+            nav.value = state ?? !nav.value;
+        }
+
+        function toggleLoading(state){
+            loading.value = state ?? !loading.value;
+        }
+
+        function pushNotify(message, color){
+            notifies.push({
+                message: message,
+                color: color
+            });
+        }
+
+        return {toggleNav, toggleLoading, pushNotify};
+    }
+
     const sfc_common_reflect = defineComponent({
         template: /*html*/`
             <div sfc_common_reflect class="x-reflect">
@@ -40,7 +63,7 @@
     const sfc_layout_main_header = defineComponent({
         template: /*html*/`
             <v-app-bar density="compact" class="text-white">
-                <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
+                <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
                 <v-app-bar-title class="text-h5">Application</v-app-bar-title>
 
                 <template #image>
@@ -49,9 +72,9 @@
             </v-app-bar>
         `,
         setup(){
-            const nav = inject("$$nav");
+            const {toggleNav} = use$$();
 
-            return {nav};
+            return {toggleNav};
         }
     });
 
@@ -83,10 +106,8 @@
             </v-navigation-drawer>
         `,
         setup(){
-            const router = useRouter();
-
             const nav = inject("$$nav");
-
+            const router = useRouter();
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
             return {nav, routes};
@@ -164,27 +185,18 @@
             </v-container>
         `,
         setup(){
+            const {pushNotify} = use$$();
             const count = ref(0);
-
-            const notifies = inject("$$notifies");
             const countx = inject("$count");
 
             function increment(){
                 count.value++;
-
-                notifies.push({
-                    color: "green",
-                    message: "Increment!"
-                });
+                pushNotify("Increment!", "green");
             }
 
             function incrementx(){
                 countx.value++;
-
-                notifies.push({
-                    color: "purple",
-                    message: "IncrementX!"
-                });
+                pushNotify("IncrementX!", "purple");
             }
 
             return {count, countx, increment, incrementx};
@@ -213,29 +225,20 @@
             </v-container>
         `,
         setup(){
-            const loading = inject("$$loading");
-            const notifies = inject("$$notifies");
+            const {toggleLoading, pushNotify} = use$$();
             const countx = inject("$count");
 
             function resetx(){
                 countx.value = 0;
-
-                notifies.push({
-                    color: "orange-darken-1",
-                    message: "ResetX!"
-                });
+                pushNotify("ResetX!", "orange-darken-1");
             }
 
             async function delayresetx(){
-                loading.value = true;
+                toggleLoading(true);
                 await new Promise(done => setTimeout(done, 1000));
                 countx.value = 0;
-                loading.value = false;
-
-                notifies.push({
-                    color: "teal-darken-1",
-                    message: "ResetDelayX!"
-                });
+                toggleLoading(false);
+                pushNotify("ResetDelayX!", "teal-darken-1");
             }
 
             return {countx, resetx, delayresetx};
@@ -252,7 +255,6 @@
         setup(){
             const display = useDisplay();
             const layout = useLayout();
-
             const mobile = computed(() => display.mobile.value);
             const height = computed(() => display.height.value - layout.mainRect.value.top - layout.mainRect.value.bottom);
 
@@ -303,7 +305,7 @@
 
     const component = {
         install(context){
-            context.component("x-reflect", sfc_common_reflect);
+            context.component("x--reflect", sfc_common_reflect);
         }
     };
 
