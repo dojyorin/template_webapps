@@ -56,7 +56,7 @@
         return {toggleNav, toggleLoading, pushNotify};
     }
 
-    const sfc_common_reflect = defineComponent({
+    const components_reflect = defineComponent({
         template: /*html*/`
             <div sfc_common_reflect class="x-reflect">
                 <slot></slot>
@@ -64,13 +64,13 @@
         `
     });
 
-    const sfc_layout_main_footer = defineComponent({
+    const components_layout_footer = defineComponent({
         template: /*html*/`
             <v-footer app color="black" class="justify-center align-center">Copyright</v-footer>
         `
     });
 
-    const sfc_layout_main_header = defineComponent({
+    const components_layout_header = defineComponent({
         template: /*html*/`
             <v-app-bar density="compact" class="text-white">
                 <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
@@ -88,7 +88,7 @@
         }
     });
 
-    const sfc_layout_main_loading = defineComponent({
+    const components_layout_loading = defineComponent({
         template: /*html*/`
             <v-overlay persistent no-click-animation z-index="4000" class="justify-center align-center" v-model="loading">
                 <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
@@ -101,7 +101,7 @@
         }
     });
 
-    const sfc_layout_main_navigation = defineComponent({
+    const components_layout_navigation = defineComponent({
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="nav">
                 <v-toolbar density="compact" color="transparent">
@@ -124,7 +124,7 @@
         }
     });
 
-    const sfc_layout_main_notify = defineComponent({
+    const components_layout_notify = defineComponent({
         template: /*html*/`
             <v-snackbar v-for="notify in notifies" model-value position="fixed" location="top" z-index="3000" :color="notify.color" timeout="-1" v-bind="notifyTimeout(notify, 5000)">
                 <div>{{notify.message}}</div>
@@ -157,7 +157,7 @@
         }
     });
 
-    const sfc_layout_main = defineComponent({
+    const layouts_default = defineComponent({
         template: /*html*/`
             <v-app>
                 <x-loading></x-loading>
@@ -171,15 +171,15 @@
             </v-app>
         `,
         components: {
-            "x-loading": sfc_layout_main_loading,
-            "x-notify": sfc_layout_main_notify,
-            "x-navigation": sfc_layout_main_navigation,
-            "x-header": sfc_layout_main_header,
-            "x-footer": sfc_layout_main_footer
+            "x-loading": components_layout_loading,
+            "x-notify": components_layout_notify,
+            "x-navigation": components_layout_navigation,
+            "x-header": components_layout_header,
+            "x-footer": components_layout_footer
         }
     });
 
-    const sfc_page_home = defineComponent({
+    const pages_index = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -217,7 +217,7 @@
         }
     });
 
-    const sfc_page_sub = defineComponent({
+    const pages_sub = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -259,7 +259,7 @@
         }
     });
 
-    const sfc_page_third = defineComponent({
+    const pages_third = defineComponent({
         template: /*html*/`
             <v-img :height="height" class="text-center align-center text-white" gradient="45deg, #FF9F17, #FF4E0E">
                 <div v-if="mobile" class="text-h4">MOBILE</div>
@@ -281,15 +281,15 @@
         routes: [{
             path: "/",
             name: "home",
-            component: sfc_page_home
+            component: pages_index
         }, {
             path: "/sub",
             name: "sub",
-            component: sfc_page_sub
+            component: pages_sub
         }, {
             path: "/third",
             name: "third",
-            component: sfc_page_third
+            component: pages_third
         }, {
             path: "/:catchAll(.*)",
             redirect: "/"
@@ -319,7 +319,7 @@
 
     const component = {
         install(context){
-            context.component("x--reflect", sfc_common_reflect);
+            context.component("x--reflect", components_reflect);
         }
     };
 
@@ -332,7 +332,7 @@
         }
     };
 
-    const vue = createApp(sfc_layout_main);
+    const vue = createApp(layouts_default);
     vue.use(router);
     vue.use(vuetify);
     vue.use(component);
