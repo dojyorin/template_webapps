@@ -21,7 +21,7 @@
 <script async type="module">
     import {createApp, defineComponent, ref, reactive, inject, computed} from "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js";
     import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
-    import {createVuetify, useDisplay, useLayout} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
+    import {createVuetify, useDisplay, useLayout, useTheme} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
 
     function useToggleLayout(){
         const nav = inject("$_nav");
@@ -66,7 +66,7 @@
 
     const components_layout_footer = defineComponent({
         template: /*html*/`
-            <v-footer app color="black" class="justify-center align-center">Copyright</v-footer>
+            <v-footer app class="justify-center align-center">Copyright</v-footer>
         `
     });
 
@@ -104,23 +104,28 @@
     const components_layout_navigation = defineComponent({
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="nav">
-                <v-toolbar density="compact" color="transparent">
-                    <v-btn icon="mdi-close" @click="nav = false"></v-btn>
-                </v-toolbar>
-
                 <v-list nav density="compact">
                     <v-list-item v-for="{path, name} in routes" :to="path">
                         <v-list-item-title>{{name}}</v-list-item-title>
                     </v-list-item>
                 </v-list>
+
+                <template #append>
+                    <v-btn tile block prepend-icon="mdi-theme-light-dark" @click="toggleTheme">Light/Dark</v-btn>
+                </template>
             </v-navigation-drawer>
         `,
         setup(){
             const nav = inject("$_nav");
+            const theme = useTheme();
             const router = useRouter();
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
-            return {nav, routes};
+            function toggleTheme(){
+                theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+            }
+
+            return {nav, routes, toggleTheme};
         }
     });
 
@@ -296,26 +301,7 @@
         }]
     });
 
-    const vuetify = createVuetify({
-        theme: {
-            defaultTheme: "main",
-            themes: {
-                "main": {
-                    dark: false,
-                    colors: {
-                        primary: "#03A9F4",
-                        secondary: "#9C27B0",
-                        surface: "#FFFFFF",
-                        background: "#FFFFFF",
-                        info: "#2196F3",
-                        success: "#4CAF50",
-                        warning: "#FFC107",
-                        error: "#FF5252"
-                    }
-                }
-            }
-        }
-    });
+    const vuetify = createVuetify();
 
     const component = {
         install(context){
