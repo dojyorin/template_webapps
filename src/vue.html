@@ -23,10 +23,10 @@
     import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
     import {createVuetify, useDisplay, useLayout} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
 
-    function use$$(){
-        const nav = inject("$$nav");
-        const loading = inject("$$loading");
-        const notifies = inject("$$notifies");
+    function useToggleLayout(){
+        const nav = inject("$_nav");
+        const loading = inject("$_loading");
+        const notifies = inject("$_notifies");
 
         /**
         * @param {boolean} [state]
@@ -82,7 +82,7 @@
             </v-app-bar>
         `,
         setup(){
-            const {toggleNav} = use$$();
+            const {toggleNav} = useToggleLayout();
 
             return {toggleNav};
         }
@@ -95,7 +95,7 @@
             </v-overlay>
         `,
         setup(){
-            const loading = inject("$$loading");
+            const loading = inject("$_loading");
 
             return {loading};
         }
@@ -116,7 +116,7 @@
             </v-navigation-drawer>
         `,
         setup(){
-            const nav = inject("$$nav");
+            const nav = inject("$_nav");
             const router = useRouter();
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
@@ -135,7 +135,7 @@
             </v-snackbar>
         `,
         setup(){
-            const notifies = inject("$$notifies");
+            const notifies = inject("$_notifies");
 
             /**
             * @param {Record<string, string>} notify
@@ -199,7 +199,7 @@
             </v-container>
         `,
         setup(){
-            const {pushNotify} = use$$();
+            const {pushNotify} = useToggleLayout();
             const count = ref(0);
             const countx = inject("$count");
 
@@ -239,7 +239,7 @@
             </v-container>
         `,
         setup(){
-            const {toggleLoading, pushNotify} = use$$();
+            const {toggleLoading, pushNotify} = useToggleLayout();
             const countx = inject("$count");
 
             function resetx(){
@@ -325,9 +325,9 @@
 
     const provide = {
         install(context){
-            context.provide("$$nav", ref(false));
-            context.provide("$$loading", ref(false));
-            context.provide("$$notifies", reactive([]));
+            context.provide("$_nav", ref(false));
+            context.provide("$_loading", ref(false));
+            context.provide("$_notifies", reactive([]));
             context.provide("$count", ref(0));
         }
     };
