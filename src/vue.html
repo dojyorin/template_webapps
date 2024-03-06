@@ -23,7 +23,7 @@
     import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
     import {createVuetify, useDisplay, useLayout, useTheme} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
 
-    function useToggleLayout(){
+    function useCommonUI(){
         const nav = inject("$_nav");
         const loading = inject("$_loading");
         const notifies = inject("$_notifies");
@@ -82,7 +82,7 @@
             </v-app-bar>
         `,
         setup(){
-            const {toggleNav} = useToggleLayout();
+            const {toggleNav} = useCommonUI();
 
             return {toggleNav};
         }
@@ -204,7 +204,7 @@
             </v-container>
         `,
         setup(){
-            const {pushNotify} = useToggleLayout();
+            const {pushNotify} = useCommonUI();
             const count = ref(0);
             const countx = inject("$count");
 
@@ -244,7 +244,7 @@
             </v-container>
         `,
         setup(){
-            const {toggleLoading, pushNotify} = useToggleLayout();
+            const {toggleLoading, pushNotify} = useCommonUI();
             const countx = inject("$count");
 
             function resetx(){
