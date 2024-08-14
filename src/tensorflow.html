@@ -1,19 +1,9 @@
 <!doctype html>
 <meta charset="utf-8">
 
-<script type="importmap">
-    {
-        "imports": {
-            "@tensorflow/tfjs": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.fesm.min.js",
-            "@tensorflow/tfjs-core": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@latest/dist/tf-core.fesm.min.js",
-            "@tensorflow/tfjs-backend-webgpu": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@latest/dist/tf-backend-webgpu.fesm.min.js"
-        }
-    }
-</script>
-
 <script async type="module">
-    import {setBackend} from "@tensorflow/tfjs";
-    import "@tensorflow/tfjs-backend-webgpu";
+    import {setBackend} from "https://esm.sh/@tensorflow/tfjs-core@4.20.0?target=esnext";
+    import "https://esm.sh/@tensorflow/tfjs-backend-webgpu@4.20.0?target=esnext";
 
     await setBackend("webgpu");
 </script>

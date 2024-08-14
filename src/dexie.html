@@ -2,13 +2,13 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {Dexie} from "https://esm.sh/dexie@3.2.6?bundle&target=esnext";
+    import {Dexie} from "https://esm.sh/dexie@4.0.8?target=esnext";
 
     const db = new Dexie("test", {
         autoOpen: false
     });
 
-    if(!db.verno){
+    if(!db.verno) {
         db.version(1).stores({
             "user": "++&id, name, age"
         });
@@ -16,8 +16,8 @@
 
     await db.open();
 
-    document.getElementById("insert").addEventListener("click", async()=>{
-        await db.transaction("rw", ["user"], async()=>{
+    document.getElementById("insert").addEventListener("click", async () => {
+        await db.transaction("rw", ["user"], async () => {
             const insert = await db["user"].put({
                 "name": `Name${Math.floor(Math.random() * 30)}`,
                 "age": Math.floor(Math.random() * 90)

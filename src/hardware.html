@@ -88,7 +88,7 @@
     /** @type {?Bluetooth} */
     const NavBluetooth = navigator?.bluetooth;
 
-    document.getElementById("usb").onclick = async()=>{
+    document.getElementById("usb").onclick = async () => {
         const usb = await NavUsb.requestDevice({
             filters: []
         });
@@ -96,7 +96,7 @@
         console.log(usb);
     };
 
-    document.getElementById("serial").onclick = async()=>{
+    document.getElementById("serial").onclick = async () => {
         const serial = await NavSerial.requestPort();
 
         await serial.open({
@@ -111,7 +111,7 @@
         console.log(serial);
     };
 
-    document.getElementById("bluetooth").onclick = async()=>{
+    document.getElementById("bluetooth").onclick = async () => {
         const bluetooth = await NavBluetooth.requestDevice({
             acceptAllDevices: true
         });

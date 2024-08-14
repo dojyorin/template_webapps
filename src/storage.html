@@ -6,7 +6,7 @@
     * @param {string} key
     * @param {unknown} data
     */
-    function storageWrite(key, data){
+    function storageWrite(key, data) {
         localStorage.setItem(key, JSON.stringify(data));
     }
 
@@ -14,21 +14,21 @@
     * @param {string} key
     * @return {unknown}
     */
-    function storageRead(key){
+    function storageRead(key) {
         return JSON.parse(localStorage.getItem(key) ?? undefined);
     }
 
     /**
     * @param {string} key
     */
-    function storageDelete(key){
+    function storageDelete(key) {
         localStorage.removeItem(key);
     }
 
     /**
     * @param {string} key
     */
-    function storageHas(key){
+    function storageHas(key) {
         return localStorage.getItem(key) !== null;
     }
 

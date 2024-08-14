@@ -2,11 +2,11 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.3.3?bundle&target=esnext";
-    import {minify} from "https://esm.sh/terser@5.28.1?bundle&target=esnext";
+    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.3.4?target=esnext";
+    import {minify} from "https://esm.sh/terser@5.31.6?target=esnext";
 
-    for(const {type, textContent} of document.getElementsByTagName("script")){
-        if(type !== "text/typescript" || !textContent){
+    for(const {type, textContent} of document.getElementsByTagName("script")) {
+        if(type !== "text/typescript" || !textContent) {
             continue;
         }
 
