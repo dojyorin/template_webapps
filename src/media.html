@@ -5,25 +5,25 @@
     const video = document.getElementById("video");
     const audio = document.getElementById("audio");
 
-    document.getElementById("camera").addEventListener("click", async () => {
+    document.getElementById("camera").onclick = async () => {
         video.srcObject = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
                 facingMode: "environment"
             }
         });
-    });
+    };
 
-    document.getElementById("screen").addEventListener("click", async () => {
+    document.getElementById("screen").onclick = async () => {
         video.srcObject = await navigator.mediaDevices.getDisplayMedia();
-    });
+    };
 
-    document.getElementById("mic").addEventListener("click", async () => {
+    document.getElementById("mic").onclick = async () => {
         audio.srcObject = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
         });
-    });
+    };
 </script>
 
 <main>

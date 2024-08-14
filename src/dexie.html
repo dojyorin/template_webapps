@@ -16,7 +16,7 @@
 
     await db.open();
 
-    document.getElementById("insert").addEventListener("click", async () => {
+    document.getElementById("insert").onclick = async () => {
         await db.transaction("rw", ["user"], async () => {
             const insert = await db["user"].put({
                 "name": `Name${Math.floor(Math.random() * 30)}`,
@@ -28,7 +28,7 @@
             console.log(insert);
             console.log(select);
         });
-    });
+    };
 </script>
 
 <main>
