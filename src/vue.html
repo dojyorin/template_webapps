@@ -5,23 +5,14 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:100px;'>🌌</text></svg>">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css">
+<link rel="stylesheet" href="https://esm.sh/vuetify@3.6.15/dist/vuetify.css">
+<link rel="stylesheet" href="https://esm.sh/@mdi/font@7.4.47/css/materialdesignicons.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=M+PLUS+1+Code:wght@100;200;300;400;500;600;700">
 
-<script type="importmap">
-    {
-        "imports": {
-            "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js",
-            "@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@vue/devtools-api@6/lib/esm/index.min.js"
-        }
-    }
-</script>
-
 <script async type="module">
-    import {createApp, defineComponent, ref, reactive, inject, computed} from "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.min.js";
-    import {createRouter, createWebHashHistory, useRouter} from "https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.esm-browser.min.js";
-    import {createVuetify, useDisplay, useLayout, useTheme} from "https://cdn.jsdelivr.net/npm/vuetify@3/dist/vuetify.esm.min.js";
+    import {createApp, defineComponent, ref, reactive, inject, computed} from "https://esm.sh/vue@3.4.38/dist/vue.esm-bundler.js?target=esnext";
+    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.4.2/dist/vue-router.esm-bundler.js?target=esnext";
+    import {createVuetify, useDisplay, useLayout, useTheme} from "https://esm.sh/vuetify@3.6.15/dist/vuetify.esm.js?target=esnext";
 
     function useCommonUI(){
         const nav = inject("$_nav");
