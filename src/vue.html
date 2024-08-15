@@ -20,14 +20,14 @@
         const notifies = inject("$_notifies");
 
         /**
-        * @param {boolean} [state]
+        * @param {boolean=} state
         */
         function toggleNav(state) {
             nav.value = state ?? !nav.value;
         }
 
         /**
-        * @param {boolean} [state]
+        * @param {boolean=} state
         */
         function toggleLoading(state) {
             loading.value = state ?? !loading.value;
