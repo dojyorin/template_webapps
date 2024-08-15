@@ -14,7 +14,7 @@
     import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.4.2/dist/vue-router.esm-bundler.js?target=esnext";
     import {createVuetify, useDisplay, useLayout, useTheme} from "https://esm.sh/vuetify@3.6.15/dist/vuetify.esm.js?target=esnext";
 
-    function useCommonUI(){
+    function useCommonUI() {
         const nav = inject("$_nav");
         const loading = inject("$_loading");
         const notifies = inject("$_notifies");
@@ -22,14 +22,14 @@
         /**
         * @param {boolean} [state]
         */
-        function toggleNav(state){
+        function toggleNav(state) {
             nav.value = state ?? !nav.value;
         }
 
         /**
         * @param {boolean} [state]
         */
-        function toggleLoading(state){
+        function toggleLoading(state) {
             loading.value = state ?? !loading.value;
         }
 
@@ -37,7 +37,7 @@
         * @param {string} message
         * @param {string} color
         */
-        function pushNotify(message, color){
+        function pushNotify(message, color) {
             notifies.push({
                 message: message,
                 color: color
@@ -72,7 +72,7 @@
                 </template>
             </v-app-bar>
         `,
-        setup(){
+        setup() {
             const {toggleNav} = useCommonUI();
 
             return {toggleNav};
@@ -85,7 +85,7 @@
                 <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
             </v-overlay>
         `,
-        setup(){
+        setup() {
             const loading = inject("$_loading");
 
             return {loading};
@@ -106,13 +106,13 @@
                 </template>
             </v-navigation-drawer>
         `,
-        setup(){
+        setup() {
             const nav = inject("$_nav");
             const theme = useTheme();
             const router = useRouter();
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
-            function toggleTheme(){
+            function toggleTheme() {
                 theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
             }
 
@@ -130,19 +130,19 @@
                 </template>
             </v-snackbar>
         `,
-        setup(){
+        setup() {
             const notifies = inject("$_notifies");
 
             /**
             * @param {Record<string, string>} notify
             * @param {number} ms
             */
-            async function notifyTimeout(notify, ms){
+            async function notifyTimeout(notify, ms) {
                 await new Promise(done => setTimeout(done, ms));
 
                 const i = notifies.findIndex(v => v === notify);
 
-                if(i === -1){
+                if(i === -1) {
                     return;
                 }
 
@@ -194,17 +194,17 @@
                 </v-row>
             </v-container>
         `,
-        setup(){
+        setup() {
             const {pushNotify} = useCommonUI();
             const count = ref(0);
             const countx = inject("$count");
 
-            function increment(){
+            function increment() {
                 count.value++;
                 pushNotify("Increment!", "green");
             }
 
-            function incrementx(){
+            function incrementx() {
                 countx.value++;
                 pushNotify("IncrementX!", "purple");
             }
@@ -234,16 +234,16 @@
                 </v-row>
             </v-container>
         `,
-        setup(){
+        setup() {
             const {toggleLoading, pushNotify} = useCommonUI();
             const countx = inject("$count");
 
-            function resetx(){
+            function resetx() {
                 countx.value = 0;
                 pushNotify("ResetX!", "orange-darken-1");
             }
 
-            async function delayresetx(){
+            async function delayresetx() {
                 toggleLoading(true);
                 await new Promise(done => setTimeout(done, 1000));
                 countx.value = 0;
@@ -262,7 +262,7 @@
                 <div v-else class="text-h2">DESKTOP</div>
             </v-img>
         `,
-        setup(){
+        setup() {
             const display = useDisplay();
             const layout = useLayout();
             const mobile = computed(() => display.mobile.value);
@@ -295,13 +295,13 @@
     const vuetify = createVuetify();
 
     const component = {
-        install(context){
+        install(context) {
             context.component("x--reflect", components_reflect);
         }
     };
 
     const provide = {
-        install(context){
+        install(context) {
             context.provide("$_nav", ref(false));
             context.provide("$_loading", ref(false));
             context.provide("$_notifies", reactive([]));
