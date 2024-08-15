@@ -15,9 +15,9 @@
     import {createVuetify, useDisplay, useLayout, useTheme} from "https://esm.sh/vuetify@3.6.15/dist/vuetify.esm.js?target=esnext";
 
     function useCommonUI() {
-        const nav = inject("$_nav");
-        const loading = inject("$_loading");
-        const notifies = inject("$_notifies");
+        const nav = inject("$$nav");
+        const loading = inject("$$loading");
+        const notifies = inject("$$notifies");
 
         /**
         * @param {boolean=} state
@@ -86,7 +86,7 @@
             </v-overlay>
         `,
         setup() {
-            const loading = inject("$_loading");
+            const loading = inject("$$loading");
 
             return {loading};
         }
@@ -107,7 +107,7 @@
             </v-navigation-drawer>
         `,
         setup() {
-            const nav = inject("$_nav");
+            const nav = inject("$$nav");
             const theme = useTheme();
             const router = useRouter();
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
@@ -131,7 +131,7 @@
             </v-snackbar>
         `,
         setup() {
-            const notifies = inject("$_notifies");
+            const notifies = inject("$$notifies");
 
             /**
             * @param {Record<string, string>} notify
@@ -302,9 +302,9 @@
 
     const provide = {
         install(context) {
-            context.provide("$_nav", ref(false));
-            context.provide("$_loading", ref(false));
-            context.provide("$_notifies", reactive([]));
+            context.provide("$$nav", ref(false));
+            context.provide("$$loading", ref(false));
+            context.provide("$$notifies", reactive([]));
             context.provide("$count", ref(0));
         }
     };
