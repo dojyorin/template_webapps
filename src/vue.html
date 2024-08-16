@@ -24,11 +24,11 @@
 
     function useCommonUI() {
         /** @type Ref<boolean> */
-        const nav = inject("$$nav");
+        const nav = inject("$_nav");
         /** @type Ref<boolean> */
-        const loading = inject("$$loading");
+        const loading = inject("$_loading");
         /** @type Notify[] */
-        const notifies = inject("$$notifies");
+        const notifies = inject("$_notifies");
 
         /**
         * @param {boolean=} state
@@ -98,7 +98,7 @@
         `,
         setup() {
             /** @type Ref<boolean> */
-            const loading = inject("$$loading");
+            const loading = inject("$_loading");
 
             return {loading};
         }
@@ -120,7 +120,7 @@
         `,
         setup() {
             /** @type Ref<boolean> */
-            const nav = inject("$$nav");
+            const nav = inject("$_nav");
 
             const theme = useTheme();
             const router = useRouter();
@@ -147,7 +147,7 @@
         `,
         setup() {
             /** @type Notify[] */
-            const notifies = inject("$$notifies");
+            const notifies = inject("$_notifies");
 
             /**
             * @param {Notify} notify
@@ -243,10 +243,10 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <x--reflect>
+                                <xx-reflect>
                                     <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
                                     <v-btn color="teal-darken-1" variant="flat" @click="delayresetx()">DelayResetX</v-btn>
-                                </x--reflect>
+                                </xx-reflect>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -330,15 +330,16 @@
 
     const component = {
         install(context) {
-            context.component("x--reflect", components_reflect);
+            context.component("xx-reflect", components_reflect);
         }
     };
 
     const provide = {
         install(context) {
-            context.provide("$$nav", ref(false));
-            context.provide("$$loading", ref(false));
-            context.provide("$$notifies", reactive([]));
+            context.provide("$_nav", ref(false));
+            context.provide("$_loading", ref(false));
+            context.provide("$_notifies", reactive([]));
+
             context.provide("$count", ref(0));
         }
     };
