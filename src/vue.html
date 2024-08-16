@@ -5,18 +5,29 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:100px;'>🌌</text></svg>">
 
-<link rel="stylesheet" href="https://esm.sh/vuetify@3.6.15/dist/vuetify.css">
-<link rel="stylesheet" href="https://esm.sh/@mdi/font@7.4.47/css/materialdesignicons.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=M+PLUS+1+Code:wght@100;200;300;400;500;600;700">
-
 <script async type="module">
     import {createApp, defineComponent, ref, reactive, inject, computed} from "https://esm.sh/vue@3.4.38/dist/vue.esm-bundler.js?target=esnext";
     import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.4.2/dist/vue-router.esm-bundler.js?target=esnext";
     import {createVuetify, useDisplay, useLayout, useTheme} from "https://esm.sh/vuetify@3.6.15/dist/vuetify.esm.js?target=esnext";
 
+    /**
+    * @template T
+    * @typedef {object} Ref
+    * @property {T} value
+    */
+
+    /**
+    * @typedef {object} Notify
+    * @property {string} color
+    * @property {string} message
+    */
+
     function useCommonUI() {
+        /** @type Ref<boolean> */
         const nav = inject("$$nav");
+        /** @type Ref<boolean> */
         const loading = inject("$$loading");
+        /** @type Notify[] */
         const notifies = inject("$$notifies");
 
         /**
@@ -49,7 +60,7 @@
 
     const components_reflect = defineComponent({
         template: /*html*/`
-            <div sfc_common_reflect class="x-reflect">
+            <div class="x-reflect">
                 <slot></slot>
             </div>
         `
@@ -86,6 +97,7 @@
             </v-overlay>
         `,
         setup() {
+            /** @type Ref<boolean> */
             const loading = inject("$$loading");
 
             return {loading};
@@ -107,9 +119,12 @@
             </v-navigation-drawer>
         `,
         setup() {
+            /** @type Ref<boolean> */
             const nav = inject("$$nav");
+
             const theme = useTheme();
             const router = useRouter();
+
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
             function toggleTheme() {
@@ -131,10 +146,11 @@
             </v-snackbar>
         `,
         setup() {
+            /** @type Notify[] */
             const notifies = inject("$$notifies");
 
             /**
-            * @param {Record<string, string>} notify
+            * @param {Notify} notify
             * @param {number} ms
             */
             async function notifyTimeout(notify, ms) {
@@ -196,7 +212,10 @@
         `,
         setup() {
             const {pushNotify} = useCommonUI();
+
+            /** @type Ref<number> */
             const count = ref(0);
+            /** @type Ref<number> */
             const countx = inject("$count");
 
             function increment() {
@@ -236,6 +255,8 @@
         `,
         setup() {
             const {toggleLoading, pushNotify} = useCommonUI();
+
+            /** @type Ref<number> */
             const countx = inject("$count");
 
             function resetx() {
@@ -265,7 +286,10 @@
         setup() {
             const display = useDisplay();
             const layout = useLayout();
+
+            /** @type Ref<boolean> */
             const mobile = computed(() => display.mobile.value);
+            /** @type Ref<number> */
             const height = computed(() => display.height.value - layout.mainRect.value.top - layout.mainRect.value.bottom);
 
             return {mobile, height};
@@ -292,7 +316,17 @@
         }]
     });
 
-    const vuetify = createVuetify();
+    const vuetify = createVuetify({
+        defaults: {
+            VBtn: {
+                style: {
+                    "text-transform": "none",
+                    "letter-spacing": "normal",
+                    "text-indent": 0
+                }
+            }
+        }
+    });
 
     const component = {
         install(context) {
@@ -318,25 +352,19 @@
 </script>
 
 <style>
+    @import "https://esm.sh/vuetify@3.6.15/dist/vuetify.css";
+    @import "https://esm.sh/@mdi/font@7.4.47/css/materialdesignicons.css";
+    @import "https://fonts.googleapis.com/css?family=M+PLUS+1+Code:wght@100;200;300;400;500;600;700";
+
     ::-webkit-scrollbar {
         display: none !important;
-    }
-
-    :focus {
-        outline: none !important;
     }
 
     * {
         font-family: "M PLUS 1 Code" !important;
     }
 
-    .v-btn {
-        text-transform: none !important;
-        letter-spacing: normal !important;
-        text-indent: 0 !important;
-    }
-
-    @keyframes x-reflect--sfc_common_reflect {
+    @keyframes x-reflect {
         0% {
             transform: scale(0) rotate(45deg);
             opacity: 0;
@@ -358,12 +386,12 @@
         }
     }
 
-    .x-reflect[sfc_common_reflect] {
+    .x-reflect {
         position: relative;
         overflow: hidden;
     }
 
-    .x-reflect[sfc_common_reflect]::after {
+    .x-reflect::after {
         pointer-events: none;
         content: "";
         position: absolute;
@@ -375,7 +403,7 @@
         opacity: 0;
         background-color: #FFFFFF;
         transform: rotate(45deg);
-        animation: x-reflect--sfc_common_reflect 5s ease-in-out infinite;
+        animation: x-reflect 5s ease-in-out infinite;
     }
 </style>
 
