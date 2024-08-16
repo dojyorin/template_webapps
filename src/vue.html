@@ -390,21 +390,21 @@
     .x-reflect {
         position: relative;
         overflow: hidden;
-    }
 
-    .x-reflect::after {
-        pointer-events: none;
-        content: "";
-        position: absolute;
-        display: block;
-        top: -180px;
-        left: 0;
-        height: 100%;
-        width: 30px;
-        opacity: 0;
-        background-color: #FFFFFF;
-        transform: rotate(45deg);
-        animation: x-reflect 5s ease-in-out infinite;
+        &::after {
+            content: "";
+            pointer-events: none;
+            position: absolute;
+            display: block;
+            top: -180px;
+            left: 0;
+            height: 100%;
+            width: 30px;
+            opacity: 0;
+            background-color: #FFFFFF;
+            transform: rotate(45deg);
+            animation: x-reflect 5s ease-in-out infinite;
+        }
     }
 </style>
 
