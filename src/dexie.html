@@ -4,26 +4,26 @@
 <script async type="module">
     import {Dexie} from "https://esm.sh/dexie@4.0.8?target=esnext";
 
-    const db = new Dexie("test", {
+    const dexie = new Dexie("test", {
         autoOpen: false
     });
 
-    if(!db.verno) {
-        db.version(1).stores({
+    if(!dexie.verno) {
+        dexie.version(1).stores({
             "user": "++&id, name, age"
         });
     }
 
-    await db.open();
+    await dexie.open();
 
     document.getElementById("insert").onclick = async () => {
-        await db.transaction("rw", ["user"], async () => {
-            const insert = await db["user"].put({
+        await dexie.transaction("rw", ["user"], async () => {
+            const insert = await dexie["user"].put({
                 "name": `Name${Math.floor(Math.random() * 30)}`,
                 "age": Math.floor(Math.random() * 90)
             });
 
-            const select = await db["user"].get(insert);
+            const select = await dexie["user"].get(insert);
 
             console.log(insert);
             console.log(select);
