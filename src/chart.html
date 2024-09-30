@@ -2,26 +2,40 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {Chart} from "https://esm.sh/chart.js@4.4.3/auto?target=esnext";
+    import {Chart} from "https://esm.sh/chart.js@4.4.4/auto?target=esnext";
 
     const chart = new Chart(document.getElementById("chart"), {
         type: "bar",
         options: {
-            title: {
-                display: true,
-                text: "My Chart"
+            scale: {
+                ticks: {
+                    stepSize: 1
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: "MyChart"
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel() {
+                            return ["foo", "bar"];
+                        }
+                    }
+                }
             }
         },
         data: {
             labels: ["January", "February", "March", "April", "May", "June", "July"],
             datasets: [{
-                label: "First Dataset",
-                backgroundColor: "rgb(255, 127, 127)",
+                label: "Data1",
+                backgroundColor: "#FF7F7F",
                 data: [0, 10, 5, 2, 20, 30, 40]
             }, {
-                label: "Second Dataset",
-                backgroundColor: "rgb(127, 127, 255)",
-                data: [0, 5, 10, 4, 10, 30, 50]
+                label: "Data2",
+                backgroundColor: "#7F7FFF",
+                data: [2, 5, 10, 4, 10, 30, 50]
             }]
         }
     });

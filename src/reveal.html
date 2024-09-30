@@ -8,17 +8,15 @@
     import {default as notes} from "https://esm.sh/reveal.js@5.1.0/plugin/notes/notes.esm.js?target=esnext";
     import {default as math} from "https://esm.sh/reveal.js@5.1.0/plugin/math/math.esm.js?target=esnext";
 
-    await new Reveal(document.getElementById("reveal")).initialize({
+    await new Reveal(document.getElementById("reveal"), {
         hash: true,
-        history: true,
-        hideCursorTime: 1000,
         plugins: [
             markdown,
             highlight,
             notes,
             math
         ]
-    });
+    }).initialize();
 </script>
 
 <style>
