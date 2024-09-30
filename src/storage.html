@@ -2,43 +2,25 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    /**
-    * @param {string} key
-    * @param {unknown} data
-    */
-    function storageWrite(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
-    }
+    const SS_TEST = "test";
+    const LS_TEST = "test";
 
-    /**
-    * @param {string} key
-    * @return {unknown}
-    */
-    function storageRead(key) {
-        return JSON.parse(localStorage.getItem(key) ?? undefined);
-    }
+    const data = {
+        foo: 123,
+        bar: true
+    };
 
-    /**
-    * @param {string} key
-    */
-    function storageDelete(key) {
-        localStorage.removeItem(key);
-    }
+    localStorage.setItem(LS_TEST, JSON.stringify(data));
+    sessionStorage.setItem(SS_TEST, JSON.stringify(data));
 
-    /**
-    * @param {string} key
-    */
-    function storageHas(key) {
-        return localStorage.getItem(key) !== null;
-    }
+    const ls = JSON.parse(localStorage.getItem(LS_TEST) ?? "");
+    const ss = JSON.parse(sessionStorage.getItem(SS_TEST) ?? "");
 
-    storageWrite("test", {foo: 123});
-    const result1 = storageRead("test");
-    storageDelete("test");
-    const result2 = storageHas("test");
+    console.log(ls);
+    console.log(ss);
 
-    console.log(result1);
-    console.log(result2);
+    localStorage.clear();
+    sessionStorage.clear();
 </script>
 
 <main></main>
