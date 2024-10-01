@@ -23,15 +23,16 @@
     */
 
     function useCommonUI() {
-        /** @type Ref<boolean> */
+        /** @type {Ref<boolean>} */
         const nav = inject("$_nav");
-        /** @type Ref<boolean> */
+        /** @type {Ref<boolean>} */
         const loading = inject("$_loading");
-        /** @type Notify[] */
+        /** @type {Notify[]} */
         const notifies = inject("$_notifies");
 
         /**
         * @param {boolean=} state
+        * @return {void}
         */
         function toggleNav(state) {
             nav.value = state ?? !nav.value;
@@ -39,6 +40,7 @@
 
         /**
         * @param {boolean=} state
+        * @return {void}
         */
         function toggleLoading(state) {
             loading.value = state ?? !loading.value;
@@ -47,6 +49,7 @@
         /**
         * @param {string} message
         * @param {string} color
+        * @return {void}
         */
         function pushNotify(message, color) {
             notifies.push({
@@ -60,10 +63,61 @@
 
     const components_reflect = defineComponent({
         template: /*html*/`
-            <div class="x-reflect">
+            <div>
+                <component is="style" v-text="css"></component>
                 <slot></slot>
             </div>
-        `
+        `,
+        setup() {
+            /** @type {Ref<string>} */
+            const css = ref(/*css*/`
+                @scope {
+                    @keyframes reflect {
+                        0% {
+                            transform: scale(0) rotate(45deg);
+                            opacity: 0;
+                        }
+
+                        75% {
+                            transform: scale(0) rotate(45deg);
+                            opacity: 0.5;
+                        }
+
+                        80% {
+                            transform: scale(5) rotate(45deg);
+                            opacity: 1;
+                        }
+
+                        100% {
+                            transform: scale(50) rotate(45deg);
+                            opacity: 0;
+                        }
+                    }
+
+                    & {
+                        position: relative;
+                        overflow: hidden;
+
+                        &::after {
+                            content: "";
+                            pointer-events: none;
+                            position: absolute;
+                            display: block;
+                            top: -180px;
+                            left: 0;
+                            height: 100%;
+                            width: 30px;
+                            opacity: 0;
+                            background-color: #FFFFFF;
+                            transform: rotate(45deg);
+                            animation: reflect 5s ease-in-out infinite;
+                        }
+                    }
+                }
+            `);
+
+            return {css};
+        }
     });
 
     const components_layout_footer = defineComponent({
@@ -97,7 +151,7 @@
             </v-overlay>
         `,
         setup() {
-            /** @type Ref<boolean> */
+            /** @type {Ref<boolean>} */
             const loading = inject("$_loading");
 
             return {loading};
@@ -119,7 +173,7 @@
             </v-navigation-drawer>
         `,
         setup() {
-            /** @type Ref<boolean> */
+            /** @type {Ref<boolean>} */
             const nav = inject("$_nav");
 
             const theme = useTheme();
@@ -146,12 +200,13 @@
             </v-snackbar>
         `,
         setup() {
-            /** @type Notify[] */
+            /** @type {Notify[]} */
             const notifies = inject("$_notifies");
 
             /**
             * @param {Notify} notify
             * @param {number} ms
+            * @return {void}
             */
             async function notifyTimeout(notify, ms) {
                 await new Promise(done => setTimeout(done, ms));
@@ -213,9 +268,9 @@
         setup() {
             const {pushNotify} = useCommonUI();
 
-            /** @type Ref<number> */
+            /** @type {Ref<number>} */
             const count = ref(0);
-            /** @type Ref<number> */
+            /** @type {Ref<number>} */
             const countx = inject("$count");
 
             function increment() {
@@ -258,7 +313,7 @@
         setup() {
             const {toggleLoading, pushNotify} = useCommonUI();
 
-            /** @type Ref<number> */
+            /** @type {Ref<number>} */
             const countx = inject("$count");
 
             function resetx() {
@@ -289,9 +344,9 @@
             const display = useDisplay();
             const layout = useLayout();
 
-            /** @type Ref<boolean> */
+            /** @type {Ref<boolean>} */
             const mobile = computed(() => display.mobile.value);
-            /** @type Ref<number> */
+            /** @type {Ref<number>} */
             const height = computed(() => display.height.value - layout.mainRect.value.top - layout.mainRect.value.bottom);
 
             return {mobile, height};
@@ -365,48 +420,6 @@
 
     * {
         font-family: "M PLUS 1 Code" !important;
-    }
-
-    @keyframes x-reflect {
-        0% {
-            transform: scale(0) rotate(45deg);
-            opacity: 0;
-        }
-
-        75% {
-            transform: scale(0) rotate(45deg);
-            opacity: 0.5;
-        }
-
-        80% {
-            transform: scale(5) rotate(45deg);
-            opacity: 1;
-        }
-
-        100% {
-            transform: scale(50) rotate(45deg);
-            opacity: 0;
-        }
-    }
-
-    .x-reflect {
-        position: relative;
-        overflow: hidden;
-
-        &::after {
-            content: "";
-            pointer-events: none;
-            position: absolute;
-            display: block;
-            top: -180px;
-            left: 0;
-            height: 100%;
-            width: 30px;
-            opacity: 0;
-            background-color: #FFFFFF;
-            transform: rotate(45deg);
-            animation: x-reflect 5s ease-in-out infinite;
-        }
     }
 </style>
 
