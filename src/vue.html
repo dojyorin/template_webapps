@@ -65,7 +65,9 @@
         template: /*html*/`
             <div>
                 <component is="style">{{css}}</component>
-                <slot></slot>
+                <div class="reflect">
+                    <slot></slot>
+                </div>
             </div>
         `,
         setup() {
@@ -94,7 +96,7 @@
                         }
                     }
 
-                    & {
+                    .reflect {
                         position: relative;
                         overflow: hidden;
 
