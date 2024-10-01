@@ -39,8 +39,18 @@
             }]
         }
     });
+
+    document.getElementById("reset").onclick = () => {
+        chart.clear();
+        chart.data.labels.splice(0);
+        chart.data.datasets.splice(0);
+        chart.options.plugins.title.text = "";
+        chart.options.plugins.tooltip.callbacks.afterLabel = () => {};
+        chart.update();
+    };
 </script>
 
 <main>
     <canvas id="chart"></canvas>
+    <button type="button" id="reset">Reset</button>
 </main>
