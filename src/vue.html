@@ -7,7 +7,7 @@
 
 <script async type="module">
     import {createApp, defineComponent, ref, reactive, inject, computed} from "https://esm.sh/vue@3.5.10/dist/vue.esm-bundler.js?target=esnext";
-    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.4.5/dist/vue-router.esm-bundler.js?target=esnext";
+    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.4.4/dist/vue-router.esm-bundler.js?target=esnext";
     import {createVuetify, useDisplay, useLayout, useTheme} from "https://esm.sh/vuetify@3.7.2/dist/vuetify.esm.js?target=esnext";
 
     /**
@@ -245,6 +245,8 @@
                             <v-card-actions class="justify-center">
                                 <xx-reflect>
                                     <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
+                                </xx-reflect>
+                                <xx-reflect>
                                     <v-btn color="teal-darken-1" variant="flat" @click="delayresetx()">DelayResetX</v-btn>
                                 </xx-reflect>
                             </v-card-actions>
