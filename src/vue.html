@@ -172,22 +172,22 @@
     const layouts_default = defineComponent({
         template: /*html*/`
             <v-app>
-                <x-loading></x-loading>
-                <x-notify></x-notify>
-                <x-navigation></x-navigation>
-                <x-header></x-header>
+                <layout-loading></layout-loading>
+                <layout-notify></layout-notify>
+                <layout-navigation></layout-navigation>
+                <layout-header></layout-header>
                 <v-main>
                     <router-view></router-view>
                 </v-main>
-                <x-footer></x-footer>
+                <layout-footer></layout-footer>
             </v-app>
         `,
         components: {
-            "x-loading": components_layout_loading,
-            "x-notify": components_layout_notify,
-            "x-navigation": components_layout_navigation,
-            "x-header": components_layout_header,
-            "x-footer": components_layout_footer
+            "layout-loading": components_layout_loading,
+            "layout-notify": components_layout_notify,
+            "layout-navigation": components_layout_navigation,
+            "layout-header": components_layout_header,
+            "layout-footer": components_layout_footer
         }
     });
 
@@ -243,12 +243,12 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <xx-reflect>
+                                <x-reflect>
                                     <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
-                                </xx-reflect>
-                                <xx-reflect>
+                                </x-reflect>
+                                <x-reflect>
                                     <v-btn color="teal-darken-1" variant="flat" @click="delayresetx()">DelayResetX</v-btn>
-                                </xx-reflect>
+                                </x-reflect>
                             </v-card-actions>
                         </v-card>
                     </v-col>
@@ -332,7 +332,7 @@
 
     const component = {
         install(context) {
-            context.component("xx-reflect", components_reflect);
+            context.component("x-reflect", components_reflect);
         }
     };
 
