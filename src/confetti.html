@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    import {default as confetti} from "https://esm.sh/canvas-confetti@1.9.3?target=esnext";
+
+    document.getElementById("confetti").onclick = async () => {
+        await confetti({
+            angle: 270,
+            origin: {
+                x: 0.5,
+                y: 0
+            }
+        });
+    };
+</script>
+
+<main>
+    <button type="button" id="confetti">Spark!</button>
+</main>
