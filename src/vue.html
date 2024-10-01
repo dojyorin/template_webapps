@@ -64,7 +64,7 @@
     const components_reflect = defineComponent({
         template: /*html*/`
             <div>
-                <component is="style" v-text="css"></component>
+                <component is="style">{{css}}</component>
                 <slot></slot>
             </div>
         `,
