@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    const timestamp = new Date().toLocaleString("sv-se", {
+        timeZoneName: "longOffset"
+    }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+
+    const yyyymmddHHMMSS = new Date().toLocaleString("sv-se").replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "");
+
+    console.log(timestamp);
+    console.log(yyyymmddHHMMSS);
+</script>
+
+<main></main>
