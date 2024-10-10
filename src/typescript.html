@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.6.2?target=esnext";
+    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.6.3?target=esnext";
     import {minify} from "https://esm.sh/terser@5.34.1?target=esnext";
 
     for(const {type, textContent} of document.getElementsByTagName("script")) {
@@ -18,12 +18,22 @@
             module: true
         });
 
-        await import(`data:text/javascript;base64,${btoa(Array.from(new TextEncoder().encode(code), v => String.fromCharCode(v)).join(""))}`);
+        await import(`data:text/javascript,${encodeURIComponent(code)}`);
     }
 </script>
 
 <script type="text/typescript">
-    console.log("TypeScript");
+    interface Person {
+        name: string;
+        age: number;
+    }
+
+    const person: Person = {
+        name: "Regina Emmet",
+        age: 20
+    };
+
+    console.log(person);
 </script>
 
 <main></main>
