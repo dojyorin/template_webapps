@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    /**
+    * @template {unknown} T
+    * @typedef {object} WorkerMessage
+    * @prop {T} message
+    * @prop {Transferable[]=} transfers
+    */
+
+    /**
+    * @template {unknown} T
+    * @template {unknown} U
+    * @param {(message: T) => WorkerMessage<U> | Promise<WorkerMessage<U>>} task
+    * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
+    */
+    export function workerTask(task) {
+        const script = /*js*/`
+            globalThis.onmessage = async ({data}) => {
+                const {message, transfers} = await (${task.toString()})(data);
+                globalThis.postMessage(message, {
+                    transfer: transfers
+                });
+            };
+        `;
+
+        return (message, transfers) => {
+            return new Promise((res, rej) => {
+                const worker = new Worker(`data:text/javascript;${encodeURIComponent(script)}`, {
+                    type: "module"
+                });
+
+                worker.onmessage = ({data}) => {
+                    res(data);
+                    worker.terminate();
+                };
+
+                worker.onerror = (e) => {
+                    rej(e);
+                    worker.terminate();
+                };
+
+                worker.onmessageerror = (e) => {
+                    rej(e);
+                    worker.terminate();
+                };
+
+                worker.postMessage(message, {
+                    transfer: transfers
+                });
+            });
+        };
+    }
+</script>
+
+<main></main>

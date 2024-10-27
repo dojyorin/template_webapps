@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    if(!Response.prototype.bytes) {
+        Response.prototype.bytes = async function() {
+            return new Uint8Array(await this.arrayBuffer());
+        }
+    }
+
+    /**
+    * @typedef {object} DataEntry
+    * @prop {string} name
+    * @prop {Uint8Array} body
+    */
+
+    /**
+    * @param {DataEntry[]} files
+    * @return {Promise<Uint8Array>}
+    */
+    async function minipackEncode(files) {
+        return await new Blob(files.flatMap(({name, body}) => [new Uint8Array([new TextEncoder().encode(name).byteLength]), new Uint32Array([body.byteLength]), name, body])).bytes();
+    }
+
+    /**
+    * @param {Uint8Array} archive
+    * @return {DataEntry[]}
+    */
+    function minipackDecode(archive) {
+        /** @type {DataEntry[]} */
+        const files = [];
+
+        for(let i = 0; i < archive.byteLength;) {
+            const nsize = new DataView(archive.buffer, i).getUint8(0);
+            i += 1;
+
+            const bsize = new DataView(archive.buffer, i).getUint32(0);
+            i += 4;
+
+            files.push({
+                name: new TextDecoder().decode(archive.subarray(i, i += nsize)),
+                body: archive.slice(i, i += bsize)
+            });
+        }
+
+        return files;
+    }
+</script>
+
+<main></main>

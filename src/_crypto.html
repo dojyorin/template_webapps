@@ -1,0 +1,98 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    if(!Response.prototype.bytes) {
+        Response.prototype.bytes = async function() {
+            return new Uint8Array(await this.arrayBuffer());
+        }
+    }
+
+    /**
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function cryptoHash(data) {
+        return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+    }
+
+    /**
+    * @param {"X25519" | "Ed25519"} algorithm
+    * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
+    */
+    async function cryptoGenerateKey(algorithm) {
+        /** @type {CryptoKeyPair} */
+        const {publicKey, privateKey} = await crypto.subtle.generateKey(algorithm, true, algorithm === "X25519" ? ["deriveKey"] : ["sign"]);
+
+        return {
+            publicKey: new Uint8Array(await crypto.subtle.exportKey("spki", publicKey)),
+            privateKey: new Uint8Array(await crypto.subtle.exportKey("pkcs8", privateKey))
+        };
+    }
+
+    /**
+    * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
+    * @return {Promise<CryptoKey>}
+    */
+    async function cryptoDeriveKey({publicKey, privateKey}) {
+        return await crypto.subtle.deriveKey({
+            name: "X25519",
+            public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
+        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["encrypt", "decrypt"]);
+    }
+
+    /**
+    * @param {CryptoKey} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function cryptoEncrypt(key, data) {
+        /** @type {AesGcmParams} */
+        const aes = {
+            name: "AES-GCM",
+            iv: crypto.getRandomValues(new Uint8Array(12))
+        };
+
+        return await new Blob([aes.iv, await crypto.subtle.encrypt(aes, key, data)]).bytes();
+    }
+
+    /**
+    * @param {CryptoKey} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    * ```
+    */
+    async function cryptoDecrypt(key, data) {
+        /** @type {AesGcmParams} */
+        const aes = {
+            name: "AES-GCM",
+            iv: data.subarray(0, 12)
+        };
+
+        return new Uint8Array(await crypto.subtle.decrypt(aes, key, data.subarray(aes.iv.byteLength)));
+    }
+
+    /**
+    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "privateKey">} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function cryptoSign({privateKey}, data) {
+        return new Uint8Array(await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]), data));
+    }
+
+    /**
+    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
+    * @param {Uint8Array} sign
+    * @param {Uint8Array} data
+    * @return {Promise<boolean>}
+    */
+    async function cryptoVerify({publicKey}, sign, data) {
+        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), sign, data);
+    }
+</script>
+
+<main></main>
