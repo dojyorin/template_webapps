@@ -8,17 +8,17 @@
 
         appearance: none;
         cursor: pointer;
-        height: var(--size);
-        width: calc(var(--size) * 2);
         margin: 0;
+        height: var(--size);
+        aspect-ratio: 2;
         border-radius: var(--size);
         background-color: #444444;
 
         &::before {
             content: "";
             display: block;
-            width: var(--size);
             height: var(--size);
+            aspect-ratio: 1;
             border-radius: var(--size);
             background-color: #FFFFFF;
             transform: scale(var(--scale));
