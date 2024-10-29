@@ -4,30 +4,13 @@
 <script async type="module">
     /**
     * @template {unknown} T
-    * @typedef {object} WorkerMessage
-    * @prop {T} message
-    * @prop {Transferable[]=} transfers
+    * @param {string} script
+    * @return {(message: unknown, transfers?: Transferable[]) => Promise<T>}
     */
-
-    /**
-    * @template {unknown} T
-    * @template {unknown} U
-    * @param {(message: T) => WorkerMessage<U> | Promise<WorkerMessage<U>>} task
-    * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
-    */
-    export function workerTask(task) {
-        const script = /*js*/`
-            globalThis.onmessage = async ({data}) => {
-                const {message, transfers} = await (${task.toString()})(data);
-                globalThis.postMessage(message, {
-                    transfer: transfers
-                });
-            };
-        `;
-
+    function factoryWorker(script) {
         return (message, transfers) => {
             return new Promise((res, rej) => {
-                const worker = new Worker(`data:text/javascript;${encodeURIComponent(script)}`, {
+                const worker = new Worker(`data:text/javascript,${encodeURIComponent(script)}`, {
                     type: "module"
                 });
 
@@ -52,6 +35,18 @@
             });
         };
     }
+
+    const generateDummy = factoryWorker(/*js*/`
+        globalThis.onmessage = async ({data}) => {
+            const sample = new Uint8Array(new Float32Array(data / 4).map(() => Math.random()).buffer);
+
+            globalThis.postMessage(sample, {
+                transfer: [sample.buffer]
+            });
+        };
+    `);
+
+    console.log(await generateDummy(64 * 1024 ** 2));
 </script>
 
 <main></main>
