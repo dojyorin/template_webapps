@@ -2,12 +2,6 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    if(!Response.prototype.bytes) {
-        Response.prototype.bytes = async function() {
-            return new Uint8Array(await this.arrayBuffer());
-        }
-    }
-
     /**
     * @typedef {object} DataEntry
     * @prop {string} name
@@ -16,10 +10,31 @@
 
     /**
     * @param {DataEntry[]} files
-    * @return {Promise<Uint8Array>}
+    * @return {Uint8Array}
     */
-    async function minipackEncode(files) {
-        return await new Blob(files.flatMap(({name, body}) => [new Uint8Array([new TextEncoder().encode(name).byteLength]), new Uint32Array([body.byteLength]), name, body])).bytes();
+    function minipackEncode(files) {
+        const enc = new TextEncoder();
+
+        const archive = new Uint8Array(files.reduce((size, {name, body}) => size + Uint32Array.BYTES_PER_ELEMENT * 2 + enc.encode(name).byteLength + body.byteLength, 0));
+
+        for(let i = 0, j = 0; i < archive.byteLength; j++) {
+            const {name, body} = files[j];
+            const uname = enc.encode(name);
+
+            new DataView(archive.buffer, i).setUint32(0, uname.byteLength);
+            i += Uint32Array.BYTES_PER_ELEMENT;
+
+            new DataView(archive.buffer, i).setUint32(0, body.byteLength);
+            i += Uint32Array.BYTES_PER_ELEMENT;
+
+            archive.set(uname, i);
+            i += uname.byteLength;
+
+            archive.set(body, i);
+            i += body.byteLength;
+        }
+
+        return archive;
     }
 
     /**
@@ -27,18 +42,20 @@
     * @return {DataEntry[]}
     */
     function minipackDecode(archive) {
+        const dec = new TextDecoder();
+
         /** @type {DataEntry[]} */
         const files = [];
 
         for(let i = 0; i < archive.byteLength;) {
-            const nsize = new DataView(archive.buffer, i).getUint8(0);
-            i += 1;
+            const nsize = new DataView(archive.buffer, i).getUint32(0);
+            i += Uint32Array.BYTES_PER_ELEMENT;
 
             const bsize = new DataView(archive.buffer, i).getUint32(0);
-            i += 4;
+            i += Uint32Array.BYTES_PER_ELEMENT;
 
             files.push({
-                name: new TextDecoder().decode(archive.subarray(i, i += nsize)),
+                name: dec.decode(archive.subarray(i, i += nsize)),
                 body: archive.slice(i, i += bsize)
             });
         }
