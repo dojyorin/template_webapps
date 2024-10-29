@@ -2,8 +2,8 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    if(!Response.prototype.bytes) {
-        Response.prototype.bytes = async function() {
+    if(!Blob.prototype.bytes) {
+        Blob.prototype.bytes = async function() {
             return new Uint8Array(await this.arrayBuffer());
         }
     }
