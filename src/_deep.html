@@ -29,7 +29,7 @@
     * @param {T} data
     * @return {T}
     */
-    export function deepSeal(data) {
+    function deepSeal(data) {
         Object.seal(data);
 
         for(const key in data) {
