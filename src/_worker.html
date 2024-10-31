@@ -5,12 +5,15 @@
     /**
     * @template {unknown} T
     * @param {string} script
+    * @param {boolean=} ts
     * @return {(message: unknown, transfers?: Transferable[]) => Promise<T>}
     */
-    function factoryWorker(script) {
+    function factoryWorker(script, ts) {
+        const source = `data:text/${ts ? "typescript" : "javascript"},${encodeURIComponent(script.replace(/(["'`])[^\\1]*?\1|\s+/sg, (m, p) => p ? m : " "))}`;
+
         return (message, transfers) => {
             return new Promise((res, rej) => {
-                const worker = new Worker(`data:text/javascript,${encodeURIComponent(script)}`, {
+                const worker = new Worker(source, {
                     type: "module"
                 });
 
