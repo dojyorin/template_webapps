@@ -2,6 +2,11 @@
 <meta charset="utf-8">
 
 <script async type="module">
+    // ESNext Polyfill
+    Uint8Array.prototype.toBase64 ??= function() {
+        return btoa(Array.from(this, v => String.fromCharCode(v)).join(""));
+    }
+
     /**
     * @template {unknown} T
     * @param {string} script
@@ -9,7 +14,7 @@
     * @return {(message: unknown, transfers?: Transferable[]) => Promise<T>}
     */
     function factoryWorker(script, ts) {
-        const source = `data:text/${ts ? "typescript" : "javascript"},${encodeURIComponent(script.replace(/(["'`])[^\\1]*?\1|\s+/sg, (m, p) => p ? m : " "))}`;
+        const source = `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script.replace(/(["'`])[^\\1]*?\1|\s+/sg, (m, p) => p ? m : " ")).toBase64()}`;
 
         return (message, transfers) => {
             return new Promise((res, rej) => {

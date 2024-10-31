@@ -2,10 +2,9 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    if(!Response.prototype.bytes) {
-        Response.prototype.bytes = async function() {
-            return new Uint8Array(await this.arrayBuffer());
-        }
+    // ESNext Polyfill
+    Response.prototype.bytes ??= async function() {
+        return new Uint8Array(await this.arrayBuffer());
     }
 
     const sample = new Uint8Array(new Float32Array(1024 ** 2).map(() => Math.random()).buffer);
