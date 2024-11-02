@@ -212,9 +212,9 @@
             * @return {void}
             */
             async function notifyTimeout(notify, ms) {
-                await new Promise(done => setTimeout(done, ms));
+                await new Promise((done) => setTimeout(done, ms));
 
-                const i = notifies.findIndex(v => v === notify);
+                const i = notifies.findIndex((v) => v === notify);
 
                 if(i === -1) {
                     return;
@@ -326,7 +326,7 @@
 
             async function delayresetx() {
                 toggleLoading(true);
-                await new Promise(done => setTimeout(done, 1000));
+                await new Promise((done) => setTimeout(done, 1000));
                 countx.value = 0;
                 toggleLoading(false);
                 pushNotify("ResetDelayX!", "teal-darken-1");

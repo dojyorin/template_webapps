@@ -4,7 +4,7 @@
 <script async type="module">
     // esnext-polyfill
     Uint8Array.prototype.toBase64 ??= function() {
-        return btoa(Array.from(this, v => String.fromCharCode(v)).join(""));
+        return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
     }
 
     /**
