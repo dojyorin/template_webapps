@@ -14,7 +14,7 @@
     * @return {(message: unknown, transfers?: Transferable[]) => Promise<T>}
     */
     function factoryWorker(script, ts) {
-        const source = `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script.trim().replace(/(["'`])(?:\\\1|[^\\1])*?\1|\s+/sg, (m, p) => p ? m : " ")).toBase64()}`;
+        const source = `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script.trim().replace(/(['"`])(?:\\\1|[^\\1])*?\1|\s+/sg, (m, p) => p ? m : " ")).toBase64()}`;
 
         return (message, transfers) => {
             return new Promise((res, rej) => {
