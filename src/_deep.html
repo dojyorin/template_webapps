@@ -13,15 +13,13 @@
     * @return {Readonly<T>}
     */
     function deepFreeze(data) {
-        Object.freeze(data);
-
         for(const key in data) {
             if(Object.hasOwn(data, key) && typeof data[key] === "object" && data[key] !== null && !Object.isFrozen(data[key])) {
                 deepFreeze(data[key]);
             }
         }
 
-        return data;
+        return Object.freeze(data);
     }
 
     /**
@@ -30,14 +28,27 @@
     * @return {T}
     */
     function deepSeal(data) {
-        Object.seal(data);
-
         for(const key in data) {
             if(Object.hasOwn(data, key) && typeof data[key] === "object" && data[key] !== null && !Object.isSealed(data[key])) {
                 deepSeal(data[key]);
             }
         }
 
-        return data;
+        return Object.seal(data);
     }
+
+    const aaa = deepFreeze({
+        bbb: {
+            ccc: true
+        }
+    });
+
+    const xxx = deepSeal({
+        yyy: {
+            zzz: true
+        }
+    });
+
+    console.log(Object.isFrozen(aaa.bbb));
+    console.log(Object.isSealed(xxx.yyy));
 </script>
