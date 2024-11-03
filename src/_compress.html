@@ -12,7 +12,7 @@
     * @return {Promise<Uint8Array>}
     */
     async function compressEncode(data) {
-        return await new Response(new Response(sample).body?.pipeThrough(new CompressionStream("deflate-raw"))).bytes();
+        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream("deflate-raw"))).bytes();
     }
 
     /**
@@ -20,11 +20,19 @@
     * @return {Promise<Uint8Array>}
     */
     async function compressDecode(data) {
-        return await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
+        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
     }
 
-    const sample = new Uint8Array(new Float32Array(16 * 1024 ** 2 / 4).map(() => Math.random()).buffer);
-    const encode = await compressEncode(sample);
+    /**
+    * @param {number} size
+    * @return {Uint8Array}
+    */
+    function _dummy(size) {
+        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    }
+
+    const binary = _dummy(16 * 1024 ** 2);
+    const encode = await compressEncode(binary);
     const decode = await compressDecode(encode);
 
     console.log(encode);
