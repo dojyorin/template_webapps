@@ -9,9 +9,10 @@
 
     /**
     * @template {unknown} T
+    * @template {unknown} U
     * @param {string} script
     * @param {boolean=} ts
-    * @return {(message: unknown, transfers?: Transferable[]) => Promise<T>}
+    * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
     */
     function factoryWorker(script, ts) {
         const source = `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script.trim().replace(/(['"`])(?:\\\1|[^\\1])*?\1|\s+/sg, (m, p) => p ? m : " ")).toBase64()}`;
@@ -44,6 +45,7 @@
         };
     }
 
+    /** @type {(message: number) => Promise<Uint8Array>} */
     const generateDummy = factoryWorker(/*js*/`
         /**
         * @param {number} size
@@ -62,5 +64,7 @@
         };
     `);
 
-    console.log(await generateDummy(64 * 1024 ** 2));
+    const binary = await generateDummy(64 * 1024 ** 2);
+
+    console.log(binary);
 </script>
