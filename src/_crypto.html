@@ -92,4 +92,29 @@
     async function cryptoVerify({publicKey}, sign, data) {
         return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), sign, data);
     }
+
+    /**
+    * @param {number} size
+    * @return {Uint8Array}
+    */
+    function _dummy(size) {
+        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    }
+
+    const binary = _dummy(1024 ** 2);
+    const hash = await cryptoHash(binary);
+    const encKey = await cryptoGenerateKey("X25519");
+    const sigKey = await cryptoGenerateKey("Ed25519");
+    const encode = await cryptoEncrypt(await cryptoDeriveKey(encKey), binary);
+    const decode = await cryptoDecrypt(await cryptoDeriveKey(encKey), encode);
+    const sign = await cryptoSign(sigKey, binary);
+    const verify = await cryptoVerify(sigKey, sign, binary);
+
+    console.log(hash);
+    console.log(encKey);
+    console.log(sigKey);
+    console.log(encode);
+    console.log(decode);
+    console.log(sign);
+    console.log(verify);
 </script>
