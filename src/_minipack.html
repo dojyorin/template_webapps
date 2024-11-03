@@ -62,4 +62,30 @@
 
         return files;
     }
+
+    /**
+    * @param {number} size
+    * @return {Uint8Array}
+    */
+    function _dummy(size) {
+        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    }
+
+    /** @type {DataEntry[]} */
+    const files = [{
+        name: "foo.bin",
+        body: _dummy(1024 ** 2)
+    }, {
+        name: "bar.bin",
+        body: _dummy(1024 ** 2)
+    }, {
+        name: "baz.bin",
+        body: _dummy(1024 ** 2)
+    }];
+
+    const encode = minipackEncode(files);
+    const decode = minipackDecode(encode);
+
+    console.log(encode);
+    console.log(decode);
 </script>
