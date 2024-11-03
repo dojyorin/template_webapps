@@ -7,8 +7,6 @@
         return new Uint8Array(await this.arrayBuffer());
     }
 
-    const sample = new Uint8Array(new Float32Array(16 * 1024 ** 2 / 4).map(() => Math.random()).buffer);
-
     /**
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
@@ -25,6 +23,7 @@
         return await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
     }
 
+    const sample = new Uint8Array(new Float32Array(16 * 1024 ** 2 / 4).map(() => Math.random()).buffer);
     const encode = await compressEncode(sample);
     const decode = await compressDecode(encode);
 
