@@ -9,8 +9,24 @@
 
     const sample = new Uint8Array(new Float32Array(16 * 1024 ** 2 / 4).map(() => Math.random()).buffer);
 
-    const encode = await new Response(new Response(sample).body?.pipeThrough(new CompressionStream("deflate-raw"))).bytes();
-    const decode = await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
+    /**
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function compressEncode(data) {
+        return await new Response(new Response(sample).body?.pipeThrough(new CompressionStream("deflate-raw"))).bytes();
+    }
+
+    /**
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function compressDecode(data) {
+        return await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
+    }
+
+    const encode = await compressEncode(sample);
+    const decode = await compressDecode(encode);
 
     console.log(encode);
     console.log(decode);
