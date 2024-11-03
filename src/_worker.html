@@ -45,11 +45,19 @@
     }
 
     const generateDummy = factoryWorker(/*js*/`
-        globalThis.onmessage = async ({data}) => {
-            const sample = new Uint8Array(new Float32Array(data / 4).map(() => Math.random()).buffer);
+        /**
+        * @param {number} size
+        * @return {Uint8Array}
+        */
+        function _dummy(size) {
+            return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+        }
 
-            globalThis.postMessage(sample, {
-                transfer: [sample.buffer]
+        globalThis.onmessage = async ({data}) => {
+            const binary = _dummy(data);
+
+            globalThis.postMessage(binary, {
+                transfer: [binary.buffer]
             });
         };
     `);
