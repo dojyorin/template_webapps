@@ -21,11 +21,10 @@
             const {name, body} = files[j];
             const uname = enc.encode(name);
 
-            new DataView(archive.buffer, i).setUint32(0, uname.byteLength);
-            i += Uint32Array.BYTES_PER_ELEMENT;
-
-            new DataView(archive.buffer, i).setUint32(0, body.byteLength);
-            i += Uint32Array.BYTES_PER_ELEMENT;
+            const view = new DataView(archive.buffer, i);
+            view.setUint32(0, uname.byteLength);
+            view.setUint32(Uint32Array.BYTES_PER_ELEMENT, body.byteLength);
+            i += Uint32Array.BYTES_PER_ELEMENT * 2;
 
             archive.set(uname, i);
             i += uname.byteLength;
@@ -48,11 +47,10 @@
         const files = [];
 
         for(let i = 0; i < archive.byteLength; undefined) {
-            const nsize = new DataView(archive.buffer, i).getUint32(0);
-            i += Uint32Array.BYTES_PER_ELEMENT;
-
-            const bsize = new DataView(archive.buffer, i).getUint32(0);
-            i += Uint32Array.BYTES_PER_ELEMENT;
+            const view = new DataView(archive.buffer, i);
+            const nsize = view.getUint32(0);
+            const bsize = view.getUint32(Uint32Array.BYTES_PER_ELEMENT);
+            i += Uint32Array.BYTES_PER_ELEMENT * 2;
 
             files.push({
                 name: dec.decode(archive.subarray(i, i += nsize)),
