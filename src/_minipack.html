@@ -47,7 +47,7 @@
         /** @type {DataEntry[]} */
         const files = [];
 
-        for(let i = 0; i < archive.byteLength;) {
+        for(let i = 0; i < archive.byteLength; undefined) {
             const nsize = new DataView(archive.buffer, i).getUint32(0);
             i += Uint32Array.BYTES_PER_ELEMENT;
 
