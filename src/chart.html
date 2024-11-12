@@ -7,9 +7,12 @@
     const chart = new Chart(document.getElementById("chart"), {
         type: "bar",
         options: {
-            scale: {
-                ticks: {
-                    stepSize: 1
+            scales: {
+                y: {
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
                 }
             },
             plugins: {
