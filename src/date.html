@@ -2,12 +2,12 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const timestamp = new Date().toLocaleString("sv-se", {
+    const iso8601 = new Date().toLocaleString("sv-se", {
         timeZoneName: "longOffset"
-    }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+    }).replace(/(?<=\d) (?=\d)/, "T").replace(/ GMT$/, "Z").replace(/ GMT(?=[+-])/, "");
 
-    const yyyymmddHHMMSS = new Date().toLocaleString("sv-se").replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "");
+    const yyyymmddHHMMSS = new Date().toLocaleString("sv-se").replace(/\D/g, "");
 
-    console.log(timestamp);
+    console.log(iso8601);
     console.log(yyyymmddHHMMSS);
 </script>
