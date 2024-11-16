@@ -52,7 +52,8 @@
         /** @type {AesGcmParams} */
         const aes = {
             name: "AES-GCM",
-            iv: crypto.getRandomValues(new Uint8Array(12))
+            iv: crypto.getRandomValues(new Uint8Array(12)),
+            tagLength: 128
         };
 
         return await new Blob([aes.iv, await crypto.subtle.encrypt(aes, key, data)]).bytes();
@@ -68,7 +69,8 @@
         /** @type {AesGcmParams} */
         const aes = {
             name: "AES-GCM",
-            iv: data.subarray(0, 12)
+            iv: data.subarray(0, 12),
+            tagLength: 128
         };
 
         return new Uint8Array(await crypto.subtle.decrypt(aes, key, data.subarray(aes.iv.byteLength)));
