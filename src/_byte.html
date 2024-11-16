@@ -2,6 +2,10 @@
 <meta charset="utf-8">
 
 <script async type="module">
+    /**
+    * @param {Uint8Array[]} sources
+    * @return {Uint8Array}
+    */
     function byteConcat(...sources) {
         const memory = new Uint8Array(sources.reduce((n, {byteLength}) => n + byteLength, 0));
 
