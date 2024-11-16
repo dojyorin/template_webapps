@@ -24,4 +24,8 @@
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
+
+    const binary = byteConcat(_dummy(1024 ** 2), _dummy(1024 ** 2), _dummy(1024 ** 2));
+
+    console.log(binary);
 </script>
