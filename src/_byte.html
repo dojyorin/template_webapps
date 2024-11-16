@@ -16,4 +16,12 @@
 
         return memory;
     }
+
+    /**
+    * @param {number} size
+    * @return {Uint8Array}
+    */
+    function _dummy(size) {
+        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    }
 </script>
