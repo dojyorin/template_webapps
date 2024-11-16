@@ -2,11 +2,6 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    // esnext-polyfill
-    Blob.prototype.bytes ??= async function() {
-        return new Uint8Array(await this.arrayBuffer());
-    }
-
     /**
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
@@ -56,7 +51,11 @@
             tagLength: 128
         };
 
-        return await new Blob([aes.iv, await crypto.subtle.encrypt(aes, key, data)]).bytes();
+        const memory = new Uint8Array(aes.iv.byteLength + aes.tagLength / 8 + data.byteLength);
+        memory.set(aes.iv, 0);
+        memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, key, data)), aes.iv.byteLength);
+
+        return memory;
     }
 
     /**
