@@ -17,20 +17,19 @@
 
         const archive = new Uint8Array(files.reduce((size, {name, body}) => size + Uint32Array.BYTES_PER_ELEMENT * 2 + enc.encode(name).byteLength + body.byteLength, 0));
 
-        for(let i = 0, j = 0; i < archive.byteLength; j++) {
-            const {name, body} = files[j];
-            const uname = enc.encode(name);
+        for(let i = 0, j = 0; i < files.length; i++) {
+            const uname = enc.encode(files[i].name);
 
-            const view = new DataView(archive.buffer, i);
+            const view = new DataView(archive.buffer, j);
             view.setUint32(0, uname.byteLength);
-            view.setUint32(Uint32Array.BYTES_PER_ELEMENT, body.byteLength);
-            i += Uint32Array.BYTES_PER_ELEMENT * 2;
+            view.setUint32(Uint32Array.BYTES_PER_ELEMENT, files[i].body.byteLength);
+            j += Uint32Array.BYTES_PER_ELEMENT * 2;
 
-            archive.set(uname, i);
-            i += uname.byteLength;
+            archive.set(uname, j);
+            j += uname.byteLength;
 
-            archive.set(body, i);
-            i += body.byteLength;
+            archive.set(files[i].body, j);
+            j += files[i].body.byteLength;
         }
 
         return archive;
