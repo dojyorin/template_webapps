@@ -44,10 +44,7 @@
         const files = [];
 
         for(let i = 0; i < archive.byteLength; undefined) {
-            const view = new DataView(archive.buffer, i);
-            const nsize = view.getUint32(0);
-            const bsize = view.getUint32(Uint32Array.BYTES_PER_ELEMENT);
-            i += Uint32Array.BYTES_PER_ELEMENT * 2;
+            const [nsize, bsize] = new Uint32Array(archive.buffer.slice(i, i += Uint32Array.BYTES_PER_ELEMENT * 2));
 
             files.push({
                 name: dec.decode(archive.subarray(i, i += nsize)),
