@@ -1,0 +1,34 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    // esnext-polyfill
+    Response.prototype.bytes ??= async function() {
+        return new Uint8Array(await this.arrayBuffer());
+    }
+
+    // esnext-polyfill
+    Blob.prototype.bytes ??= async function() {
+        return new Uint8Array(await this.arrayBuffer());
+    }
+
+    // esnext-polyfill
+    Uint8Array.prototype.toBase64 ??= function() {
+        return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
+    }
+
+    // esnext-polyfill
+    Uint8Array.prototype.toHex ??= function() {
+        return Array.from(this, (v) => v.toString(16).padStart(2, "0")).join("");
+    }
+
+    // esnext-polyfill
+    Uint8Array.fromBase64 ??= function(text) {
+        return Uint8Array.from(atob(text), (v) => v.charCodeAt(0));
+    }
+
+    // esnext-polyfill
+    Uint8Array.fromHex ??= function(text) {
+        return Uint8Array.from(text.match(/[0-9a-fA-F]{2}/g) ?? [], (v) => parseInt(v, 16));
+    }
+</script>
