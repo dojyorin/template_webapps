@@ -9,12 +9,12 @@
 
     /**
     * @param {string} script
-    * @param {string=} mime
+    * @param {string=} type
     * @param {string=} name
     * @return {Worker}
     */
-    function createWorker(script, mime, name) {
-        return new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+    function createWorker(script, type, name) {
+        return new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
             type: "module",
             name: name
         });
@@ -24,11 +24,11 @@
     * @template {unknown} T
     * @template {unknown} U
     * @param {string} script
-    * @param {string=} mime
+    * @param {string=} type
     * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
     */
-    function factoryWorker(script, mime) {
-        const source = `data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`;
+    function factoryWorker(script, type) {
+        const source = `data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`;
 
         return (message, transfers) => {
             return new Promise((res, rej) => {
