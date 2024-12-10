@@ -8,14 +8,27 @@
     }
 
     /**
+    * @param {string} script
+    * @param {string=} mime
+    * @param {string=} name
+    * @return {Worker}
+    */
+    function createWorker(script, mime, name) {
+        return new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+            type: "module",
+            name: name
+        });
+    }
+
+    /**
     * @template {unknown} T
     * @template {unknown} U
     * @param {string} script
-    * @param {boolean=} ts
+    * @param {string=} mime
     * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
     */
-    function factoryWorker(script, ts) {
-        const source = `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script).toBase64()}`;
+    function factoryWorker(script, mime) {
+        const source = `data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`;
 
         return (message, transfers) => {
             return new Promise((res, rej) => {
