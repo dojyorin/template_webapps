@@ -68,7 +68,7 @@
             return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
         }
 
-        globalThis.onmessage = async ({data}) => {
+        globalThis.onmessage = ({data}) => {
             const binary = _dummy(data);
 
             globalThis.postMessage(binary, {
@@ -80,4 +80,17 @@
     const binary = await generateDummy(128 * 1024 ** 2);
 
     console.log(binary);
+
+    const context = createWorker(/*js*/`
+        globalThis.onmessage = ({data}) => {
+            globalThis.postMessage(data * 2);
+        };
+    `);
+
+    context.onmessage = ({data}) => {
+        context.terminate();
+        console.log(data);
+    };
+
+    context.postMessage(1024);
 </script>
