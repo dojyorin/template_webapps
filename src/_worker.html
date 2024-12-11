@@ -2,7 +2,10 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    // esnext-polyfill
+    /**
+    * @summary esnext-polyfill
+    * @return {string}
+    */
     Uint8Array.prototype.toBase64 ??= function() {
         return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
     }

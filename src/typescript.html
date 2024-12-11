@@ -5,7 +5,10 @@
     import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.7.2?target=esnext";
     import {minify} from "https://esm.sh/terser@5.37.0?target=esnext";
 
-    // esnext-polyfill
+    /**
+    * @summary esnext-polyfill
+    * @return {string}
+    */
     Uint8Array.prototype.toBase64 ??= function() {
         return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
     }
