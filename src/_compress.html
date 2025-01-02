@@ -3,14 +3,6 @@
 
 <script async type="module">
     /**
-    * @summary esnext-polyfill
-    * @return {Promise<Uint8Array>}
-    */
-    Response.prototype.bytes ??= async function() {
-        return new Uint8Array(await this.arrayBuffer());
-    }
-
-    /**
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
