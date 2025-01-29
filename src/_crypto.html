@@ -2,39 +2,39 @@
 <meta charset="utf-8">
 
 <script async type="module">
-/**
-* @summary esnext-polyfill
-* @return {string}
-*/
-Uint8Array.prototype.toBase64 ??= function() {
-    return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
-}
+    /**
+    * @summary esnext-polyfill
+    * @return {string}
+    */
+    Uint8Array.prototype.toBase64 ??= function() {
+        return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
+    }
 
-/**
-* @summary esnext-polyfill
-* @param {string} text
-* @return {Uint8Array}
-*/
-Uint8Array.fromBase64 ??= function(text) {
-    return Uint8Array.from(atob(text), (v) => v.charCodeAt(0));
-}
+    /**
+    * @summary esnext-polyfill
+    * @param {string} text
+    * @return {Uint8Array}
+    */
+    Uint8Array.fromBase64 ??= function(text) {
+        return Uint8Array.from(atob(text), (v) => v.charCodeAt(0));
+    }
 
-/**
-* @param {Uint8Array} data
-* @param {string} name
-* @return {string}
-*/
-function pemEncode(data, name) {
-    return `-----BEGIN ${name.toUpperCase()}-----\n${data.toBase64()}\n-----END ${name.toUpperCase()}-----`;
-}
+    /**
+    * @param {string} name
+    * @param {Uint8Array} data
+    * @return {string}
+    */
+    function pemEncode(name, data) {
+        return `-----BEGIN ${name.toUpperCase()}-----\n${data.toBase64()}\n-----END ${name.toUpperCase()}-----`;
+    }
 
-/**
-* @param {string} data
-* @return {Uint8Array}
-*/
-function pemDecode(data) {
-    return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").replaceAll("\n", "").match(/(?<=-----)[a-zA-Z0-9+/]+(?=-----)/)?.[0] ?? "");
-}
+    /**
+    * @param {string} data
+    * @return {Uint8Array}
+    */
+    function pemDecode(data) {
+        return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").replaceAll("\n", "").replace(/^-----BEGIN [A-Z0-9 ]+-----/, "").replace(/-----END [A-Z0-9 ]+-----$/, ""));
+    }
 
     /**
     * @param {Uint8Array} data
