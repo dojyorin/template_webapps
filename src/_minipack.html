@@ -3,31 +3,31 @@
 
 <script async type="module">
     /**
-    * @typedef {object} Binary
-    * @prop {string} name
-    * @prop {Uint8Array} body
+    * @summary esnext-polyfill
+    * @return {Promise<Uint8Array>}
     */
+    Blob.prototype.bytes ??= async function() {
+        return new Uint8Array(await this.arrayBuffer());
+    }
 
     /**
-    * @param {Binary[]} files
-    * @return {Uint8Array}
+    * @param {File[]} files
+    * @return {Promise<Uint8Array>}
     */
-    function minipackEncode(files) {
-        const enc = new TextEncoder();
+    async function minipackEncode(files) {
+        const archive = new Uint8Array(files.reduce((n, {size}) => n + Uint32Array.BYTES_PER_ELEMENT + 0xFF + size, 0));
+        const view = new DataView(archive.buffer);
+        const encoder = new TextEncoder();
 
-        const archive = new Uint8Array(files.reduce((n, {name, body}) => n + Uint32Array.BYTES_PER_ELEMENT * 2 + enc.encode(name).byteLength + body.byteLength, 0));
+        for(let i = 0, j = 0; j < files.length; j++) {
+            view.setUint32(i, files[j].size);
+            i += Uint32Array.BYTES_PER_ELEMENT;
 
-        for(let i = 0, j = 0; i < files.length; i++) {
-            const name = enc.encode(files[i].name);
+            archive.set(encoder.encode(files[j].name), i);
+            i += 0xFF;
 
-            archive.set(new Uint8Array(new Uint32Array([name.byteLength, files[i].body.byteLength]).buffer), j);
-            j += Uint32Array.BYTES_PER_ELEMENT * 2;
-
-            archive.set(name, j);
-            j += name.byteLength;
-
-            archive.set(files[i].body, j);
-            j += files[i].body.byteLength;
+            archive.set(await files[j].bytes(), i);
+            i += files[j].size;
         }
 
         return archive;
@@ -35,24 +35,24 @@
 
     /**
     * @param {Uint8Array} archive
-    * @return {Binary[]}
+    * @return {Promise<File[]>}
     */
-    function minipackDecode(archive) {
-        const dec = new TextDecoder();
-
-        /** @type {Binary[]} */
+    async function minipackDecode(archive) {
+        /** @type {File[]} */
         const files = [];
+        const view = new DataView(archive.buffer);
+        const decoder = new TextDecoder();
 
         for(let i = 0; i < archive.byteLength; undefined) {
-            const [nsize, bsize] = new Uint32Array(archive.buffer.slice(i, i += Uint32Array.BYTES_PER_ELEMENT * 2));
+            const size = view.getUint32(i);
+            i += Uint32Array.BYTES_PER_ELEMENT;
 
-            files.push({
-                name: dec.decode(archive.subarray(i, i += nsize)),
-                body: archive.slice(i, i += bsize)
-            });
+            const name = decoder.decode(archive.subarray(i, i += 0xFF)).replaceAll("\0", "");
+
+            files.push(new File([archive.slice(i, i += size)], name));
         }
 
-        return files;
+        return await files;
     }
 
     /**
@@ -63,20 +63,14 @@
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    /** @type {Binary[]} */
-    const files = [{
-        name: "foo.bin",
-        body: _dummy(1024 ** 2)
-    }, {
-        name: "bar.bin",
-        body: _dummy(1024 ** 2)
-    }, {
-        name: "baz.bin",
-        body: _dummy(1024 ** 2)
-    }];
+    const files = [
+        new File([_dummy(1024 ** 2)], "foo"),
+        new File([_dummy(1024 ** 2)], "bar"),
+        new File([_dummy(1024 ** 2)], "baz")
+    ];
 
-    const encode = minipackEncode(files);
-    const decode = minipackDecode(encode);
+    const encode = await minipackEncode(files);
+    const decode = await minipackDecode(encode);
 
     console.log(encode);
     console.log(decode);
