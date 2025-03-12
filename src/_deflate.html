@@ -4,18 +4,20 @@
 <script async type="module">
     /**
     * @param {Uint8Array} data
+    * @param {CompressionFormat=} format
     * @return {Promise<Uint8Array>}
     */
-    async function compressEncode(data) {
-        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream("deflate-raw"))).bytes();
+    async function deflateEncode(data, format) {
+        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "deflate-raw"))).bytes();
     }
 
     /**
     * @param {Uint8Array} data
+    * @param {CompressionFormat=} format
     * @return {Promise<Uint8Array>}
     */
-    async function compressDecode(data) {
-        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream("deflate-raw"))).bytes();
+    async function deflateDecode(data, format) {
+        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "deflate-raw"))).bytes();
     }
 
     /**
@@ -27,8 +29,8 @@
     }
 
     const binary = _dummy(16 * 1024 ** 2);
-    const encode = await compressEncode(binary);
-    const decode = await compressDecode(encode);
+    const encode = await deflateEncode(binary);
+    const decode = await deflateDecode(encode);
 
     console.log(encode);
     console.log(decode);
