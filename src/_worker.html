@@ -13,13 +13,11 @@
     /**
     * @param {string} script
     * @param {string=} type
-    * @param {string=} name
     * @return {Worker}
     */
-    function createWorker(script, type, name) {
+    function createWorker(script, type) {
         return new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
-            type: "module",
-            name: name
+            type: "module"
         });
     }
 
@@ -31,11 +29,9 @@
     * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
     */
     function factoryWorker(script, type) {
-        const source = `data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`;
-
         return (message, transfers) => {
             return new Promise((res, rej) => {
-                const worker = new Worker(source, {
+                const worker = new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
                     type: "module"
                 });
 
