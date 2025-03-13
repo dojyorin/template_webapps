@@ -95,7 +95,8 @@
             }
 
             if(type !== "0" && type !== "\0") {
-                throw new ReferenceError("Only regular file are supported.");
+                i += size + TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE;
+                continue;
             }
 
             const body = _tar.slice(i, i += size);
