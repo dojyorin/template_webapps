@@ -99,7 +99,7 @@
                 continue;
             }
 
-            const body = _tar.slice(i, i += size);
+            const body = _tar.subarray(i, i += size);
             i += TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE;
 
             files.push(new File([body], name, {
