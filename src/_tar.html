@@ -43,7 +43,7 @@
             i += 8;
             i += 247;
 
-            tar.set(encoder.encode(`${tar.subarray(i - TAR_BLOCK_SIZE, i).reduce((a, b) => a + b, 0).toString(8).slice(0, 6).padStart(6, "0")}\0 `), i - 364);
+            tar.set(encoder.encode(`${tar.subarray(i - TAR_BLOCK_SIZE, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")}\0 `), i - 364);
 
             tar.set(await files[j].bytes(), i);
             i += files[j].size + TAR_BLOCK_SIZE - files[j].size % TAR_BLOCK_SIZE;
@@ -90,7 +90,7 @@
             const header = _tar.slice(i - TAR_BLOCK_SIZE, i);
             header.set(encoder.encode("        "), TAR_BLOCK_SIZE - 364);
 
-            if(checksum !== header.reduce((a, b) => a + b, 0).toString(8).slice(0, 6).padStart(6, "0")) {
+            if(checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
