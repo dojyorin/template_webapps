@@ -12,47 +12,102 @@
 
     /**
     * @param {File[]} files
+    * @param {boolean=} gzip
     * @return {Promise<Uint8Array>}
     */
-    async function minipackEncode(files) {
-        const archive = new Uint8Array(files.reduce((n, {size}) => n + Uint32Array.BYTES_PER_ELEMENT + 0xFF + size, 0));
-        const view = new DataView(archive.buffer);
+    async function tarEncode(files, gzip) {
+        const TAR_BLOCK_SIZE = 512;
+
+        const tar = new Uint8Array(files.length * TAR_BLOCK_SIZE + files.reduce((n, {size}) => n + size + TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE, 0) + TAR_BLOCK_SIZE * 2);
         const encoder = new TextEncoder();
 
         for(let i = 0, j = 0; j < files.length; j++) {
-            view.setUint32(i, files[j].size);
-            i += Uint32Array.BYTES_PER_ELEMENT;
+            tar.set(encoder.encode(files[j].name).subarray(0, 100), i);
+            i += 100;
+            tar.set(encoder.encode("0000644"), i);
+            i += 8;
+            tar.set(encoder.encode("0000000"), i);
+            i += 8;
+            tar.set(encoder.encode("0000000"), i);
+            i += 8;
+            tar.set(encoder.encode(files[j].size.toString(8).slice(0, 11).padStart(11, "0")), i);
+            i += 12;
+            tar.set(encoder.encode(Math.floor(files[j].lastModified / 1000).toString(8).slice(0, 11).padStart(11, "0")), i);
+            i += 12;
+            tar.set(encoder.encode("        "), i);
+            i += 8;
+            tar.set(encoder.encode("0"), i);
+            i += 1;
+            i += 100;
+            tar.set(encoder.encode("ustar  "), i);
+            i += 8;
+            i += 247;
 
-            archive.set(encoder.encode(files[j].name), i);
-            i += 0xFF;
+            tar.set(encoder.encode(tar.subarray(i - TAR_BLOCK_SIZE, i).reduce((a, b) => a + b, 0).toString(8).slice(0, 6).padStart(6, "0")), i - 364);
+            tar.set(encoder.encode("\0"), i - 358);
 
-            archive.set(await files[j].bytes(), i);
-            i += files[j].size;
+            tar.set(await files[j].bytes(), i);
+            i += files[j].size + TAR_BLOCK_SIZE - files[j].size % TAR_BLOCK_SIZE;
         }
 
-        return archive;
+        return gzip ? await new Response(new Response(tar).body?.pipeThrough(new CompressionStream("gzip"))).bytes() : tar;
     }
 
     /**
-    * @param {Uint8Array} archive
+    * @param {Uint8Array} tar
+    * @param {boolean=} gzip
     * @return {Promise<File[]>}
     */
-    async function minipackDecode(archive) {
+    async function tarDecode(tar, gzip) {
+        const TAR_BLOCK_SIZE = 512;
+
+        const _tar = gzip ? await new Response(new Response(tar).body?.pipeThrough(new DecompressionStream("gzip"))).bytes() : tar;
         /** @type {File[]} */
         const files = [];
-        const view = new DataView(archive.buffer);
+        const encoder = new TextEncoder();
         const decoder = new TextDecoder();
 
-        for(let i = 0; i < archive.byteLength; undefined) {
-            const size = view.getUint32(i);
-            i += Uint32Array.BYTES_PER_ELEMENT;
+        for(let i = 0; i < _tar.byteLength; i) {
+            if(i + TAR_BLOCK_SIZE * 2 === _tar.byteLength && _tar.subarray(i).every((v) => v === 0x00)) {
+                break;
+            }
 
-            const name = decoder.decode(archive.subarray(i, i += 0xFF)).replaceAll("\0", "");
+            const name = decoder.decode(_tar.subarray(i, i += 100)).replaceAll("\0", "");
+            i += 8;
+            i += 8;
+            i += 8;
+            const size = parseInt(decoder.decode(_tar.subarray(i, i += 12)).slice(0, 11), 8);
+            const time = parseInt(decoder.decode(_tar.subarray(i, i += 12)).slice(0, 11), 8);
+            const checksum = decoder.decode(_tar.subarray(i, i += 8)).slice(0, 6);
+            const type = decoder.decode(_tar.subarray(i, i += 1));
+            i += 100;
+            const magic = decoder.decode(_tar.subarray(i, i += 8)).slice(0, 7);
+            i += 247;
 
-            files.push(new File([archive.slice(i, i += size)], name));
+            if(!magic.startsWith("ustar")) {
+                throw new ReferenceError("Invalid tar magic.");
+            }
+
+            const header = _tar.slice(i - TAR_BLOCK_SIZE, i);
+            header.set(encoder.encode("        "), TAR_BLOCK_SIZE - 364);
+
+            if(checksum !== header.reduce((a, b) => a + b, 0).toString(8).slice(0, 6).padStart(6, "0")) {
+                throw new ReferenceError("Invalid tar checksum.");
+            }
+
+            if(type !== "0" && type !== "\0") {
+                throw new ReferenceError("Only regular file are supported.");
+            }
+
+            const body = _tar.slice(i, i += size);
+            i += TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE;
+
+            files.push(new File([body], name, {
+                lastModified: time
+            }));
         }
 
-        return await files;
+        return files;
     }
 
     /**
@@ -69,8 +124,8 @@
         new File([_dummy(1024 ** 2)], "baz")
     ];
 
-    const encode = await minipackEncode(files);
-    const decode = await minipackDecode(encode);
+    const encode = await tarEncode(files, true);
+    const decode = await tarDecode(encode, true);
 
     console.log(encode);
     console.log(decode);
