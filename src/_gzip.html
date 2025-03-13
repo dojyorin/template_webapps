@@ -7,8 +7,8 @@
     * @param {CompressionFormat=} format
     * @return {Promise<Uint8Array>}
     */
-    async function deflateEncode(data, format) {
-        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "deflate-raw"))).bytes();
+    async function gzipEncode(data, format) {
+        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
@@ -16,8 +16,8 @@
     * @param {CompressionFormat=} format
     * @return {Promise<Uint8Array>}
     */
-    async function deflateDecode(data, format) {
-        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "deflate-raw"))).bytes();
+    async function gzipDecode(data, format) {
+        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
@@ -29,8 +29,8 @@
     }
 
     const binary = _dummy(16 * 1024 ** 2);
-    const encode = await deflateEncode(binary);
-    const decode = await deflateDecode(encode);
+    const encode = await gzipEncode(binary);
+    const decode = await gzipDecode(encode);
 
     console.log(encode);
     console.log(decode);
