@@ -13,8 +13,8 @@
         return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
     }
 
-    for(const {type, textContent} of document.getElementsByTagName("script")) {
-        if(type !== "text/typescript" || !textContent) {
+    for (const {type, textContent} of document.getElementsByTagName("script")) {
+        if (type !== "text/typescript" || !textContent) {
             continue;
         }
 

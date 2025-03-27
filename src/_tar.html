@@ -21,7 +21,7 @@
         const tar = new Uint8Array(files.length * TAR_BLOCK_SIZE + files.reduce((n, {size}) => n + size + TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE, 0) + TAR_BLOCK_SIZE * 2);
         const encoder = new TextEncoder();
 
-        for(let i = 0, j = 0; j < files.length; j++) {
+        for (let i = 0, j = 0; j < files.length; j++) {
             tar.set(encoder.encode(files[j].name).subarray(0, 100), i);
             i += 100;
             tar.set(encoder.encode("0000644"), i);
@@ -66,8 +66,8 @@
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
 
-        for(let i = 0; i < _tar.byteLength;) {
-            if(i + TAR_BLOCK_SIZE * 2 === _tar.byteLength && _tar.subarray(i).every((v) => v === 0x00)) {
+        for (let i = 0; i < _tar.byteLength;) {
+            if (i + TAR_BLOCK_SIZE * 2 === _tar.byteLength && _tar.subarray(i).every((v) => v === 0x00)) {
                 break;
             }
 
@@ -83,18 +83,18 @@
             const magic = decoder.decode(_tar.subarray(i, i += 8)).slice(0, 7);
             i += 247;
 
-            if(!magic.startsWith("ustar")) {
+            if (!magic.startsWith("ustar")) {
                 throw new ReferenceError("Invalid tar magic.");
             }
 
             const header = _tar.slice(i - TAR_BLOCK_SIZE, i);
             header.set(encoder.encode("        "), TAR_BLOCK_SIZE - 364);
 
-            if(checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
+            if (checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
-            if(type !== "0" && type !== "\0") {
+            if (type !== "0" && type !== "\0") {
                 i += size + TAR_BLOCK_SIZE - size % TAR_BLOCK_SIZE;
                 continue;
             }

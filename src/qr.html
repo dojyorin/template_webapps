@@ -24,7 +24,7 @@
             const image = render.getImageData(0, 0, render.canvas.width, render.canvas.height);
             const result = jsqr(image.data, image.width, image.height);
 
-            if(result) {
+            if (result) {
                 clearInterval(loop);
                 res(result.data);
             }
