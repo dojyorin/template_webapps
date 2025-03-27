@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    /**
+    * @param {string} name
+    * @return {HTMLInputElement=}
+    */
+    function radioActive(name) {
+        for (const element of document.getElementsByName(name)) {
+            if (element instanceof HTMLInputElement && element.type === "radio" && element.checked) {
+                return element;
+            }
+        }
+    }
+
+    console.log(radioActive("foo")?.value);
+</script>
+
+<input type="radio" name="foo" value="x" checked>
+<input type="radio" name="foo" value="y">
+<input type="radio" name="foo" value="z">
