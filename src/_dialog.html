@@ -10,9 +10,9 @@
     */
     function showNotify(message, color, timeout) {
         const dialog = document.createElement("dialog");
-        dialog.textContent = message;
-
         const style = document.createElement("style");
+
+        dialog.textContent = message;
         style.textContent = /*css*/`
             @scope {
                 & {
@@ -79,4 +79,12 @@
 
         return (enable) => enable ? dialog.showModal() : dialog.close();
     }
+
+    showNotify("Test", "green");
+
+    const showLoading = factoryLoading("orange");
+
+    showLoading(true);
+    await new Promise(done => setTimeout(done, 1000));
+    showLoading(false);
 </script>
