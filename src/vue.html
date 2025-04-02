@@ -62,7 +62,7 @@
         return {toggleNav, toggleLoading, pushNotify};
     }
 
-    const components_reflect = defineComponent({
+    const vueComponentReflect = defineComponent({
         template: /*html*/`
             <div>
                 <component is="style">{{css}}</component>
@@ -123,13 +123,13 @@
         }
     });
 
-    const components_layout_footer = defineComponent({
+    const vueComponentFooter = defineComponent({
         template: /*html*/`
             <v-footer app class="justify-center align-center">Copyright</v-footer>
         `
     });
 
-    const components_layout_header = defineComponent({
+    const vueComponentHeader = defineComponent({
         template: /*html*/`
             <v-app-bar density="compact" class="text-white">
                 <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
@@ -147,7 +147,7 @@
         }
     });
 
-    const components_layout_loading = defineComponent({
+    const vueComponentLoading = defineComponent({
         template: /*html*/`
             <v-overlay persistent no-click-animation z-index="4000" class="justify-center align-center" v-model="loading">
                 <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
@@ -161,7 +161,7 @@
         }
     });
 
-    const components_layout_navigation = defineComponent({
+    const vueComponentNavigation = defineComponent({
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="nav">
                 <v-list nav density="compact">
@@ -192,7 +192,7 @@
         }
     });
 
-    const components_layout_notify = defineComponent({
+    const vueComponentNotify = defineComponent({
         template: /*html*/`
             <v-snackbar v-for="notify in notifies" model-value position="fixed" location="top" z-index="3000" :color="notify.color" timeout="-1" v-bind="notifyTimeout(notify, 5000)">
                 <div>{{notify.message}}</div>
@@ -227,7 +227,7 @@
         }
     });
 
-    const layouts_default = defineComponent({
+    const vueLayoutDefault = defineComponent({
         template: /*html*/`
             <v-app>
                 <layout-loading></layout-loading>
@@ -241,15 +241,15 @@
             </v-app>
         `,
         components: {
-            "layout-loading": components_layout_loading,
-            "layout-notify": components_layout_notify,
-            "layout-navigation": components_layout_navigation,
-            "layout-header": components_layout_header,
-            "layout-footer": components_layout_footer
+            "layout-loading": vueComponentLoading,
+            "layout-notify": vueComponentNotify,
+            "layout-navigation": vueComponentNavigation,
+            "layout-header": vueComponentHeader,
+            "layout-footer": vueComponentFooter
         }
     });
 
-    const pages_index = defineComponent({
+    const vuePageIndex = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -290,7 +290,7 @@
         }
     });
 
-    const pages_sub = defineComponent({
+    const vuePageSub = defineComponent({
         template: /*html*/`
             <v-container fluid>
                 <v-row justify="center">
@@ -336,7 +336,7 @@
         }
     });
 
-    const pages_third = defineComponent({
+    const vuePageThird = defineComponent({
         template: /*html*/`
             <v-img :height="height" class="text-center align-center text-white" gradient="45deg, #FF9F17, #FF4E0E">
                 <div v-if="mobile" class="text-h4">MOBILE</div>
@@ -356,27 +356,27 @@
         }
     });
 
-    const router = createRouter({
+    const vuePluginRouter = createRouter({
         history: createWebHashHistory(),
         routes: [{
             path: "/",
             name: "home",
-            component: pages_index
+            component: vuePageIndex
         }, {
             path: "/sub",
             name: "sub",
-            component: pages_sub
+            component: vuePageSub
         }, {
             path: "/third",
             name: "third",
-            component: pages_third
+            component: vuePageThird
         }, {
             path: "/:catchAll(.*)",
             redirect: "/"
         }]
     });
 
-    const vuetify = createVuetify({
+    const vuePluginVuetify = createVuetify({
         defaults: {
             VBtn: {
                 style: {
@@ -388,13 +388,13 @@
         }
     });
 
-    const component = {
+    const vuePluginComponent = {
         install(context) {
-            context.component("x-reflect", components_reflect);
+            context.component("x-reflect", vueComponentReflect);
         }
     };
 
-    const provide = {
+    const vuePluginProvide = {
         install(context) {
             context.provide("$_nav", ref(false));
             context.provide("$_loading", ref(false));
@@ -404,11 +404,11 @@
         }
     };
 
-    const vue = createApp(layouts_default);
-    vue.use(router);
-    vue.use(vuetify);
-    vue.use(component);
-    vue.use(provide);
+    const vue = createApp(vueLayoutDefault);
+    vue.use(vuePluginRouter);
+    vue.use(vuePluginVuetify);
+    vue.use(vuePluginComponent);
+    vue.use(vuePluginProvide);
     vue.mount(document.getElementById("vue"));
 </script>
 
