@@ -217,12 +217,12 @@
 
                             <v-card-actions class="justify-center">
                                 <v-btn color="green" variant="flat" @click="increment()">Increment</v-btn>
-                                <v-btn color="purple" variant="flat" @click="incrementx()">IncrementX</v-btn>
+                                <v-btn color="green" variant="flat" @click="incrementx()">IncrementX</v-btn>
                                 <x-reflect>
-                                    <v-btn color="orange-darken-1" variant="flat" @click="resetx()">ResetX</v-btn>
+                                    <v-btn color="orange-darken-1" variant="flat" @click="decrement()">Decrement</v-btn>
                                 </x-reflect>
                                 <x-reflect>
-                                    <v-btn color="teal-darken-1" variant="flat" @click="delayresetx()">DelayResetX</v-btn>
+                                    <v-btn color="orange-darken-1" variant="flat" @click="decrementx()">DecrementX</v-btn>
                                 </x-reflect>
                             </v-card-actions>
                         </v-card>
@@ -243,25 +243,28 @@
                 pushToast("green", "Increment!");
             }
 
-            function incrementx() {
-                countx.value++;
-                pushToast("purple", "IncrementX!");
-            }
-
-            function resetx() {
-                countx.value = 0;
-                pushToast("orange-darken-1", "ResetX!");
-            }
-
-            async function delayresetx() {
+            async function incrementx() {
                 toggleLoading(true);
-                await new Promise((done) => setTimeout(done, 1000));
-                countx.value = 0;
+                await new Promise((done) => setTimeout(done, 200));
+                countx.value++;
                 toggleLoading(false);
-                pushToast("teal-darken-1", "ResetDelayX!");
+                pushToast("green", "IncrementX!");
             }
 
-            return {count, countx, increment, incrementx, resetx, delayresetx};
+            function decrement() {
+                count.value--;
+                pushToast("orange-darken-1", "Decrement!");
+            }
+
+            async function decrementx() {
+                toggleLoading(true);
+                await new Promise((done) => setTimeout(done, 200));
+                countx.value--;
+                toggleLoading(false);
+                pushToast("orange-darken-1", "DecrementX!");
+            }
+
+            return {count, countx, increment, incrementx, decrement, decrementx};
         }
     });
 
