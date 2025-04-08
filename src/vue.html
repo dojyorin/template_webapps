@@ -151,34 +151,6 @@
         }
     });
 
-    const vueComponentLoading = defineComponent({
-        template: /*html*/`
-            <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
-                <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
-            </v-overlay>
-        `,
-        setup() {
-            const {loading} = useCommonUI();
-
-            return {loading};
-        }
-    });
-
-    const vueComponentToast = defineComponent({
-        template: /*html*/`
-            <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
-                <template #actions="{props}">
-                    <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
-                </template>
-            </v-snackbar-queue>
-        `,
-        setup() {
-            const {toasts} = useCommonUI();
-
-            return {toasts};
-        }
-    });
-
     const vueComponentHeader = defineComponent({
         template: /*html*/`
             <v-app-bar theme="dark" density="compact">
@@ -285,22 +257,34 @@
     const vueLayoutMain = defineComponent({
         template: /*html*/`
             <v-app>
+                <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
+                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
+                </v-overlay>
+
+                <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
+                    <template #actions="{props}">
+                        <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
+                    </template>
+                </v-snackbar-queue>
+
                 <layout-menu></layout-menu>
-                <layout-loading></layout-loading>
-                <layout-toast></layout-toast>
                 <layout-header></layout-header>
+                <layout-footer></layout-footer>
+
                 <v-main>
                     <router-view></router-view>
                 </v-main>
-                <layout-footer></layout-footer>
             </v-app>
         `,
         components: {
             "layout-menu": vueComponentMenu,
-            "layout-loading": vueComponentLoading,
-            "layout-toast": vueComponentToast,
             "layout-header": vueComponentHeader,
             "layout-footer": vueComponentFooter
+        },
+        setup() {
+            const {loading, toasts} = useCommonUI();
+
+            return {loading, toasts};
         }
     });
 
