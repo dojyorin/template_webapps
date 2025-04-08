@@ -126,10 +126,52 @@
         }
     });
 
-    const vueComponentFooter = defineComponent({
+    const vueComponentMenu = defineComponent({
         template: /*html*/`
-            <v-footer app class="justify-center align-center">Copyright</v-footer>
-        `
+            <v-navigation-drawer floating temporary v-model="menu">
+                <v-list nav density="compact">
+                    <v-list-item v-for="{path, name} in routes" :to="path">
+                        <v-list-item-title>{{name}}</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+        `,
+        setup() {
+            const {menu} = useCommonUI();
+            const router = useRouter();
+
+            const routes = router.options.routes.filter(({path}) => !/:/.test(path));
+
+            return {menu, routes};
+        }
+    });
+
+    const vueComponentLoading = defineComponent({
+        template: /*html*/`
+            <v-overlay persistent no-click-animation z-index="4000" class="justify-center align-center" v-model="loading">
+                <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
+            </v-overlay>
+        `,
+        setup() {
+            const {loading} = useCommonUI();
+
+            return {loading};
+        }
+    });
+
+    const vueComponentToast = defineComponent({
+        template: /*html*/`
+            <v-snackbar-queue closable timeout="5000" v-model="toasts">
+                <template #actions="{props}">
+                    <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
+                </template>
+            </v-snackbar-queue>
+        `,
+        setup() {
+            const {toasts} = useCommonUI();
+
+            return {toasts};
+        }
     });
 
     const vueComponentHeader = defineComponent({
@@ -157,74 +199,10 @@
         }
     });
 
-    const vueComponentLoading = defineComponent({
+    const vueComponentFooter = defineComponent({
         template: /*html*/`
-            <v-overlay persistent no-click-animation z-index="4000" class="justify-center align-center" v-model="loading">
-                <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
-            </v-overlay>
-        `,
-        setup() {
-            const {loading} = useCommonUI();
-
-            return {loading};
-        }
-    });
-
-    const vueComponentNavigation = defineComponent({
-        template: /*html*/`
-            <v-navigation-drawer floating temporary v-model="menu">
-                <v-list nav density="compact">
-                    <v-list-item v-for="{path, name} in routes" :to="path">
-                        <v-list-item-title>{{name}}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-navigation-drawer>
-        `,
-        setup() {
-            const {menu} = useCommonUI();
-            const router = useRouter();
-
-            const routes = router.options.routes.filter(({path}) => !/:/.test(path));
-
-            return {menu, routes};
-        }
-    });
-
-    const vueComponentNotify = defineComponent({
-        template: /*html*/`
-            <v-snackbar-queue closable timeout="5000" v-model="toasts">
-                <template #actions="{props}">
-                    <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
-                </template>
-            </v-snackbar-queue>
-        `,
-        setup() {
-            const {toasts} = useCommonUI();
-
-            return {toasts};
-        }
-    });
-
-    const vueLayoutMain = defineComponent({
-        template: /*html*/`
-            <v-app>
-                <layout-loading></layout-loading>
-                <layout-notify></layout-notify>
-                <layout-navigation></layout-navigation>
-                <layout-header></layout-header>
-                <v-main>
-                    <router-view></router-view>
-                </v-main>
-                <layout-footer></layout-footer>
-            </v-app>
-        `,
-        components: {
-            "layout-loading": vueComponentLoading,
-            "layout-notify": vueComponentNotify,
-            "layout-navigation": vueComponentNavigation,
-            "layout-header": vueComponentHeader,
-            "layout-footer": vueComponentFooter
-        }
+            <v-footer app class="justify-center align-center">Copyright</v-footer>
+        `
     });
 
     const vuePageIndex = defineComponent({
@@ -304,6 +282,28 @@
             const height = computed(() => display.height.value - layout.mainRect.value.top - layout.mainRect.value.bottom);
 
             return {mobile, height};
+        }
+    });
+
+    const vueLayoutMain = defineComponent({
+        template: /*html*/`
+            <v-app>
+                <layout-menu></layout-menu>
+                <layout-loading></layout-loading>
+                <layout-toast></layout-toast>
+                <layout-header></layout-header>
+                <v-main>
+                    <router-view></router-view>
+                </v-main>
+                <layout-footer></layout-footer>
+            </v-app>
+        `,
+        components: {
+            "layout-menu": vueComponentMenu,
+            "layout-loading": vueComponentLoading,
+            "layout-toast": vueComponentToast,
+            "layout-header": vueComponentHeader,
+            "layout-footer": vueComponentFooter
         }
     });
 
