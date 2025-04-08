@@ -335,12 +335,6 @@
         }
     });
 
-    const vuePluginComponent = {
-        install(context) {
-            context.component("x-reflect", vueComponentReflect);
-        }
-    };
-
     const vuePluginProvide = {
         install(context) {
             context.provide("$_menu", ref(false));
@@ -351,11 +345,17 @@
         }
     };
 
+    const vuePluginComponent = {
+        install(context) {
+            context.component("x-reflect", vueComponentReflect);
+        }
+    };
+
     const vue = createApp(vueLayoutMain);
     vue.use(vuePluginRouter);
     vue.use(vuePluginVuetify);
-    vue.use(vuePluginComponent);
     vue.use(vuePluginProvide);
+    vue.use(vuePluginComponent);
     vue.mount(document.getElementById("vue"));
 </script>
 
