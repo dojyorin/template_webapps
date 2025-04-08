@@ -315,18 +315,18 @@
     });
 
     const vuePluginProvide = {
-        install(context) {
-            context.provide("$_menu", ref(false));
-            context.provide("$_loading", ref(false));
-            context.provide("$_toasts", ref([]));
+        install(c) {
+            c.provide("$_menu", ref(false));
+            c.provide("$_loading", ref(false));
+            c.provide("$_toasts", ref([]));
 
-            context.provide("$count", ref(0));
+            c.provide("$count", ref(0));
         }
     };
 
     const vuePluginComponent = {
-        install(context) {
-            context.component("x-reflect", vueComponentReflect);
+        install(c) {
+            c.component("x-reflect", vueComponentReflect);
         }
     };
 
