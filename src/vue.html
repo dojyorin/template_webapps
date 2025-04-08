@@ -176,11 +176,11 @@
             </v-navigation-drawer>
         `,
         setup() {
-            /** @type {Ref<boolean>} */
-            const nav = inject("$_nav");
-
             const theme = useTheme();
             const router = useRouter();
+
+            /** @type {Ref<boolean>} */
+            const nav = inject("$_nav");
 
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
