@@ -7,9 +7,9 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:100px;'>🌌</text></svg>">
 
 <script async type="module">
-    import {createApp, defineComponent, ref, inject, computed} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
-    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.5.0/dist/vue-router.esm-bundler.js?target=esnext";
-    import {createVuetify, useTheme, useDisplay} from "https://esm.sh/vuetify@3.8.1/dist/vuetify.esm.js?target=esnext";
+    import {createApp, defineComponent, ref, inject} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
+    import {createRouter, createWebHashHistory} from "https://esm.sh/vue-router@4.5.0/dist/vue-router.esm-bundler.js?target=esnext";
+    import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.1/dist/vuetify.esm.js?target=esnext";
 
     /**
     * @template T
@@ -17,6 +17,7 @@
     */
 
     function useCommonUI() {
+        /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
         const {global} = useTheme();
 
         /** @type {Ref<boolean>} */
@@ -128,7 +129,7 @@
         template: /*html*/`
             <v-navigation-drawer floating temporary v-model="menu">
                 <v-list nav density="compact">
-                    <v-list-item v-for="{path, name} in routes" :to="path">
+                    <v-list-item v-for="{to, name} in links" :to="to">
                         <v-list-item-title>{{name}}</v-list-item-title>
                     </v-list-item>
                 </v-list>
@@ -136,11 +137,17 @@
         `,
         setup() {
             const {menu} = useCommonUI();
-            const {options} = useRouter();
 
-            const routes = options.routes.filter(({path}) => !/:/.test(path));
+            /** @type {Ref<{to: string; name: string;}[]>} */
+            const links = ref([{
+                to: "/",
+                name: "Home"
+            }, {
+                to: "/sub",
+                name: "Sub"
+            }]);
 
-            return {menu, routes};
+            return {menu, links};
         }
     });
 
@@ -269,15 +276,10 @@
     const vuePageSub = defineComponent({
         template: /*html*/`
             <v-img gradient="45deg, #FF9F17, #FF4E0E" class="fill-height text-center align-center text-white text-h2">
-                <div v-if="mobile">MOBILE</div>
-                <div v-else>DESKTOP</div>
+                <div class="hidden-md-and-up">MOBILE</div>
+                <div class="hidden-sm-and-down">DESKTOP</div>
             </v-img>
-        `,
-        setup() {
-            const {mobile} = useDisplay();
-
-            return {mobile};
-        }
+        `
     });
 
     const vueLayoutMain = defineComponent({
@@ -306,11 +308,9 @@
         history: createWebHashHistory(),
         routes: [{
             path: "/",
-            name: "home",
             component: vuePageIndex
         }, {
             path: "/sub",
-            name: "sub",
             component: vuePageSub
         }, {
             path: "/:catchAll(.*)",
