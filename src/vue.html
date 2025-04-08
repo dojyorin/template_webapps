@@ -24,12 +24,22 @@
     */
 
     function useCommonUI() {
+        const theme = useTheme();
+
         /** @type {Ref<boolean>} */
         const nav = inject("$_nav");
         /** @type {Ref<boolean>} */
         const loading = inject("$_loading");
         /** @type {Notify[]} */
         const notifies = inject("$_notifies");
+
+        /**
+        * @param {boolean=} state
+        * @return {void}
+        */
+        function toggleDark(state) {
+            theme.global.name.value = state !== undefined ? state ? "dark" : "light" : theme.global.current.value.dark ? "light" : "dark";
+        }
 
         /**
         * @param {boolean=} state
@@ -59,7 +69,7 @@
             });
         }
 
-        return {toggleNav, toggleLoading, pushNotify};
+        return {toggleDark, toggleNav, toggleLoading, pushNotify};
     }
 
     const vueComponentReflect = defineComponent({
@@ -131,19 +141,26 @@
 
     const vueComponentHeader = defineComponent({
         template: /*html*/`
-            <v-app-bar density="compact" class="text-white">
-                <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
-                <v-app-bar-title class="text-h5">Application</v-app-bar-title>
+            <v-app-bar theme="dark" density="compact">
+                <template #prepend>
+                    <v-app-bar-nav-icon @click="toggleNav()"></v-app-bar-nav-icon>
+                </template>
+
+                <template #append>
+                    <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
+                </template>
 
                 <template #image>
                     <v-img gradient="45deg, #174AFF, #0ECDFF"></v-img>
                 </template>
+
+                <v-app-bar-title>Application</v-app-bar-title>
             </v-app-bar>
         `,
         setup() {
-            const {toggleNav} = useCommonUI();
+            const {toggleDark, toggleNav} = useCommonUI();
 
-            return {toggleNav};
+            return {toggleNav, toggleDark};
         }
     });
 
@@ -169,14 +186,9 @@
                         <v-list-item-title>{{name}}</v-list-item-title>
                     </v-list-item>
                 </v-list>
-
-                <template #append>
-                    <v-btn tile block prepend-icon="mdi-theme-light-dark" @click="toggleTheme">Light/Dark</v-btn>
-                </template>
             </v-navigation-drawer>
         `,
         setup() {
-            const theme = useTheme();
             const router = useRouter();
 
             /** @type {Ref<boolean>} */
@@ -184,11 +196,7 @@
 
             const routes = router.options.routes.filter(({path}) => !/:/.test(path));
 
-            function toggleTheme() {
-                theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
-            }
-
-            return {nav, routes, toggleTheme};
+            return {nav, routes};
         }
     });
 
