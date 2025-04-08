@@ -9,7 +9,7 @@
 <script async type="module">
     import {createApp, defineComponent, ref, inject, computed} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
     import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.5.0/dist/vue-router.esm-bundler.js?target=esnext";
-    import {createVuetify, useTheme, useDisplay, useLayout} from "https://esm.sh/vuetify@3.8.1/dist/vuetify.esm.js?target=esnext";
+    import {createVuetify, useTheme, useDisplay} from "https://esm.sh/vuetify@3.8.1/dist/vuetify.esm.js?target=esnext";
 
     /**
     * @template T
@@ -17,7 +17,7 @@
     */
 
     function useCommonUI() {
-        const theme = useTheme();
+        const {global} = useTheme();
 
         /** @type {Ref<boolean>} */
         const menu = inject("$_menu");
@@ -31,7 +31,7 @@
         * @return {void}
         */
         function toggleDark(state) {
-            theme.global.name.value = state !== undefined ? state ? "dark" : "light" : theme.global.current.value.dark ? "light" : "dark";
+            global.name.value = state !== undefined ? state ? "dark" : "light" : global.current.value.dark ? "light" : "dark";
         }
 
         /**
@@ -138,9 +138,9 @@
         `,
         setup() {
             const {menu} = useCommonUI();
-            const router = useRouter();
+            const {options} = useRouter();
 
-            const routes = router.options.routes.filter(({path}) => !/:/.test(path));
+            const routes = options.routes.filter(({path}) => !/:/.test(path));
 
             return {menu, routes};
         }
@@ -270,21 +270,15 @@
 
     const vuePageSub = defineComponent({
         template: /*html*/`
-            <v-img :height="height" class="text-center align-center text-white" gradient="45deg, #FF9F17, #FF4E0E">
-                <div v-if="mobile" class="text-h4">MOBILE</div>
-                <div v-else class="text-h2">DESKTOP</div>
+            <v-img gradient="45deg, #FF9F17, #FF4E0E" class="fill-height text-center align-center text-white text-h2">
+                <div v-if="mobile">MOBILE</div>
+                <div v-else>DESKTOP</div>
             </v-img>
         `,
         setup() {
-            const display = useDisplay();
-            const layout = useLayout();
+            const {mobile} = useDisplay();
 
-            /** @type {Ref<boolean>} */
-            const mobile = computed(() => display.mobile.value);
-            /** @type {Ref<number>} */
-            const height = computed(() => display.height.value - layout.mainRect.value.top - layout.mainRect.value.bottom);
-
-            return {mobile, height};
+            return {mobile};
         }
     });
 
