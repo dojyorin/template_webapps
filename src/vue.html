@@ -166,7 +166,7 @@
 
     const vueComponentToast = defineComponent({
         template: /*html*/`
-            <v-snackbar-queue closable timeout="5000" v-model="toasts">
+            <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
                 <template #actions="{props}">
                     <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
                 </template>
