@@ -16,7 +16,7 @@
     * @typedef {{value: T;}} Ref
     */
 
-    function useCommonUI() {
+    function vueUseGlobalControl() {
         /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
         const {global} = useTheme();
 
@@ -136,7 +136,7 @@
             </v-navigation-drawer>
         `,
         setup() {
-            const {menu} = useCommonUI();
+            const {menu} = vueUseGlobalControl();
 
             /** @type {Ref<{to: string; name: string;}[]>} */
             const links = ref([{
@@ -170,7 +170,7 @@
             </v-app-bar>
         `,
         setup() {
-            const {toggleDark, toggleMenu} = useCommonUI();
+            const {toggleDark, toggleMenu} = vueUseGlobalControl();
 
             return {toggleDark, toggleMenu};
         }
@@ -208,7 +208,7 @@
             </v-container>
         `,
         setup() {
-            const {toggleLoading, pushToast} = useCommonUI();
+            const {toggleLoading, pushToast} = vueUseGlobalControl();
 
             /** @type {Ref<number>} */
             const count = ref(0);
@@ -282,7 +282,7 @@
             "layout-footer": vueComponentFooter
         },
         setup() {
-            const {loading, toasts} = useCommonUI();
+            const {loading, toasts} = vueUseGlobalControl();
 
             return {loading, toasts};
         }
