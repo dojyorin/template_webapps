@@ -26,39 +26,41 @@
     * @template {unknown} U
     * @param {string} script
     * @param {string=} type
-    * @return {(message: T, transfers?: Transferable[]) => Promise<U>}
+    * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
     */
     function factoryWorker(script, type) {
-        return (message, transfers) => {
-            return new Promise((res, rej) => {
-                const worker = new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
-                    type: "module"
+        return {
+            runWorker(message, transfers) {
+                return new Promise((res, rej) => {
+                    const worker = new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+                        type: "module"
+                    });
+
+                    worker.onmessage = ({data}) => {
+                        worker.terminate();
+                        res(data);
+                    };
+
+                    worker.onerror = (e) => {
+                        worker.terminate();
+                        rej(e);
+                    };
+
+                    worker.onmessageerror = (e) => {
+                        worker.terminate();
+                        rej(e);
+                    };
+
+                    worker.postMessage(message, {
+                        transfer: transfers
+                    });
                 });
-
-                worker.onmessage = ({data}) => {
-                    worker.terminate();
-                    res(data);
-                };
-
-                worker.onerror = (e) => {
-                    worker.terminate();
-                    rej(e);
-                };
-
-                worker.onmessageerror = (e) => {
-                    worker.terminate();
-                    rej(e);
-                };
-
-                worker.postMessage(message, {
-                    transfer: transfers
-                });
-            });
+            }
         };
     }
 
-    /** @type {(message: number) => Promise<Uint8Array>} */
-    const generateDummy = factoryWorker(/*js*/`
+    /** @type {{runWorker(message: number): Promise<Uint8Array>;}} */
+    const {runWorker} = factoryWorker(/*js*/`
         /**
         * @param {number} size
         * @return {Uint8Array}
@@ -76,7 +78,7 @@
         };
     `);
 
-    const binary = await generateDummy(128 * 1024 ** 2);
+    const binary = await runWorker(128 * 1024 ** 2);
 
     console.log(binary);
 

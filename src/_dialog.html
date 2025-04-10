@@ -3,12 +3,11 @@
 
 <script async type="module">
     /**
-    * @param {string} message
     * @param {string} color
-    * @param {number=} timeout
+    * @param {string} message
     * @return {void}
     */
-    function showNotify(message, color, timeout) {
+    function pushToast(color, message) {
         const dialog = document.createElement("dialog");
         const style = document.createElement("style");
 
@@ -35,18 +34,19 @@
         dialog.appendChild(style);
         document.body.appendChild(dialog);
 
-        setTimeout(() => dialog.remove(), timeout ?? 5000);
+        setTimeout(() => dialog.remove(), 5000);
 
         dialog.show();
     }
 
     /**
     * @param {string} color
-    * @return {(enable: boolean) => void}
+    * @return {{toggleLoading(enable: boolean): void;}}
     */
     function factoryLoading(color) {
         const dialog = document.createElement("dialog");
         const style = document.createElement("style");
+
         style.textContent = /*css*/`
             @scope {
                 @keyframes loading {
@@ -77,14 +77,22 @@
         dialog.appendChild(style);
         document.body.appendChild(dialog);
 
-        return (enable) => enable ? dialog.showModal() : dialog.close();
+        return {
+            toggleLoading(enable) {
+                if (enable) {
+                    dialog.showModal();
+                } else {
+                    dialog.close();
+                }
+            }
+        };
     }
 
-    showNotify("Test", "green");
+    pushToast("green", "Test");
 
-    const showLoading = factoryLoading("orange");
+    const {toggleLoading} = factoryLoading("orange");
 
-    showLoading(true);
+    toggleLoading(true);
     await new Promise(done => setTimeout(done, 1000));
-    showLoading(false);
+    toggleLoading(false);
 </script>
