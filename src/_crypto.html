@@ -45,12 +45,12 @@
     }
 
     /**
-    * @param {"X25519" | "Ed25519"} algorithm
+    * @param {boolean=} sign
     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
     */
-    async function cryptoGenerateKey(algorithm) {
+    async function cryptoGenerateKey(sign) {
         /** @type {CryptoKeyPair} */
-        const {publicKey, privateKey} = await crypto.subtle.generateKey(algorithm, true, algorithm === "X25519" ? ["deriveKey"] : ["sign"]);
+        const {publicKey, privateKey} = await crypto.subtle.generateKey(sign ? "Ed25519" : "X25519", true, sign ? ["sign"] : ["deriveKey"]);
 
         return {
             publicKey: new Uint8Array(await crypto.subtle.exportKey("spki", publicKey)),
@@ -84,7 +84,7 @@
             iv: crypto.getRandomValues(new Uint8Array(12))
         };
 
-        const memory = new Uint8Array(aes.iv.byteLength + aes.tagLength / 8 + data.byteLength);
+        const memory = new Uint8Array(aes.iv.byteLength + data.byteLength + 16);
         memory.set(aes.iv, 0);
         memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, key, data)), aes.iv.byteLength);
 
@@ -118,12 +118,12 @@
 
     /**
     * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
-    * @param {Uint8Array} sign
+    * @param {Uint8Array} signature
     * @param {Uint8Array} data
     * @return {Promise<boolean>}
     */
-    async function cryptoVerify({publicKey}, sign, data) {
-        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), sign, data);
+    async function cryptoVerify({publicKey}, signature, data) {
+        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), signature, data);
     }
 
     /**
@@ -136,8 +136,8 @@
 
     const binary = _dummy(1024 ** 2);
     const hash = await cryptoHash(binary);
-    const encKey = await cryptoGenerateKey("X25519");
-    const sigKey = await cryptoGenerateKey("Ed25519");
+    const encKey = await cryptoGenerateKey();
+    const sigKey = await cryptoGenerateKey(true);
     const encode = await cryptoEncrypt(await cryptoDeriveKey(encKey), binary);
     const decode = await cryptoDecrypt(await cryptoDeriveKey(encKey), encode);
     const sign = await cryptoSign(sigKey, binary);
