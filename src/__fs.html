@@ -3,42 +3,19 @@
 
 <script async type="module">
     /**
-    * @typedef {object} Binary
-    * @prop {string} name
-    * @prop {Uint8Array} body
-    */
-
-    // esnext-polyfill
-    Blob.prototype.bytes ??= async function() {
-        return new Uint8Array(await this.arrayBuffer());
-    }
-
-    /**
-    * @param {File[] | FileList | HTMLInputElement} input
-    * @return {Promise<Binary[]>}
-    */
-    async function fsParse(input) {
-        return await Array.fromAsync(input instanceof HTMLInputElement ? input.files ?? [] : input, async (v) => {
-            return {
-                name: v.name,
-                body: await v.bytes()
-            };
-        });
-    }
-
-    /**
-    * @param {boolean=} multiple
+    * @template {boolean} T
+    * @param {T} multiple
     * @param {string=} accept
-    * @return {Promise<Binary[]>}
+    * @return {Promise<T extends true ? File[] : File>}
     */
     async function fsRead(multiple, accept) {
         return await new Promise((res, rej) => {
             const input = document.createElement("input");
             input.type = "file";
-            input.multiple = multiple ?? false;
+            input.multiple = multiple;
             input.accept = accept ?? "";
 
-            input.oninput = () => input.files ? res(fsParse(input)) : rej();
+            input.oninput = () => input.files ? res(multiple ? Array.from(input.files) : input.files[0]) : rej();
             input.click();
         });
     }
@@ -48,13 +25,11 @@
     * @param {BlobPart} body
     * @return {void}
     */
-    export function fsWrite(name, body) {
+    function fsWrite(name, body) {
         const anchor = document.createElement("a");
         anchor.download = name;
         anchor.href = URL.createObjectURL(new Blob([body]));
 
         anchor.click();
-
-        URL.revokeObjectURL(anchor.href);
     }
 </script>
