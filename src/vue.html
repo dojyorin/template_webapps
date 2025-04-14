@@ -267,9 +267,9 @@
                     </template>
                 </v-snackbar-queue>
 
-                <layout-menu></layout-menu>
-                <layout-header></layout-header>
-                <layout-footer></layout-footer>
+                <a-menu></a-menu>
+                <a-header></a-header>
+                <a-footer></a-footer>
 
                 <v-main>
                     <router-view></router-view>
@@ -277,11 +277,11 @@
             </v-app>
         `,
         components: {
-            "layout-menu": defineComponent({}),
-            "layout-header": defineComponent({}),
-            "layout-footer": defineComponent({}),
-            "layout-loading": defineComponent({}),
-            "layout-toast": defineComponent({})
+            "a-toast": defineComponent({}),
+            "a-loading": defineComponent({}),
+            "a-menu": defineComponent({}),
+            "a-header": defineComponent({}),
+            "a-footer": defineComponent({})
         },
         setup() {
             const {loading, toasts} = useMainUI();
