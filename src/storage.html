@@ -2,23 +2,32 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const SS_TEST = "test";
-    const LS_TEST = "test";
-
-    const data = {
-        foo: 123,
-        bar: true
+    const storageS = {
+        /** @type {string} */
+        get foo() {
+            return sessionStorage.getItem("foo") ?? "";
+        },
+        set foo(v) {
+            sessionStorage.setItem("foo", v);
+        }
     };
 
-    localStorage.setItem(LS_TEST, JSON.stringify(data));
-    sessionStorage.setItem(SS_TEST, JSON.stringify(data));
+    const storageL = {
+        /** @type {string} */
+        get foo() {
+            return localStorage.getItem("foo") ?? "";
+        },
+        set foo(v) {
+            localStorage.setItem("foo", v);
+        }
+    };
 
-    const ls = JSON.parse(localStorage.getItem(LS_TEST) ?? "");
-    const ss = JSON.parse(sessionStorage.getItem(SS_TEST) ?? "");
+    storageS.foo = "bar";
+    storageL.foo = "bar";
 
-    console.log(ls);
-    console.log(ss);
+    console.log(storageS.foo);
+    console.log(storageL.foo);
 
-    localStorage.clear();
     sessionStorage.clear();
+    localStorage.clear();
 </script>
