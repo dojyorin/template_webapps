@@ -257,16 +257,8 @@
     const vueLayoutMain = defineComponent({
         template: /*html*/`
             <v-app>
-                <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
-                    <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
-                </v-overlay>
-
-                <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
-                    <template #actions="{props}">
-                        <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
-                    </template>
-                </v-snackbar-queue>
-
+                <a-toast></a-toast>
+                <a-loading></a-loading>
                 <a-menu></a-menu>
                 <a-header></a-header>
                 <a-footer></a-footer>
@@ -279,6 +271,11 @@
         components: {
             "a-toast": defineComponent({
                 template: /*html*/`
+                    <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
+                        <template #actions="{props}">
+                            <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
+                        </template>
+                    </v-snackbar-queue>
                 `,
                 setup() {
                     const {toasts} = useMainUI();
@@ -288,6 +285,9 @@
             }),
             "a-loading": defineComponent({
                 template: /*html*/`
+                    <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
+                        <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
+                    </v-overlay>
                 `,
                 setup() {
                     const {loading} = useMainUI();
