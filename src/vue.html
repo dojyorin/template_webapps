@@ -277,9 +277,11 @@
             </v-app>
         `,
         components: {
-            "layout-menu": vueComponentMenu,
-            "layout-header": vueComponentHeader,
-            "layout-footer": vueComponentFooter
+            "layout-menu": defineComponent({}),
+            "layout-header": defineComponent({}),
+            "layout-footer": defineComponent({}),
+            "layout-loading": defineComponent({}),
+            "layout-toast": defineComponent({})
         },
         setup() {
             const {loading, toasts} = useMainUI();
