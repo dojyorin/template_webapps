@@ -277,16 +277,27 @@
             </v-app>
         `,
         components: {
-            "a-toast": defineComponent({}),
-            "a-loading": defineComponent({}),
+            "a-toast": defineComponent({
+                template: /*html*/`
+                `,
+                setup() {
+                    const {toasts} = useMainUI();
+
+                    return {toasts};
+                }
+            }),
+            "a-loading": defineComponent({
+                template: /*html*/`
+                `,
+                setup() {
+                    const {loading} = useMainUI();
+
+                    return {loading};
+                }
+            }),
             "a-menu": defineComponent({}),
             "a-header": defineComponent({}),
             "a-footer": defineComponent({})
-        },
-        setup() {
-            const {loading, toasts} = useMainUI();
-
-            return {loading, toasts};
         }
     });
 
