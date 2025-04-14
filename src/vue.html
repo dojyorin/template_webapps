@@ -136,13 +136,13 @@
                             </v-card-item>
 
                             <v-card-actions class="justify-center">
-                                <v-btn color="green" variant="flat" @click="increment()">Increment</v-btn>
-                                <v-btn color="green" variant="flat" @click="incrementx()">IncrementX</v-btn>
+                                <v-btn variant="flat" color="green" @click="increment()">Increment</v-btn>
+                                <v-btn variant="flat" color="green" @click="incrementx()">IncrementX</v-btn>
                                 <x-reflect>
-                                    <v-btn color="orange-darken-1" variant="flat" @click="decrement()">Decrement</v-btn>
+                                    <v-btn variant="flat" color="orange-darken-1" @click="decrement()">Decrement</v-btn>
                                 </x-reflect>
                                 <x-reflect>
-                                    <v-btn color="orange-darken-1" variant="flat" @click="decrementx()">DecrementX</v-btn>
+                                    <v-btn variant="flat" color="orange-darken-1" @click="decrementx()">DecrementX</v-btn>
                                 </x-reflect>
                             </v-card-actions>
                         </v-card>
@@ -215,7 +215,7 @@
                 template: /*html*/`
                     <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
                         <template #actions="{props}">
-                            <v-btn v-bind="props" density="compact" icon="mdi-close"></v-btn>
+                            <v-btn :="props" density="compact" icon="mdi-close"></v-btn>
                         </template>
                     </v-snackbar-queue>
                 `,
