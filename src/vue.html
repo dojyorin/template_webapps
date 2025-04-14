@@ -20,12 +20,12 @@
         /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
         const {global} = useTheme();
 
-        /** @type {Ref<boolean>} */
-        const menu = inject("$_menu");
-        /** @type {Ref<boolean>} */
-        const loading = inject("$_loading");
         /** @type {Ref<{color: string; text: string;}[]>} */
         const toasts = inject("$_toasts");
+        /** @type {Ref<boolean>} */
+        const loading = inject("$_loading");
+        /** @type {Ref<boolean>} */
+        const menu = inject("$_menu");
 
         /**
         * @param {boolean=} state
@@ -33,22 +33,6 @@
         */
         function toggleDark(state) {
             global.name.value = state !== undefined ? state ? "dark" : "light" : global.current.value.dark ? "light" : "dark";
-        }
-
-        /**
-        * @param {boolean=} state
-        * @return {void}
-        */
-        function toggleMenu(state) {
-            menu.value = state ?? !menu.value;
-        }
-
-        /**
-        * @param {boolean=} state
-        * @return {void}
-        */
-        function toggleLoading(state) {
-            loading.value = state ?? !loading.value;
         }
 
         /**
@@ -63,7 +47,23 @@
             });
         }
 
-        return {menu, loading, toasts, toggleDark, toggleMenu, toggleLoading, pushToast};
+        /**
+        * @param {boolean=} state
+        * @return {void}
+        */
+        function toggleLoading(state) {
+            loading.value = state ?? !loading.value;
+        }
+
+        /**
+        * @param {boolean=} state
+        * @return {void}
+        */
+        function toggleMenu(state) {
+            menu.value = state ?? !menu.value;
+        }
+
+        return {toasts, loading, menu, toggleDark, pushToast, toggleLoading, toggleMenu};
     }
 
     const vueComponentReflect = defineComponent({
@@ -151,7 +151,7 @@
             </v-container>
         `,
         setup() {
-            const {toggleLoading, pushToast} = useMainUI();
+            const {pushToast, toggleLoading} = useMainUI();
 
             /** @type {Ref<number>} */
             const count = ref(0);
@@ -322,9 +322,9 @@
 
     const vuePluginProvide = {
         install(context) {
-            context.provide("$_menu", ref(false));
-            context.provide("$_loading", ref(false));
             context.provide("$_toasts", ref([]));
+            context.provide("$_loading", ref(false));
+            context.provide("$_menu", ref(false));
 
             context.provide("$count", ref(0));
         }
