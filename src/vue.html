@@ -125,63 +125,6 @@
         }
     });
 
-    const vueComponentMenu = defineComponent({
-        template: /*html*/`
-            <v-navigation-drawer floating temporary v-model="menu">
-                <v-list nav density="compact">
-                    <v-list-item v-for="{to, name} in links" :to="to">
-                        <v-list-item-title>{{name}}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-navigation-drawer>
-        `,
-        setup() {
-            const {menu} = useMainUI();
-
-            /** @type {Ref<{to: string; name: string;}[]>} */
-            const links = ref([{
-                to: "/",
-                name: "Home"
-            }, {
-                to: "/sub",
-                name: "Sub"
-            }]);
-
-            return {menu, links};
-        }
-    });
-
-    const vueComponentHeader = defineComponent({
-        template: /*html*/`
-            <v-app-bar theme="dark" density="compact">
-                <template #prepend>
-                    <v-app-bar-nav-icon @click="toggleMenu()"></v-app-bar-nav-icon>
-                </template>
-
-                <template #append>
-                    <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
-                </template>
-
-                <template #image>
-                    <v-img gradient="45deg, #174AFF, #0ECDFF"></v-img>
-                </template>
-
-                <v-app-bar-title>Application</v-app-bar-title>
-            </v-app-bar>
-        `,
-        setup() {
-            const {toggleDark, toggleMenu} = useMainUI();
-
-            return {toggleDark, toggleMenu};
-        }
-    });
-
-    const vueComponentFooter = defineComponent({
-        template: /*html*/`
-            <v-footer app class="justify-center align-center">Copyright</v-footer>
-        `
-    });
-
     const vuePageIndex = defineComponent({
         template: /*html*/`
             <v-container fluid>
@@ -262,7 +205,6 @@
                 <a-menu></a-menu>
                 <a-header></a-header>
                 <a-footer></a-footer>
-
                 <v-main>
                     <router-view></router-view>
                 </v-main>
@@ -295,9 +237,60 @@
                     return {loading};
                 }
             }),
-            "a-menu": defineComponent({}),
-            "a-header": defineComponent({}),
-            "a-footer": defineComponent({})
+            "a-menu": defineComponent({
+                template: /*html*/`
+                    <v-navigation-drawer floating temporary v-model="menu">
+                        <v-list nav density="compact">
+                            <v-list-item v-for="{to, name} in links" :to="to">
+                                <v-list-item-title>{{name}}</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-navigation-drawer>
+                `,
+                setup() {
+                    const {menu} = useMainUI();
+
+                    /** @type {Ref<{to: string; name: string;}[]>} */
+                    const links = ref([{
+                        to: "/",
+                        name: "Home"
+                    }, {
+                        to: "/sub",
+                        name: "Sub"
+                    }]);
+
+                    return {menu, links};
+                }
+            }),
+            "a-header": defineComponent({
+                template: /*html*/`
+                    <v-app-bar theme="dark" density="compact">
+                        <template #prepend>
+                            <v-app-bar-nav-icon @click="toggleMenu()"></v-app-bar-nav-icon>
+                        </template>
+
+                        <template #append>
+                            <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
+                        </template>
+
+                        <template #image>
+                            <v-img gradient="45deg, #174AFF, #0ECDFF"></v-img>
+                        </template>
+
+                        <v-app-bar-title>Application</v-app-bar-title>
+                    </v-app-bar>
+                `,
+                setup() {
+                    const {toggleDark, toggleMenu} = useMainUI();
+
+                    return {toggleDark, toggleMenu};
+                }
+            }),
+            "a-footer": defineComponent({
+                template: /*html*/`
+                    <v-footer app class="justify-center align-center">Copyright</v-footer>
+                `
+            })
         }
     });
 
