@@ -15,7 +15,7 @@
             input.multiple = multiple;
             input.accept = accept ?? "";
 
-            input.oninput = () => input.files ? res(multiple ? Array.from(input.files) : input.files[0]) : rej();
+            input.oninput = () => input.files?.length ? res(multiple ? Array.from(input.files) : input.files[0]) : rej();
             input.click();
         });
     }
