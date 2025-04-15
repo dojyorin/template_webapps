@@ -21,8 +21,6 @@
         const toasts = inject("$_toasts");
         /** @type {Ref<boolean>} */
         const loading = inject("$_loading");
-        /** @type {Ref<boolean>} */
-        const menu = inject("$_menu");
 
         /**
         * @param {string} color
@@ -44,15 +42,7 @@
             loading.value = state ?? !loading.value;
         }
 
-        /**
-        * @param {boolean=} state
-        * @return {void}
-        */
-        function toggleMenu(state) {
-            menu.value = state ?? !menu.value;
-        }
-
-        return {toasts, loading, menu, pushToast, toggleLoading, toggleMenu};
+        return {toasts, loading, pushToast, toggleLoading};
     }
 
     const vueComponentReflect = defineComponent({
@@ -119,7 +109,6 @@
             <v-app>
                 <x-toast></x-toast>
                 <x-loading></x-loading>
-                <x-menu></x-menu>
                 <x-header></x-header>
                 <x-footer></x-footer>
                 <v-main>
@@ -154,40 +143,27 @@
                     return {loading};
                 }
             }),
-            "x-menu": defineComponent({
+            "x-header": defineComponent({
                 template: /*html*/`
                     <v-navigation-drawer floating temporary v-model="menu">
                         <v-list nav density="compact">
-                            <v-list-item v-for="{to, name} in links" :to="to">
-                                <v-list-item-title>{{name}}</v-list-item-title>
+                            <v-list-item to="/">
+                                <v-list-item-title>Top</v-list-item-title>
+                            </v-list-item>
+
+                            <v-list-item to="/sub">
+                                <v-list-item-title>Sub</v-list-item-title>
                             </v-list-item>
                         </v-list>
                     </v-navigation-drawer>
-                `,
-                setup() {
-                    const {menu} = useMainUI();
 
-                    /** @type {Ref<{to: string; name: string;}[]>} */
-                    const links = ref([{
-                        to: "/",
-                        name: "Home"
-                    }, {
-                        to: "/sub",
-                        name: "Sub"
-                    }]);
-
-                    return {menu, links};
-                }
-            }),
-            "x-header": defineComponent({
-                template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
-                            <v-app-bar-nav-icon @click="toggleMenu()"></v-app-bar-nav-icon>
+                            <v-app-bar-nav-icon @click="menu = !menu"></v-app-bar-nav-icon>
                         </template>
 
                         <template #append>
-                            <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
+                            <v-btn icon="mdi-theme-light-dark" @click="theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'"></v-btn>
                         </template>
 
                         <template #image>
@@ -198,20 +174,13 @@
                     </v-app-bar>
                 `,
                 setup() {
-                    const {toggleMenu} = useMainUI();
-
                     /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
-                    const {global} = useTheme();
+                    const theme = useTheme();
 
-                    /**
-                    * @param {boolean=} state
-                    * @return {void}
-                    */
-                    function toggleDark(state) {
-                        global.name.value = state !== undefined ? state ? "dark" : "light" : global.current.value.dark ? "light" : "dark";
-                    }
+                    /** @type {Ref<boolean>} */
+                    const menu = ref(false);
 
-                    return {toggleMenu, toggleDark};
+                    return {theme, menu};
                 }
             }),
             "x-footer": defineComponent({
@@ -328,7 +297,6 @@
         install(context) {
             context.provide("$_toasts", ref([]));
             context.provide("$_loading", ref(false));
-            context.provide("$_menu", ref(false));
 
             context.provide("$count", ref(0));
         }
