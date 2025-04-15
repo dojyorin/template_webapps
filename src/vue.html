@@ -125,93 +125,21 @@
         }
     });
 
-    const vuePageIndex = defineComponent({
-        template: /*html*/`
-            <v-container fluid>
-                <v-row justify="center">
-                    <v-col cols="auto">
-                        <v-card>
-                            <v-card-item>
-                                <v-card-title class="text-center">{{count}} : {{countx}}</v-card-title>
-                            </v-card-item>
-
-                            <v-card-actions class="justify-center">
-                                <v-btn variant="flat" color="green" @click="increment()">Increment</v-btn>
-                                <v-btn variant="flat" color="green" @click="incrementx()">IncrementX</v-btn>
-                                <x-reflect>
-                                    <v-btn variant="flat" color="orange-darken-1" @click="decrement()">Decrement</v-btn>
-                                </x-reflect>
-                                <x-reflect>
-                                    <v-btn variant="flat" color="orange-darken-1" @click="decrementx()">DecrementX</v-btn>
-                                </x-reflect>
-                            </v-card-actions>
-                        </v-card>
-                    </v-col>
-                </v-row>
-            </v-container>
-        `,
-        setup() {
-            const {pushToast, toggleLoading} = useMainUI();
-
-            /** @type {Ref<number>} */
-            const count = ref(0);
-            /** @type {Ref<number>} */
-            const countx = inject("$count");
-
-            function increment() {
-                count.value++;
-                pushToast("green", "Increment!");
-            }
-
-            async function incrementx() {
-                toggleLoading(true);
-                await new Promise((done) => setTimeout(done, 200));
-                countx.value++;
-                toggleLoading(false);
-                pushToast("green", "IncrementX!");
-            }
-
-            function decrement() {
-                count.value--;
-                pushToast("orange-darken-1", "Decrement!");
-            }
-
-            async function decrementx() {
-                toggleLoading(true);
-                await new Promise((done) => setTimeout(done, 200));
-                countx.value--;
-                toggleLoading(false);
-                pushToast("orange-darken-1", "DecrementX!");
-            }
-
-            return {count, countx, increment, incrementx, decrement, decrementx};
-        }
-    });
-
-    const vuePageSub = defineComponent({
-        template: /*html*/`
-            <v-img gradient="45deg, #FF9F17, #FF4E0E" class="fill-height text-center align-center text-white text-h2">
-                <div class="hidden-md-and-up">MOBILE</div>
-                <div class="hidden-sm-and-down">DESKTOP</div>
-            </v-img>
-        `
-    });
-
     const vueLayoutMain = defineComponent({
         template: /*html*/`
             <v-app>
-                <a-toast></a-toast>
-                <a-loading></a-loading>
-                <a-menu></a-menu>
-                <a-header></a-header>
-                <a-footer></a-footer>
+                <x-toast></x-toast>
+                <x-loading></x-loading>
+                <x-menu></x-menu>
+                <x-header></x-header>
+                <x-footer></x-footer>
                 <v-main>
                     <router-view></router-view>
                 </v-main>
             </v-app>
         `,
         components: {
-            "a-toast": defineComponent({
+            "x-toast": defineComponent({
                 template: /*html*/`
                     <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
                         <template #actions="{props}">
@@ -225,7 +153,7 @@
                     return {toasts};
                 }
             }),
-            "a-loading": defineComponent({
+            "x-loading": defineComponent({
                 template: /*html*/`
                     <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
                         <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
@@ -237,7 +165,7 @@
                     return {loading};
                 }
             }),
-            "a-menu": defineComponent({
+            "x-menu": defineComponent({
                 template: /*html*/`
                     <v-navigation-drawer floating temporary v-model="menu">
                         <v-list nav density="compact">
@@ -262,7 +190,7 @@
                     return {menu, links};
                 }
             }),
-            "a-header": defineComponent({
+            "x-header": defineComponent({
                 template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
@@ -286,7 +214,7 @@
                     return {toggleDark, toggleMenu};
                 }
             }),
-            "a-footer": defineComponent({
+            "x-footer": defineComponent({
                 template: /*html*/`
                     <v-footer app class="justify-center align-center">Copyright</v-footer>
                 `
@@ -298,10 +226,78 @@
         history: createWebHashHistory(),
         routes: [{
             path: "/",
-            component: vuePageIndex
+            component: defineComponent({
+                template: /*html*/`
+                    <v-container fluid>
+                        <v-row justify="center">
+                            <v-col cols="auto">
+                                <v-card>
+                                    <v-card-item>
+                                        <v-card-title class="text-center">{{count}} : {{countx}}</v-card-title>
+                                    </v-card-item>
+
+                                    <v-card-actions class="justify-center">
+                                        <v-btn variant="flat" color="green" @click="increment()">Increment</v-btn>
+                                        <v-btn variant="flat" color="green" @click="incrementx()">IncrementX</v-btn>
+                                        <x-reflect>
+                                            <v-btn variant="flat" color="orange-darken-1" @click="decrement()">Decrement</v-btn>
+                                        </x-reflect>
+                                        <x-reflect>
+                                            <v-btn variant="flat" color="orange-darken-1" @click="decrementx()">DecrementX</v-btn>
+                                        </x-reflect>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                `,
+                setup() {
+                    const {pushToast, toggleLoading} = useMainUI();
+
+                    /** @type {Ref<number>} */
+                    const count = ref(0);
+                    /** @type {Ref<number>} */
+                    const countx = inject("$count");
+
+                    function increment() {
+                        count.value++;
+                        pushToast("green", "Increment!");
+                    }
+
+                    async function incrementx() {
+                        toggleLoading(true);
+                        await new Promise((done) => setTimeout(done, 200));
+                        countx.value++;
+                        toggleLoading(false);
+                        pushToast("green", "IncrementX!");
+                    }
+
+                    function decrement() {
+                        count.value--;
+                        pushToast("orange-darken-1", "Decrement!");
+                    }
+
+                    async function decrementx() {
+                        toggleLoading(true);
+                        await new Promise((done) => setTimeout(done, 200));
+                        countx.value--;
+                        toggleLoading(false);
+                        pushToast("orange-darken-1", "DecrementX!");
+                    }
+
+                    return {count, countx, increment, incrementx, decrement, decrementx};
+                }
+            })
         }, {
             path: "/sub",
-            component: vuePageSub
+            component: defineComponent({
+                template: /*html*/`
+                    <v-img gradient="45deg, #FF9F17, #FF4E0E" class="fill-height text-center align-center text-white text-h2">
+                        <div class="hidden-md-and-up">MOBILE</div>
+                        <div class="hidden-sm-and-down">DESKTOP</div>
+                    </v-img>
+                `
+            })
         }, {
             path: "/:catchAll(.*)",
             redirect: "/"
