@@ -125,7 +125,7 @@
         }
     });
 
-    const vueLayoutMain = defineComponent({
+    const vueLayout = defineComponent({
         template: /*html*/`
             <v-app>
                 <x-toast></x-toast>
@@ -222,7 +222,7 @@
         }
     });
 
-    const vuePluginRouter = createRouter({
+    const vueRouter = createRouter({
         history: createWebHashHistory(),
         routes: [{
             path: "/",
@@ -251,6 +251,9 @@
                         </v-row>
                     </v-container>
                 `,
+                components: {
+                    "x-reflect": vueComponentReflect
+                },
                 setup() {
                     const {pushToast, toggleLoading} = useMainUI();
 
@@ -304,7 +307,7 @@
         }]
     });
 
-    const vuePluginVuetify = createVuetify({
+    const vueVuetify = createVuetify({
         defaults: {
             VBtn: {
                 style: {
@@ -316,7 +319,7 @@
         }
     });
 
-    const vuePluginProvide = {
+    const vueProvide = {
         install(context) {
             context.provide("$_toasts", ref([]));
             context.provide("$_loading", ref(false));
@@ -326,17 +329,10 @@
         }
     };
 
-    const vuePluginComponent = {
-        install(context) {
-            context.component("x-reflect", vueComponentReflect);
-        }
-    };
-
-    const vue = createApp(vueLayoutMain);
-    vue.use(vuePluginRouter);
-    vue.use(vuePluginVuetify);
-    vue.use(vuePluginProvide);
-    vue.use(vuePluginComponent);
+    const vue = createApp(vueLayout);
+    vue.use(vueRouter);
+    vue.use(vueVuetify);
+    vue.use(vueProvide);
     vue.mount(document.getElementById("vue"));
 </script>
 
