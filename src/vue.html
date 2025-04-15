@@ -17,23 +17,12 @@
     */
 
     function useMainUI() {
-        /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
-        const {global} = useTheme();
-
         /** @type {Ref<{color: string; text: string;}[]>} */
         const toasts = inject("$_toasts");
         /** @type {Ref<boolean>} */
         const loading = inject("$_loading");
         /** @type {Ref<boolean>} */
         const menu = inject("$_menu");
-
-        /**
-        * @param {boolean=} state
-        * @return {void}
-        */
-        function toggleDark(state) {
-            global.name.value = state !== undefined ? state ? "dark" : "light" : global.current.value.dark ? "light" : "dark";
-        }
 
         /**
         * @param {string} color
@@ -63,7 +52,7 @@
             menu.value = state ?? !menu.value;
         }
 
-        return {toasts, loading, menu, toggleDark, pushToast, toggleLoading, toggleMenu};
+        return {toasts, loading, menu, pushToast, toggleLoading, toggleMenu};
     }
 
     const vueComponentReflect = defineComponent({
@@ -209,9 +198,20 @@
                     </v-app-bar>
                 `,
                 setup() {
-                    const {toggleDark, toggleMenu} = useMainUI();
+                    const {toggleMenu} = useMainUI();
 
-                    return {toggleDark, toggleMenu};
+                    /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
+                    const {global} = useTheme();
+
+                    /**
+                    * @param {boolean=} state
+                    * @return {void}
+                    */
+                    function toggleDark(state) {
+                        global.name.value = state !== undefined ? state ? "dark" : "light" : global.current.value.dark ? "light" : "dark";
+                    }
+
+                    return {toggleMenu, toggleDark};
                 }
             }),
             "x-footer": defineComponent({
