@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const storageS = {
+    const storageSS = {
         /** @type {string} */
         get foo() {
             return sessionStorage.getItem("foo") ?? "";
@@ -12,7 +12,7 @@
         }
     };
 
-    const storageL = {
+    const storageLS = {
         /** @type {string} */
         get foo() {
             return localStorage.getItem("foo") ?? "";
@@ -22,11 +22,11 @@
         }
     };
 
-    storageS.foo = "bar";
-    storageL.foo = "bar";
+    storageSS.foo = "bar";
+    storageLS.foo = "bar";
 
-    console.log(storageS.foo);
-    console.log(storageL.foo);
+    console.log(storageSS.foo);
+    console.log(storageLS.foo);
 
     sessionStorage.clear();
     localStorage.clear();
