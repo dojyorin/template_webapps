@@ -151,7 +151,7 @@
                         </template>
 
                         <template #append>
-                            <v-btn icon="mdi-theme-light-dark" @click="theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'"></v-btn>
+                            <v-btn icon="mdi-theme-light-dark" @click="toggleTheme()"></v-btn>
                         </template>
 
                         <template #image>
@@ -180,7 +180,11 @@
                     /** @type {Ref<boolean>} */
                     const menu = ref(false);
 
-                    return {theme, menu};
+                    function toggleTheme() {
+                        theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+                    }
+
+                    return {menu, toggleTheme};
                 }
             }),
             "x-footer": defineComponent({
