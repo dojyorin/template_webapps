@@ -2,31 +2,27 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const storageSS = {
+    const storage = {
         /** @type {string} */
         get foo() {
             return sessionStorage.getItem("foo") ?? "";
         },
         set foo(v) {
             sessionStorage.setItem("foo", v);
-        }
-    };
-
-    const storageLS = {
-        /** @type {string} */
-        get foo() {
-            return localStorage.getItem("foo") ?? "";
         },
-        set foo(v) {
-            localStorage.setItem("foo", v);
+        /** @type {string} */
+        get bar() {
+            return localStorage.getItem("bar") ?? "";
+        },
+        set bar(v) {
+            localStorage.setItem("bar", v);
         }
     };
 
-    storageSS.foo = "bar";
-    storageLS.foo = "bar";
+    storage.foo = "foo";
+    storage.bar = "bar";
 
-    console.log(storageSS.foo);
-    console.log(storageLS.foo);
+    console.log(storage.foo, storage.bar);
 
     sessionStorage.clear();
     localStorage.clear();
