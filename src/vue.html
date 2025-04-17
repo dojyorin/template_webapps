@@ -8,7 +8,7 @@
 
 <script async type="module">
     import {createApp, defineComponent, ref, inject} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
-    import {createRouter, createWebHashHistory} from "https://esm.sh/vue-router@4.5.0/dist/vue-router.esm-bundler.js?target=esnext";
+    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.5.0/dist/vue-router.esm-bundler.js?target=esnext";
     import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.1/dist/vuetify.esm.js?target=esnext";
 
     /**
@@ -16,12 +16,30 @@
     * @typedef {{value: T;}} Ref
     */
 
+    function vueUseRouterWrap() {
+        /** @type {{push(path: string): void;}} */
+        const router = useRouter();
+
+        /**
+        * @param {string} path
+        * @return {void}
+        */
+        function pushTo(path) {
+            router.push(path);
+        }
+
+        return {pushTo};
+    }
+
     function vueUseThemeWrap() {
-        /** @type {{global: {name: Ref<string>; current: Ref<{dark: boolean;}>;};}} */
+        /** @type {{global: {name: Ref<string>;};}} */
         const theme = useTheme();
 
+        /**
+        * @return {void}
+        */
         function toggleTheme() {
-            theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+            theme.global.name.value = theme.global.name.value === "light" ? "dark" : "light";
         }
 
         return {toggleTheme};
@@ -235,21 +253,30 @@
                     "x-reflect": vueComponentReflect
                 },
                 setup() {
+                    const {pushTo} = vueUseRouterWrap();
                     const {pushToast, toggleLoading} = vueUseLayout();
 
-                    /** @type {Ref<string>} */
-                    const text = ref("");
                     /** @type {Ref<number>} */
                     const count = inject("$count");
+                    /** @type {Ref<string>} */
+                    const text = ref("");
 
-                    async function increment() {
-                        toggleLoading(true);
-                        await new Promise((done) => setTimeout(done, 200));
+                    /**
+                    * @return {void}
+                    */
+                    function increment() {
                         count.value++;
-                        toggleLoading(false);
+
+                        if (count.value === 10) {
+                            pushTo("/sub");
+                        }
+
                         pushToast("green", "IncrementX!");
                     }
 
+                    /**
+                    * @return {Promise<void>}
+                    */
                     async function decrement() {
                         toggleLoading(true);
                         await new Promise((done) => setTimeout(done, 200));
