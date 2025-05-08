@@ -33,69 +33,22 @@
     * @typedef {symbol & T} InjectionKey
     */
 
-    /**
-    * @param {Component} component
-    * @return {Context}
-    */
-    function _createApp(component) {
-        return createApp(component);
-    }
-
-    /**
-    * @param {Component} component
-    * @return {Component}
-    */
-    function _defineComponent(component) {
-        return defineComponent(component);
-    }
-
-    /**
-    * @template T
-    * @param {T} value
-    * @return {Ref<T>}
-    */
-    function _ref(value) {
-        return ref(value);
-    }
-
-    /**
-    * @template T
-    * @param {InjectionKey<T>} key
-    * @return {T}
-    */
-    function _inject(key) {
-        return inject(key);
-    }
-
-    /**
-    * @param {{history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}} option
-    * @return {Plugin}
-    */
-    function _createRouter(option) {
-        return createRouter(option);
-    }
-
-    /**
-    * @return {Record<string, unknown>}
-    */
-    function _createWebHashHistory() {
-        return createWebHashHistory();
-    }
-
-    /**
-    * @param {{defaults: Record<string, {style: Record<string, string | number>;}>;}} option
-    * @return {Plugin}
-    */
-    function _createVuetify(option) {
-        return createVuetify(option);
-    }
-
-    /**
-    * @return {{global: {name: Ref<string>;};}}
-    */
-    function _useTheme() {
-        return useTheme();
-    }
+    /** @type {(component: Component) => Context} */
+    const _createApp = createApp;
+    /** @type {(component: Component) => Component} */
+    const _defineComponent = defineComponent;
+    /** @type {<T>(value: T) => Ref<T>} */
+    const _ref = ref;
+    /** @type {<T>(key: InjectionKey<T>) => T} */
+    const _inject = inject;
+    /** @type {(option: {history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}) => Plugin} */
+    const _createRouter = createRouter;
+    /** @type {() => Record<string, unknown>} */
+    const _createWebHashHistory = createWebHashHistory;
+    /** @type {(option: {defaults: Record<string, {style: Record<string, string | number>;}>;}) => Plugin} */
+    const _createVuetify = createVuetify;
+    /** @type {() => {global: {name: Ref<string>;};}} */
+    const _useTheme = useTheme;
 
     function vueUseLayout() {
         const toasts = _inject(vueInject.$_toasts);
