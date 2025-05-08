@@ -42,9 +42,8 @@
     }
 
     /**
-    * @template {Component} T
-    * @param {T} component
-    * @return {T}
+    * @param {Component} component
+    * @return {Component}
     */
     function _defineComponent(component) {
         return defineComponent(component);
@@ -372,7 +371,6 @@
         install(context) {
             context.provide(vueInject.$_toasts, _ref([]));
             context.provide(vueInject.$_loading, _ref(false));
-
             context.provide(vueInject.$count, _ref(0));
         }
     };
