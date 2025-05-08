@@ -8,63 +8,99 @@
 
 <script async type="module">
     import {createApp, defineComponent, ref, inject} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
-    import {createRouter, createWebHashHistory, useRouter} from "https://esm.sh/vue-router@4.5.1/dist/vue-router.esm-bundler.js?target=esnext";
-    import {createVuetify, useTheme, useGoTo} from "https://esm.sh/vuetify@3.8.2/dist/vuetify.esm.js?target=esnext";
+    import {createRouter, createWebHashHistory} from "https://esm.sh/vue-router@4.5.1/dist/vue-router.esm-bundler.js?target=esnext";
+    import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.2/dist/vuetify.esm.js?target=esnext";
+
+    /**
+    * @typedef {{mount(target: Element): void; provide<T>(key: InjectionKey<T>, value: T): void; use(plugin: Plugin): void;}} Context
+    */
+
+    /**
+    * @typedef {{install(context: Context): void;}} Plugin
+    */
+
+    /**
+    * @typedef {{template: string; setup?(): Record<string, unknown> | void; components?: Record<string, Component>;}} Component
+    */
 
     /**
     * @template T
     * @typedef {{value: T;}} Ref
     */
 
-    function vueUseRouterWrap() {
-        /** @type {{push(path: string): void;}} */
-        const router = useRouter();
+    /**
+    * @template T
+    * @typedef {symbol & T} InjectionKey
+    */
 
-        /**
-        * @param {string} path
-        * @return {void}
-        */
-        function routerPush(path) {
-            router.push(path);
-        }
-
-        return {routerPush};
+    /**
+    * @param {Component} component
+    * @return {Context}
+    */
+    function _createApp(component) {
+        return createApp(component);
     }
 
-    function vueUseThemeWrap() {
-        /** @type {{global: {name: Ref<string>;};}} */
-        const theme = useTheme();
-
-        /**
-        * @return {void}
-        */
-        function toggleTheme() {
-            theme.global.name.value = theme.global.name.value === "light" ? "dark" : "light";
-        }
-
-        return {toggleTheme};
+    /**
+    * @template {Component} T
+    * @param {T} component
+    * @return {T}
+    */
+    function _defineComponent(component) {
+        return defineComponent(component);
     }
 
-    function vueUseGoToWrap() {
-        /** @type {(target: string | number | Element) => void} */
-        const goTo = useGoTo();
+    /**
+    * @template T
+    * @param {T} value
+    * @return {Ref<T>}
+    */
+    function _ref(value) {
+        return ref(value);
+    }
 
-        /**
-        * @param {(string | number | Element)=} target
-        * @return {void}
-        */
-        function vScrollTo(target) {
-            goTo(target ?? 0);
-        }
+    /**
+    * @template T
+    * @param {InjectionKey<T>} key
+    * @return {T}
+    */
+    function _inject(key) {
+        return inject(key);
+    }
 
-        return {vScrollTo};
+    /**
+    * @param {{history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}} option
+    * @return {Plugin}
+    */
+    function _createRouter(option) {
+        return createRouter(option);
+    }
+
+    /**
+    * @return {Record<string, unknown>}
+    */
+    function _createWebHashHistory() {
+        return createWebHashHistory();
+    }
+
+    /**
+    * @param {{defaults: Record<string, {style: Record<string, string | number>;}>;}} option
+    * @return {Plugin}
+    */
+    function _createVuetify(option) {
+        return createVuetify(option);
+    }
+
+    /**
+    * @return {{global: {name: Ref<string>;};}}
+    */
+    function _useTheme() {
+        return useTheme();
     }
 
     function vueUseLayout() {
-        /** @type {Ref<{color: string; text: string;}[]>} */
-        const toasts = inject("$_toasts");
-        /** @type {Ref<boolean>} */
-        const loading = inject("$_loading");
+        const toasts = _inject(vueInject.$_toasts);
+        const loading = _inject(vueInject.$_loading);
 
         /**
         * @param {string} color
@@ -83,10 +119,10 @@
             loading.value = state ?? !loading.value;
         }
 
-        return {toasts, loading, pushToast, toggleLoading};
+        return {pushToast, toggleLoading};
     }
 
-    const vueComponentReflect = defineComponent({
+    const vueComponentReflect = _defineComponent({
         template: /*html*/`
             <div>
                 <component is="style">{{css}}</component>
@@ -94,8 +130,7 @@
             </div>
         `,
         setup() {
-            /** @type {Ref<string>} */
-            const css = ref(/*css*/`
+            const css = _ref(/*css*/`
                 @scope {
                     @keyframes reflect {
                         0% {
@@ -145,7 +180,7 @@
         }
     });
 
-    const vueLayout = defineComponent({
+    const vueLayout = _defineComponent({
         template: /*html*/`
             <v-app>
                 <x-toast></x-toast>
@@ -158,7 +193,7 @@
             </v-app>
         `,
         components: {
-            "x-toast": defineComponent({
+            "x-toast": _defineComponent({
                 template: /*html*/`
                     <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
                         <template #actions="{props}">
@@ -167,24 +202,24 @@
                     </v-snackbar-queue>
                 `,
                 setup() {
-                    const {toasts} = vueUseLayout();
+                    const toasts = _inject(vueInject.$_toasts);
 
                     return {toasts};
                 }
             }),
-            "x-loading": defineComponent({
+            "x-loading": _defineComponent({
                 template: /*html*/`
                     <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
                         <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
                     </v-overlay>
                 `,
                 setup() {
-                    const {loading} = vueUseLayout();
+                    const loading = _inject(vueInject.$_loading);
 
                     return {loading};
                 }
             }),
-            "x-header": defineComponent({
+            "x-header": _defineComponent({
                 template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
@@ -215,15 +250,18 @@
                     </v-navigation-drawer>
                 `,
                 setup() {
-                    const {toggleTheme} = vueUseThemeWrap();
+                    const theme = _useTheme();
 
-                    /** @type {Ref<boolean>} */
-                    const menu = ref(false);
+                    const menu = _ref(false);
+
+                    function toggleTheme() {
+                        theme.global.name.value = theme.global.name.value === "light" ? "dark" : "light";
+                    }
 
                     return {menu, toggleTheme};
                 }
             }),
-            "x-footer": defineComponent({
+            "x-footer": _defineComponent({
                 template: /*html*/`
                     <v-footer app class="justify-center align-center">Copyright</v-footer>
                 `
@@ -231,11 +269,11 @@
         }
     });
 
-    const vueRouter = createRouter({
-        history: createWebHashHistory(),
+    const vueRouter = _createRouter({
+        history: _createWebHashHistory(),
         routes: [{
             path: "/",
-            component: defineComponent({
+            component: _defineComponent({
                 template: /*html*/`
                     <v-container fluid>
                         <v-row justify="center">
@@ -265,35 +303,17 @@
                     "x-reflect": vueComponentReflect
                 },
                 setup() {
-                    const {routerPush} = vueUseRouterWrap();
-                    const {vScrollTo} = vueUseGoToWrap();
                     const {pushToast, toggleLoading} = vueUseLayout();
 
-                    /** @type {Ref<number>} */
-                    const count = inject("$count");
-                    /** @type {Ref<string>} */
-                    const text = ref("");
+                    const count = _inject(vueInject.$count);
 
-                    /**
-                    * @return {void}
-                    */
+                    const text = _ref("");
+
                     function increment() {
                         count.value++;
-
-                        if (count.value === 10) {
-                            routerPush("/sub");
-                        }
-
-                        if (count.value === 20) {
-                            vScrollTo();
-                        }
-
                         pushToast("green", "IncrementX!");
                     }
 
-                    /**
-                    * @return {Promise<void>}
-                    */
                     async function decrement() {
                         toggleLoading(true);
                         await new Promise((done) => setTimeout(done, 200));
@@ -307,7 +327,7 @@
             })
         }, {
             path: "/sub",
-            component: defineComponent({
+            component: _defineComponent({
                 template: /*html*/`
                     <v-img gradient="45deg, #FF9F17, #FF4E0E" class="fill-height text-center align-center text-white text-h2">
                         <div class="hidden-md-and-up">MOBILE</div>
@@ -317,7 +337,7 @@
             })
         }, {
             path: "/:catchAll(.*)",
-            component: defineComponent({
+            component: _defineComponent({
                 template: /*html*/`
                     <v-container fluid class="justify-center fill-height">
                         <v-card flat color="transparent">
@@ -335,7 +355,7 @@
         }]
     });
 
-    const vueVuetify = createVuetify({
+    const vueVuetify = _createVuetify({
         defaults: {
             VBtn: {
                 style: {
@@ -347,16 +367,26 @@
         }
     });
 
+    /** @type {Plugin} */
     const vueProvide = {
         install(context) {
-            context.provide("$_toasts", ref([]));
-            context.provide("$_loading", ref(false));
+            context.provide(vueInject.$_toasts, _ref([]));
+            context.provide(vueInject.$_loading, _ref(false));
 
-            context.provide("$count", ref(0));
+            context.provide(vueInject.$count, _ref(0));
         }
     };
 
-    const vue = createApp(vueLayout);
+    const vueInject = {
+        /** @type {InjectionKey<Ref<{color: string; text: string;}[]>>} */
+        $_toasts: Symbol(),
+        /** @type {InjectionKey<Ref<boolean>>} */
+        $_loading: Symbol(),
+        /** @type {InjectionKey<Ref<number>>} */
+        $count: Symbol()
+    };
+
+    const vue = _createApp(vueLayout);
     vue.use(vueRouter);
     vue.use(vueVuetify);
     vue.use(vueProvide);
