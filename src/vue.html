@@ -71,6 +71,28 @@
         return {toasts, loading, pushToast, toggleLoading};
     }
 
+    function vueUseUtility() {
+        const {pushToast, toggleLoading} = vueUseApplication();
+
+        /** @type {Ref<number>} */
+        const count = _inject("$count");
+
+        function increment() {
+            count.value++;
+            pushToast("green", "IncrementX!");
+        }
+
+        async function decrement() {
+            toggleLoading(true);
+            await new Promise((done) => setTimeout(done, 200));
+            count.value--;
+            toggleLoading(false);
+            pushToast("orange-darken-1", "DecrementX!");
+        }
+
+        return {count, increment, decrement};
+    }
+
     const vueComponentReflect = _defineComponent({
         template: /*html*/`
             <div>
@@ -253,23 +275,9 @@
                 },
                 setup() {
                     const {pushToast, toggleLoading} = vueUseApplication();
-
-                    const count = _inject("$count");
+                    const {count, increment, decrement} = vueUseUtility();
 
                     const text = _ref("");
-
-                    function increment() {
-                        count.value++;
-                        pushToast("green", "IncrementX!");
-                    }
-
-                    async function decrement() {
-                        toggleLoading(true);
-                        await new Promise((done) => setTimeout(done, 200));
-                        count.value--;
-                        toggleLoading(false);
-                        pushToast("orange-darken-1", "DecrementX!");
-                    }
 
                     return {text, count, increment, decrement};
                 }
