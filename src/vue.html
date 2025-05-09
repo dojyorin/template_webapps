@@ -129,7 +129,7 @@
         }
     });
 
-    const vueLayout = _defineComponent({
+    const vueApplication = _defineComponent({
         template: /*html*/`
             <v-app>
                 <x-toast></x-toast>
@@ -325,7 +325,7 @@
         }
     };
 
-    const vue = _createApp(vueLayout);
+    const vue = _createApp(vueApplication);
     vue.use(vueRouter);
     vue.use(vueVuetify);
     vue.use(vueProvide);
