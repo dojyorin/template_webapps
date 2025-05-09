@@ -2,8 +2,13 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {transpile, ScriptTarget} from "https://esm.sh/typescript@5.8.3?target=esnext";
-    import {minify} from "https://esm.sh/terser@5.39.0?target=esnext";
+    import {transpile} from "https://esm.sh/typescript@5.8.3?target=esnext";
+    import {minify_sync} from "https://esm.sh/terser@5.39.0?target=esnext";
+
+    /** @type {(ts: string, option?: {target?: number;}) => string} */
+    const _transpile = transpile;
+    /** @type {(js: string, option?: {module?: boolean;}) => {code: string;}} */
+    const _minify_sync = minify_sync;
 
     /**
     * @summary esnext-polyfill
@@ -18,11 +23,11 @@
             continue;
         }
 
-        const js = transpile(textContent, {
-            target: ScriptTarget.ESNext
+        const js = _transpile(textContent, {
+            target: 99
         });
 
-        const {code} = await minify(js, {
+        const {code} = _minify_sync(js, {
             module: true
         });
 
