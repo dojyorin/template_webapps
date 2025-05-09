@@ -30,7 +30,8 @@
 
     /**
     * @template T
-    * @typedef {symbol & T} InjectionKey
+    * @typedef {_InjectionKey<T>} InjectionKey
+    * @typedef {{}} _InjectionKey
     */
 
     /** @type {(component: Component) => Context} */
