@@ -4,6 +4,9 @@
 <script async type="module">
     import {Chart} from "https://esm.sh/chart.js@4.4.9/auto?target=esnext";
 
+    /** @type {new (target: Element, option: {}) => {}} */
+    const _Chart = Chart;
+
     const chart = new Chart(document.getElementById("chart"), {
         type: "bar",
         options: {
@@ -32,13 +35,13 @@
         data: {
             labels: ["January", "February", "March", "April", "May", "June", "July"],
             datasets: [{
+                data: [0, 10, 5, 2, 20, 30, 40],
                 label: "Data1",
-                backgroundColor: "#FF7F7F",
-                data: [0, 10, 5, 2, 20, 30, 40]
+                backgroundColor: "#FF7F7F"
             }, {
+                data: [2, 5, 10, 4, 10, 30, 50],
                 label: "Data2",
-                backgroundColor: "#7F7FFF",
-                data: [2, 5, 10, 4, 10, 30, 50]
+                backgroundColor: "#7F7FFF"
             }]
         }
     });
