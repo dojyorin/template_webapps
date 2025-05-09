@@ -5,41 +5,75 @@
     import {default as qrcode} from "https://esm.sh/qrcode@1.5.4?target=esnext";
     import {default as jsqr} from "https://esm.sh/jsqr@1.4.0?target=esnext";
 
+    /** @type {{toDataURL(segments: {type: "byte"; data: Uint8Array;}[]): Promise<string>;}} */
+    const _qrcode = qrcode;
+    /** @type {(data: Uint8ClampedArray, width: number, height: number) => {data: string;} | null} */
+    const _jsqr = jsqr;
+
+    /** @type {HTMLButtonElement} */
+    const capture = document.getElementById("capture");
     /** @type {HTMLVideoElement} */
     const video = document.getElementById("video");
+    /** @type {HTMLImageElement} */
+    const image = document.getElementById("image");
+    /** @type {HTMLTextAreaElement} */
+    const input = document.getElementById("input");
+    /** @type {HTMLTextAreaElement} */
+    const output = document.getElementById("output");
 
-    video.srcObject = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-            facingMode: "environment"
+    capture.onclick = async () => {
+        if (!video.srcObject) {
+            video.srcObject = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    facingMode: "environment"
+                }
+            });
         }
-    });
 
-    document.getElementById("output").value = await new Promise((res) => {
-        const render = new OffscreenCanvas(240, 320).getContext("2d");
+        const render = new OffscreenCanvas(320, 240).getContext("2d", {
+            willReadFrequently: true
+        });
 
-        const loop = setInterval(() => {
-            render.drawImage(video, 0, 0, render.canvas.width, render.canvas.height);
+        output.value = await new Promise((res) => {
+            const timer = setInterval(() => {
+                render.drawImage(video, 0, 0, render.canvas.width, render.canvas.height);
 
-            const image = render.getImageData(0, 0, render.canvas.width, render.canvas.height);
-            const result = jsqr(image.data, image.width, image.height);
+                const {data, width, height} = render.getImageData(0, 0, render.canvas.width, render.canvas.height);
+                const result = _jsqr(data, width, height);
 
-            if (result) {
-                clearInterval(loop);
-                res(result.data);
-            }
-        }, 100);
-    });
+                if (result) {
+                    clearInterval(timer);
+                    res(result.data);
+                }
+            }, 100);
+        });
+    };
 
-    document.getElementById("input").onchange = async ({target}) => {
-        document.getElementById("image").src = await qrcode.toDataURL([{
+    input.oninput = async () => {
+        image.src = await _qrcode.toDataURL([{
             type: "byte",
-            data: new TextEncoder().encode(target.value)
+            data: new TextEncoder().encode(input.value)
         }]);
     };
 </script>
 
-<video autoplay muted width="320" height="480" id="video"></video>
-<textarea readonly id="output"></textarea>
-<img id="image"></img>
-<textarea id="input"></textarea>
+<div>
+    <div>
+        <video autoplay muted height="240" width="320" id="video"></video>
+    </div>
+    <div>
+        <button type="button" id="capture">Read</button>
+    </div>
+    <div>
+        <textarea readonly placeholder="Output" id="output"></textarea>
+    </div>
+</div>
+<div>
+    <div>
+        <img alt="Result" id="image">
+    </div>
+    <div>
+        <textarea placeholder="Input" id="input"></textarea>
+    </div>
+</div>
