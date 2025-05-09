@@ -4,8 +4,11 @@
 <script async type="module">
     import {default as confetti} from "https://esm.sh/canvas-confetti@1.9.3?target=esnext";
 
+    /** @type {(option?: {angle?: number; origin?: {x?: number; y?: number;};}) => Promise<void>} */
+    const _confetti = confetti;
+
     document.getElementById("confetti").onclick = async () => {
-        await confetti({
+        await _confetti({
             angle: 270,
             origin: {
                 x: 0.5,
