@@ -51,8 +51,8 @@
     const _useTheme = useTheme;
 
     function vueUseLayout() {
-        const toasts = _inject(vueInject.$_toasts);
-        const loading = _inject(vueInject.$_loading);
+        const toasts = _inject(vueInject._toasts);
+        const loading = _inject(vueInject._loading);
 
         /**
         * @param {string} color
@@ -154,7 +154,7 @@
                     </v-snackbar-queue>
                 `,
                 setup() {
-                    const toasts = _inject(vueInject.$_toasts);
+                    const toasts = _inject(vueInject._toasts);
 
                     return {toasts};
                 }
@@ -166,7 +166,7 @@
                     </v-overlay>
                 `,
                 setup() {
-                    const loading = _inject(vueInject.$_loading);
+                    const loading = _inject(vueInject._loading);
 
                     return {loading};
                 }
@@ -257,7 +257,7 @@
                 setup() {
                     const {pushToast, toggleLoading} = vueUseLayout();
 
-                    const count = _inject(vueInject.$count);
+                    const count = _inject(vueInject.count);
 
                     const text = _ref("");
 
@@ -322,19 +322,19 @@
     /** @type {Plugin} */
     const vueProvide = {
         install(context) {
-            context.provide(vueInject.$_toasts, _ref([]));
-            context.provide(vueInject.$_loading, _ref(false));
-            context.provide(vueInject.$count, _ref(0));
+            context.provide(vueInject._toasts, _ref([]));
+            context.provide(vueInject._loading, _ref(false));
+            context.provide(vueInject.count, _ref(0));
         }
     };
 
     const vueInject = {
         /** @type {InjectionKey<Ref<{color: string; text: string;}[]>>} */
-        $_toasts: Symbol(),
+        _toasts: Symbol(),
         /** @type {InjectionKey<Ref<boolean>>} */
-        $_loading: Symbol(),
+        _loading: Symbol(),
         /** @type {InjectionKey<Ref<number>>} */
-        $count: Symbol()
+        count: Symbol()
     };
 
     const vue = _createApp(vueLayout);
