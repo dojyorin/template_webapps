@@ -45,7 +45,7 @@
     /** @type {() => {global: {name: Ref<string>;};}} */
     const _useTheme = useTheme;
 
-    function vueUseLayout() {
+    function vueUseApplication() {
         /** @type {Ref<{color: string; text: string;}[]>} */
         const toasts = _inject("$_toasts");
         /** @type {Ref<boolean>} */
@@ -252,7 +252,7 @@
                     "x-reflect": vueComponentReflect
                 },
                 setup() {
-                    const {pushToast, toggleLoading} = vueUseLayout();
+                    const {pushToast, toggleLoading} = vueUseApplication();
 
                     const count = _inject("$count");
 
