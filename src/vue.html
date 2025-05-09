@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline: central; text-anchor: middle; font-size: 100px;'>🌌</text></svg>">
 
 <script async type="module">
-    import {createApp, defineComponent, ref, inject} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
+    import {createApp, defineComponent, ref, provide, inject} from "https://esm.sh/vue@3.5.13/dist/vue.esm-bundler.js?target=esnext";
     import {createRouter, createWebHashHistory} from "https://esm.sh/vue-router@4.5.1/dist/vue-router.esm-bundler.js?target=esnext";
     import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.4/dist/vuetify.esm.js?target=esnext";
 
@@ -34,6 +34,8 @@
     const _defineComponent = defineComponent;
     /** @type {<T>(value: T) => Ref<T>} */
     const _ref = ref;
+    /** @type {<T>(key: string, value: T) => void} */
+    const _provide = provide;
     /** @type {<T>(key: string) => T} */
     const _inject = inject;
     /** @type {(option: {history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}) => Plugin} */
