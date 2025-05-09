@@ -12,7 +12,7 @@
     import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.2/dist/vuetify.esm.js?target=esnext";
 
     /**
-    * @typedef {{mount(target: Element): void; provide<T>(key: InjectionKey<T>, value: T): void; use(plugin: Plugin): void;}} Context
+    * @typedef {{mount(target: Element): void; provide<T>(key: string, value: T): void; use(plugin: Plugin): void;}} Context
     */
 
     /**
@@ -28,19 +28,13 @@
     * @typedef {{value: T;}} Ref
     */
 
-    /**
-    * @template T
-    * @typedef {_InjectionKey<T>} InjectionKey
-    * @typedef {{}} _InjectionKey
-    */
-
     /** @type {(component: Component) => Context} */
     const _createApp = createApp;
     /** @type {(component: Component) => Component} */
     const _defineComponent = defineComponent;
     /** @type {<T>(value: T) => Ref<T>} */
     const _ref = ref;
-    /** @type {<T>(key: InjectionKey<T>) => T} */
+    /** @type {<T>(key: string) => T} */
     const _inject = inject;
     /** @type {(option: {history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}) => Plugin} */
     const _createRouter = createRouter;
