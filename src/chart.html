@@ -9,6 +9,18 @@
 
     const chart = new Chart(document.getElementById("chart"), {
         type: "bar",
+        data: {
+            labels: ["January", "February", "March", "April", "May", "June", "July"],
+            datasets: [{
+                data: [0, 10, 5, 2, 20, 30, 40],
+                label: "Data1",
+                backgroundColor: "#FF7F7F"
+            }, {
+                data: [2, 5, 10, 4, 10, 30, 50],
+                label: "Data2",
+                backgroundColor: "#7F7FFF"
+            }]
+        },
         options: {
             plugins: {
                 title: {
@@ -31,18 +43,6 @@
                     }
                 }
             }
-        },
-        data: {
-            labels: ["January", "February", "March", "April", "May", "June", "July"],
-            datasets: [{
-                data: [0, 10, 5, 2, 20, 30, 40],
-                label: "Data1",
-                backgroundColor: "#FF7F7F"
-            }, {
-                data: [2, 5, 10, 4, 10, 30, 50],
-                label: "Data2",
-                backgroundColor: "#7F7FFF"
-            }]
         }
     });
 
