@@ -68,7 +68,7 @@
             loading.value = state ?? !loading.value;
         }
 
-        return {pushToast, toggleLoading};
+        return {toasts, loading, pushToast, toggleLoading};
     }
 
     const vueComponentReflect = _defineComponent({
@@ -151,7 +151,7 @@
                     </v-snackbar-queue>
                 `,
                 setup() {
-                    const toasts = _inject("$_toasts");
+                    const {toasts} = vueUseApplication();
 
                     return {toasts};
                 }
@@ -163,7 +163,7 @@
                     </v-overlay>
                 `,
                 setup() {
-                    const loading = _inject("$_loading");
+                    const {loading} = vueUseApplication();
 
                     return {loading};
                 }
