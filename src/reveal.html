@@ -8,13 +8,24 @@
     import {default as notes} from "https://esm.sh/reveal.js@5.2.1/plugin/notes/notes.esm.js?target=esnext";
     import {default as math} from "https://esm.sh/reveal.js@5.2.1/plugin/math/math.esm.js?target=esnext";
 
-    await new Reveal(document.getElementById("reveal"), {
+    /** @type {new (target: Element, option?: {hash?: boolean; plugins?: Record<string, unknown>[];}) => {initialize(): Promise<void>;}} */
+    const _Reveal = Reveal;
+    /** @type {() => Record<string, unknown>} */
+    const _markdown = markdown;
+    /** @type {() => Record<string, unknown>} */
+    const _highlight = highlight;
+    /** @type {() => Record<string, unknown>} */
+    const _notes = notes;
+    /** @type {Record<string, unknown>} */
+    const _math = math;
+
+    await new _Reveal(document.getElementById("reveal"), {
         hash: true,
         plugins: [
-            markdown,
-            highlight,
-            notes,
-            math
+            _markdown(),
+            _highlight(),
+            _notes(),
+            _math
         ]
     }).initialize();
 </script>
