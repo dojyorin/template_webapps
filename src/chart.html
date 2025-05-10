@@ -4,10 +4,18 @@
 <script async type="module">
     import {Chart} from "https://esm.sh/chart.js@4.4.9/auto?target=esnext";
 
-    /** @type {new (target: Element, option: {}) => {}} */
+    /**
+    * @typedef {{type: string; data: {datasets: {data: unknown[]; label?: string; backgroundColor?: string;}[]; labels?: string[];}; options?: {plugins?: {title?: {display?: boolean; text?: string;}; tooltip?: {callbacks?: {afterLabel?(): string | string[] | void;};};};} & BarOption;}} Option
+    */
+
+    /**
+    * @typedef {{scales: {y: {ticks: {stepSize: number; precision: number;};};};}} BarOption
+    */
+
+    /** @type {new (target: HTMLCanvasElement | OffscreenCanvas, option: Option) => {clear(): void; update(): void;} & Omit<Option, "type">} */
     const _Chart = Chart;
 
-    const chart = new Chart(document.getElementById("chart"), {
+    const chart = new _Chart(document.getElementById("chart"), {
         type: "bar",
         data: {
             datasets: [{
