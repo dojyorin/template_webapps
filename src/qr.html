@@ -10,8 +10,6 @@
     /** @type {(data: Uint8ClampedArray, width: number, height: number) => {data: string;} | null} */
     const _jsqr = jsqr;
 
-    /** @type {HTMLButtonElement} */
-    const capture = document.getElementById("capture");
     /** @type {HTMLVideoElement} */
     const video = document.getElementById("video");
     /** @type {HTMLImageElement} */
@@ -21,7 +19,7 @@
     /** @type {HTMLTextAreaElement} */
     const output = document.getElementById("output");
 
-    capture.onclick = async () => {
+    document.getElementById("capture").onclick = async () => {
         if (!video.srcObject) {
             video.srcObject = await navigator.mediaDevices.getUserMedia({
                 audio: false,
