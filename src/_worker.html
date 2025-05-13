@@ -12,7 +12,7 @@
 
     /**
     * @param {string} script
-    * @param {string=} type
+    * @param {string} [type]
     * @return {Worker}
     */
     function createWorker(script, type) {
@@ -25,7 +25,7 @@
     * @template {unknown} T
     * @template {unknown} U
     * @param {string} script
-    * @param {string=} type
+    * @param {string} [type]
     * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
     */
     function factoryWorker(script, type) {

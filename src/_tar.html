@@ -12,7 +12,7 @@
 
     /**
     * @param {File[]} files
-    * @param {boolean=} gzip
+    * @param {boolean} [gzip]
     * @return {Promise<Uint8Array>}
     */
     async function tarEncode(files, gzip) {
@@ -54,7 +54,7 @@
 
     /**
     * @param {Uint8Array} tar
-    * @param {boolean=} gzip
+    * @param {boolean} [gzip]
     * @return {Promise<File[]>}
     */
     async function tarDecode(tar, gzip) {

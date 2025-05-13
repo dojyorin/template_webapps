@@ -5,7 +5,7 @@
     /**
     * @template {boolean} T
     * @param {T} multiple
-    * @param {string=} accept
+    * @param {string} [accept]
     * @return {Promise<T extends true ? File[] : File>}
     */
     async function fsRead(multiple, accept) {
