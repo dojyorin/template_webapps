@@ -4,14 +4,14 @@
 <script async type="module">
     /**
     * @param {string} color
-    * @param {string} message
+    * @param {string} text
     * @return {void}
     */
-    function pushToast(color, message) {
+    function pushToast(color, text) {
         const dialog = document.createElement("dialog");
         const style = document.createElement("style");
 
-        dialog.textContent = message;
+        dialog.textContent = text;
         style.textContent = /*css*/`
             @scope {
                 & {
