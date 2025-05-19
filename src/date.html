@@ -2,12 +2,42 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const iso8601 = new Date().toLocaleString("sv-se", {
-        timeZoneName: "longOffset"
-    }).replace(/(?<=\d) (?=\d)/, "T").replace(/ GMT$/, "Z").replace(/ GMT(?=[+-])/, "");
+    /**
+    * @param {string | number | Date} [date]
+    * @return {string}
+    */
+    function iso8601(date) {
+        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se", {
+            timeZoneName: "longOffset"
+        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+    }
 
-    const yyyymmddHHMMSS = new Date().toLocaleString("sv-se").replace(/\D/g, "");
+    /**
+    * @param {string | number | Date} [date]
+    * @return {string}
+    */
+    function yyyymmdd(date) {
+        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se").replace(/\D/g, "");
+    }
 
-    console.log(iso8601);
-    console.log(yyyymmddHHMMSS);
+    /**
+    * @param {string | number | Date} [date]
+    * @return {number}
+    */
+    function unixtime(date) {
+        return Math.floor((typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).getTime() / 1000);
+    }
+
+    /**
+    * @param {string} text
+    * @return {boolean}
+    */
+    function iso8601test(text) {
+        return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|\+\d{2}:\d{2}){0,1}){0,1}$/.test(text);
+    }
+
+    console.log(iso8601());
+    console.log(yyyymmdd());
+    console.log(unixtime());
+    console.log(iso8601test("2000-01-01T00:00:00+09:00"));
 </script>
