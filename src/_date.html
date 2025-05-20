@@ -4,12 +4,18 @@
 <script async type="module">
     /**
     * @param {string | number | Date} [date]
+    * @return {number}
+    */
+    function unixtime(date) {
+        return Math.floor((typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).getTime() / 1000);
+    }
+
+    /**
+    * @param {string | number | Date} [date]
     * @return {string}
     */
-    function iso8601(date) {
-        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se", {
-            timeZoneName: "longOffset"
-        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+    function simpledate(date) {
+        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se");
     }
 
     /**
@@ -24,16 +30,10 @@
     * @param {string | number | Date} [date]
     * @return {string}
     */
-    function simpledate(date) {
-        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se");
-    }
-
-    /**
-    * @param {string | number | Date} [date]
-    * @return {number}
-    */
-    function unixtime(date) {
-        return Math.floor((typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).getTime() / 1000);
+    function iso8601(date) {
+        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se", {
+            timeZoneName: "longOffset"
+        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
     }
 
     /**
@@ -44,9 +44,9 @@
         return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|\+\d{2}:\d{2}){0,1}){0,1}$/.test(text);
     }
 
-    console.log(iso8601());
-    console.log(yyyymmdd());
-    console.log(simpledate());
     console.log(unixtime());
+    console.log(simpledate());
+    console.log(yyyymmdd());
+    console.log(iso8601());
     console.log(iso8601test("2000-01-01T00:00:00+09:00"));
 </script>
