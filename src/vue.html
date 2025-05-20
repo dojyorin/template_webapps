@@ -36,6 +36,14 @@
     * @typedef {{path: string; hash: string; query: Record<string, string>; params: Record<string, string>; name?: string; meta?: Record<string, unknown>;}} Route
     */
 
+    /**
+    * @typedef {Plugin & {theme: Theme;}} Vuetify
+    */
+
+    /**
+    * @typedef {{global: {name: Ref<string>;};}} Theme
+    */
+
     /** @type {(component: Component) => Vue} */
     const _createApp = createApp;
     /** @type {(component: Component) => Component} */
@@ -48,9 +56,9 @@
     const _createRouter = createRouter;
     /** @type {() => Record<string, unknown>} */
     const _createWebHashHistory = createWebHashHistory;
-    /** @type {(option: {defaults: Record<string, {style: Record<string, string | number>;}>;}) => Plugin} */
+    /** @type {(option: {defaults: Record<string, {style: Record<string, string | number>;}>;}) => Vuetify} */
     const _createVuetify = createVuetify;
-    /** @type {() => {global: {name: Ref<string>;};}} */
+    /** @type {() => Theme} */
     const _useTheme = useTheme;
 
     function vueUseApplication() {
