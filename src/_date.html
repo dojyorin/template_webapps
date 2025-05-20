@@ -22,6 +22,14 @@
 
     /**
     * @param {string | number | Date} [date]
+    * @return {string}
+    */
+    function simpledisplay(date) {
+        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se");
+    }
+
+    /**
+    * @param {string | number | Date} [date]
     * @return {number}
     */
     function unixtime(date) {
@@ -38,6 +46,7 @@
 
     console.log(iso8601());
     console.log(yyyymmdd());
+    console.log(simpledisplay());
     console.log(unixtime());
     console.log(iso8601test("2000-01-01T00:00:00+09:00"));
 </script>
