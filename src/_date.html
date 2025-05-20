@@ -3,6 +3,14 @@
 
 <script async type="module">
     /**
+    * @param {number} time
+    * @return {string}
+    */
+    function displaytime(time) {
+        return `${Math.floor(time / 3600).toString().padStart(2, "0")}:${Math.floor(time % 3600 / 60).toString().padStart(2, "0")}:${Math.floor(time % 60).toString().padStart(2, "0")}`;
+    }
+
+    /**
     * @param {string | number | Date} [date]
     * @return {number}
     */
@@ -44,6 +52,7 @@
         return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|\+\d{2}:\d{2}){0,1}){0,1}$/.test(text);
     }
 
+    console.log(displaytime(12345));
     console.log(unixtime());
     console.log(simpledate());
     console.log(yyyymmdd());
