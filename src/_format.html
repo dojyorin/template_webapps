@@ -38,7 +38,16 @@
         }).reduce((t, [k, v]) => t.replaceAll(k, v), text);
     }
 
-    const text = fixWidth("１＋１＝２");
+    /**
+    * @param {number} n
+    * @param {number} [digit]
+    * @param {number} [radix]
+    * @return {string}
+    */
+    function p0(n, digit, radix) {
+        return n.toString(radix ?? 10).padStart(digit ?? 2, "0");
+    }
 
-    console.log(text);
+    console.log(fixWidth("１＋１＝２"));
+    console.log(p0(8));
 </script>
