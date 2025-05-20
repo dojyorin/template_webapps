@@ -12,11 +12,11 @@
     import {createVuetify, useTheme} from "https://esm.sh/vuetify@3.8.5/dist/vuetify.esm.js?target=esnext";
 
     /**
-    * @typedef {{mount(target: Element): void; provide<T>(key: string, value: T): void; use(plugin: Plugin): void;}} Context
+    * @typedef {{mount(target: Element): void; provide<T>(key: string, value: T): void; use(plugin: Plugin): void;}} Vue
     */
 
     /**
-    * @typedef {{install(context: Context): void;}} Plugin
+    * @typedef {{install(context: Vue): void;}} Plugin
     */
 
     /**
@@ -28,7 +28,7 @@
     * @typedef {{value: T;}} Ref
     */
 
-    /** @type {(component: Component) => Context} */
+    /** @type {(component: Component) => Vue} */
     const _createApp = createApp;
     /** @type {(component: Component) => Component} */
     const _defineComponent = defineComponent;
