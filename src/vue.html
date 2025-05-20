@@ -29,11 +29,11 @@
     */
 
     /**
-    * @typedef {{path: string; hash: string; query: Record<string, string>; params: Record<string, string>; name?: string; meta?: Record<string, unknown>;}} Route
+    * @typedef {Plugin & {push(path: string): void; beforeEach(func: (to: Route, from: Route, next: () => void) => Promise<void | boolean | string>): void;}} Router
     */
 
     /**
-    * @typedef {Plugin & {push(path: string): void; beforeEach(func: (to: Route, from: Route, next: () => void) => Promise<void | boolean | string>): void;}} Router
+    * @typedef {{path: string; hash: string; query: Record<string, string>; params: Record<string, string>; name?: string; meta?: Record<string, unknown>;}} Route
     */
 
     /** @type {(component: Component) => Vue} */
