@@ -210,11 +210,11 @@
                 template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
-                            <v-app-bar-nav-icon @click="menu = !menu"></v-app-bar-nav-icon>
+                            <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
                         </template>
 
                         <template #append>
-                            <v-btn icon="mdi-theme-light-dark" @click="toggleTheme()"></v-btn>
+                            <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
                         </template>
 
                         <template #image>
@@ -224,7 +224,7 @@
                         <v-app-bar-title>Application</v-app-bar-title>
                     </v-app-bar>
 
-                    <v-navigation-drawer floating temporary v-model="menu">
+                    <v-navigation-drawer floating temporary v-model="nav">
                         <v-list nav density="compact">
                             <v-list-item to="/">
                                 <v-list-item-title>Top</v-list-item-title>
@@ -239,13 +239,13 @@
                 setup() {
                     const theme = _useTheme();
 
-                    const menu = _ref(false);
+                    const nav = _ref(false);
 
-                    function toggleTheme() {
+                    function toggleDark() {
                         theme.global.name.value = theme.global.name.value === "dark" ? "light" : "dark";
                     }
 
-                    return {menu, toggleTheme};
+                    return {nav, toggleDark};
                 }
             }),
             "x-footer": _defineComponent({
