@@ -36,11 +36,13 @@
 
     /**
     * @param {string | number | Date} [date]
+    * @param {string} [timezone]
     * @return {string}
     */
-    function iso8601(date) {
+    function iso8601(date, timezone) {
         return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se", {
-            timeZoneName: "longOffset"
+            timeZoneName: "longOffset",
+            timeZone: timezone
         }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
     }
 
