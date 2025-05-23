@@ -2,30 +2,48 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const jsonSessionStorage = {
-        /** @type {string | null} */
-        get foo() {
-            return JSON.parse(sessionStorage.getItem("foo") ?? "null");
-        },
-        set foo(v) {
-            sessionStorage.setItem("foo", JSON.stringify(v));
-        }
-    };
+    /**
+    * @template T
+    * @param {string} key
+    * @param {T} defaultValue
+    * @param {Storage} storage
+    * @return {{remove(): void; readonly exist: boolean; body: T;}}
+    */
+    function bindStorage(key, defaultValue, storage) {
+        return {
+            remove() {
+                storage.removeItem(key);
+            },
+            get exist() {
+                return storage.getItem(key) !== null;
+            },
+            /** @type {T} */
+            get body() {
+                const v = storage.getItem(key);
 
-    const jsonLocalStorage = {
-        /** @type {number | null} */
-        get foo() {
-            return JSON.parse(localStorage.getItem("foo") ?? "null");
-        },
-        set foo(v) {
-            localStorage.setItem("foo", JSON.stringify(v));
-        }
-    };
+                if (v === null) {
+                    storage.setItem(key, JSON.stringify(defaultValue));
 
-    jsonSessionStorage.foo = "foo";
-    jsonLocalStorage.foo = 12345;
+                    return defaultValue;
+                }
 
-    console.log(jsonSessionStorage.foo, jsonLocalStorage.foo);
+                return JSON.parse(v);
+            },
+            set body(v) {
+                storage.setItem(key, JSON.stringify(v));
+            }
+        };
+    }
+
+    const aaa = bindStorage("aaa", "foo", sessionStorage);
+    console.log(aaa.body);
+    aaa.body = "bar";
+    console.log(aaa.body);
+
+    const bbb = bindStorage("bbb", 0, localStorage);
+    console.log(bbb.body);
+    bbb.body = 12345;
+    console.log(bbb.body);
 
     sessionStorage.clear();
     localStorage.clear();
