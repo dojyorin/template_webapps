@@ -2,27 +2,30 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const storage = {
-        /** @type {string} */
+    const jsonSessionStorage = {
+        /** @type {string | null} */
         get foo() {
-            return sessionStorage.getItem("foo") ?? "";
+            return JSON.parse(sessionStorage.getItem("foo") ?? "null");
         },
         set foo(v) {
-            sessionStorage.setItem("foo", v);
-        },
-        /** @type {string} */
-        get bar() {
-            return localStorage.getItem("bar") ?? "";
-        },
-        set bar(v) {
-            localStorage.setItem("bar", v);
+            sessionStorage.setItem("foo", JSON.stringify(v));
         }
     };
 
-    storage.foo = "foo";
-    storage.bar = "bar";
+    const jsonLocalStorage = {
+        /** @type {number | null} */
+        get foo() {
+            return JSON.parse(localStorage.getItem("foo") ?? "null");
+        },
+        set foo(v) {
+            localStorage.setItem("foo", JSON.stringify(v));
+        }
+    };
 
-    console.log(storage.foo, storage.bar);
+    jsonSessionStorage.foo = "foo";
+    jsonLocalStorage.foo = 12345;
+
+    console.log(jsonSessionStorage.foo, jsonLocalStorage.foo);
 
     sessionStorage.clear();
     localStorage.clear();
