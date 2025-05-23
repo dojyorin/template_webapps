@@ -7,12 +7,15 @@
     * @param {string} key
     * @param {T} defaultValue
     * @param {Storage} storage
-    * @return {{remove(): void; readonly exist: boolean; body: T;}}
+    * @return {{remove(): void; reset(): void; readonly exist: boolean; body: T;}}
     */
     function bindStorage(key, defaultValue, storage) {
         return {
             remove() {
                 storage.removeItem(key);
+            },
+            reset() {
+                storage.setItem(key, JSON.stringify(defaultValue));
             },
             get exist() {
                 return storage.getItem(key) !== null;
