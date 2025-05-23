@@ -15,14 +15,14 @@
     * @return {number}
     */
     function unixtime(date) {
-        return Math.floor((typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).getTime() / 1000);
+        return typeof date === "number" ? date : Math.floor((!date ? Date.now() : typeof date === "string" ? Date.parse(date) : date.getTime()) / 1000);
     }
 
     /**
     * @param {string | number | Date} [date]
     * @return {string}
     */
-    function simpledate(date) {
+    function basicdate(date) {
         return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se");
     }
 
@@ -54,7 +54,7 @@
 
     console.log(displaytime(12345));
     console.log(unixtime());
-    console.log(simpledate());
+    console.log(basicdate());
     console.log(yyyymmdd());
     console.log(iso8601());
     console.log(iso8601test("2000-01-01T00:00:00+09:00"));
