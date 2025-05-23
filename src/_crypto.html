@@ -6,7 +6,7 @@
     * @summary esnext-polyfill
     * @return {string}
     */
-    Uint8Array.prototype.toBase64 ??= function() {
+    Uint8Array.prototype.toBase64 ??= function () {
         return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
     }
 
@@ -15,7 +15,7 @@
     * @param {string} data
     * @return {Uint8Array}
     */
-    Uint8Array.fromBase64 ??= function(data) {
+    Uint8Array.fromBase64 ??= function (data) {
         return Uint8Array.from(atob(data), (v) => v.charCodeAt(0));
     }
 
