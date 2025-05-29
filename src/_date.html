@@ -3,44 +3,49 @@
 
 <script async type="module">
     /**
-    * @param {number} time
+    * @param {number} n
     * @return {string}
     */
-    function displaytime(time) {
-        return [time / 3600, time % 3600 / 60, time % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
+    function displaytime(n) {
+        return [n / 3600, n % 3600 / 60, n % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
     }
 
     /**
-    * @param {string | number | Date} [date]
+    * @param {string | number | Date} [part]
     * @return {number}
     */
-    function unixtime(date) {
-        return typeof date === "number" ? date : Math.floor((!date ? Date.now() : typeof date === "string" ? Date.parse(date) : date.getTime()) / 1000);
+    function unixtime(part) {
+        return typeof part === "number" ? part : Math.floor((!part ? Date.now() : typeof part === "string" ? Date.parse(part) : part.getTime()) / 1000);
     }
 
     /**
-    * @param {string | number | Date} [date]
+    * @param {string | number | Date} [part]
+    * @param {"datetime" | "date" | "time" | "datetime-numeric" | "date-numeric" | "time-numeric"} [type]
     * @return {string}
     */
-    function basicdate(date) {
-        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se");
+    function formatdate(part, type) {
+        const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
+
+        switch (type) {
+            case "datetime": return date.toLocaleString("sv-se");
+            case "date": return date.toLocaleDateString("sv-se");
+            case "time": return date.toLocaleTimeString("sv-se");
+            case "datetime-numeric": return date.toLocaleString("sv-se").replace(/\D/g, "");
+            case "date-numeric": return date.toLocaleDateString("sv-se").replace(/\D/g, "");
+            case "time-numeric": return date.toLocaleTimeString("sv-se").replace(/\D/g, "");
+            default: return date.toLocaleString("sv-se");
+        }
     }
 
     /**
-    * @param {string | number | Date} [date]
-    * @return {string}
-    */
-    function yyyymmdd(date) {
-        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se").replace(/\D/g, "");
-    }
-
-    /**
-    * @param {string | number | Date} [date]
+    * @param {string | number | Date} [part]
     * @param {string} [timezone]
     * @return {string}
     */
-    function iso8601(date, timezone) {
-        return (typeof date === "string" ? new Date(date) : typeof date === "number" ? new Date(date * 1000) : date ?? new Date()).toLocaleString("sv-se", {
+    function iso8601(part, timezone) {
+        const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
+
+        return date.toLocaleString("sv-se", {
             timeZoneName: "longOffset",
             timeZone: timezone
         }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
@@ -56,8 +61,7 @@
 
     console.log(displaytime(12345));
     console.log(unixtime());
-    console.log(basicdate());
-    console.log(yyyymmdd());
+    console.log(formatdate());
     console.log(iso8601());
     console.log(iso8601test("2000-01-01T00:00:00+09:00"));
 </script>
