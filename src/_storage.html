@@ -18,7 +18,7 @@
                 storage.setItem(key, JSON.stringify(defaultValue));
             },
             /** @type {T} */
-            get body() {
+            get value() {
                 const v = storage.getItem(key);
 
                 if (v === null) {
@@ -29,21 +29,21 @@
 
                 return JSON.parse(v);
             },
-            set body(v) {
+            set value(v) {
                 storage.setItem(key, JSON.stringify(v));
             }
         };
     }
 
     const aaa = bindStorage("aaa", "foo", sessionStorage);
-    console.log(aaa.body);
-    aaa.body = "bar";
-    console.log(aaa.body);
+    console.log(aaa.value);
+    aaa.value = "bar";
+    console.log(aaa.value);
 
     const bbb = bindStorage("bbb", 0, localStorage);
-    console.log(bbb.body);
-    bbb.body = 12345;
-    console.log(bbb.body);
+    console.log(bbb.value);
+    bbb.value = 12345;
+    console.log(bbb.value);
 
     sessionStorage.clear();
     localStorage.clear();
