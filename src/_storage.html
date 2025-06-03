@@ -3,11 +3,28 @@
 
 <script async type="module">
     /**
-    * @template T
+    * @overload
     * @param {string} key
-    * @param {T} defaultValue
+    * @param {string} defaultValue
     * @param {Storage} storage
-    * @return {{remove(): void; reset(): void; value: T;}}
+    * @return {{remove(): void; reset(): void; value: string;}}
+    *
+    * @overload
+    * @param {string} key
+    * @param {number} defaultValue
+    * @param {Storage} storage
+    * @return {{remove(): void; reset(): void; value: number;}}
+    *
+    * @overload
+    * @param {string} key
+    * @param {boolean} defaultValue
+    * @param {Storage} storage
+    * @return {{remove(): void; reset(): void; value: boolean;}}
+    *
+    * @param {string} key
+    * @param {string | number | boolean} defaultValue
+    * @param {Storage} storage
+    * @return {{remove(): void; reset(): void; value: string | number | boolean;}}
     */
     function createStorage(key, defaultValue, storage) {
         return {
@@ -17,7 +34,7 @@
             reset() {
                 storage.setItem(key, JSON.stringify(defaultValue));
             },
-            /** @type {T} */
+            /** @type {string | number | boolean} */
             get value() {
                 const v = storage.getItem(key);
 
