@@ -9,7 +9,7 @@
     * @param {Storage} storage
     * @return {{remove(): void; reset(): void; value: T;}}
     */
-    function bindStorage(key, defaultValue, storage) {
+    function createStorage(key, defaultValue, storage) {
         return {
             remove() {
                 storage.removeItem(key);
@@ -35,12 +35,12 @@
         };
     }
 
-    const aaa = bindStorage("aaa", "foo", sessionStorage);
+    const aaa = createStorage("aaa", "foo", sessionStorage);
     console.log(aaa.value);
     aaa.value = "bar";
     console.log(aaa.value);
 
-    const bbb = bindStorage("bbb", 0, localStorage);
+    const bbb = createStorage("bbb", 0, localStorage);
     console.log(bbb.value);
     bbb.value = 12345;
     console.log(bbb.value);
