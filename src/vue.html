@@ -255,6 +255,11 @@
                     <v-footer app class="justify-center align-center">Copyright</v-footer>
                 `
             })
+        },
+        setup() {
+            _provide("$_toasts", _ref([]));
+            _provide("$_loading", _ref(false));
+            _provide("$count", _ref(0));
         }
     });
 
@@ -342,19 +347,9 @@
         }
     });
 
-    /** @type {Plugin} */
-    const vueProvide = {
-        install(context) {
-            context.provide("$_toasts", _ref([]));
-            context.provide("$_loading", _ref(false));
-            context.provide("$count", _ref(0));
-        }
-    };
-
     const vue = _createApp(vueApplication);
     vue.use(vueRouter);
     vue.use(vueVuetify);
-    vue.use(vueProvide);
     vue.mount(document.getElementById("vue"));
 </script>
 
