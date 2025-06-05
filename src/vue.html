@@ -68,6 +68,8 @@
         const toasts = _inject("toasts");
         /** @type {Ref<boolean>} */
         const loading = _inject("loading");
+        /** @type {Ref<number>} */
+        const count = _inject("count");
 
         /**
         * @param {string} color
@@ -86,15 +88,6 @@
             loading.value = state ?? !loading.value;
         }
 
-        return {toasts, loading, pushToast, toggleLoading};
-    }
-
-    function vueUseUtility() {
-        const {pushToast, toggleLoading} = vueUseApplication();
-
-        /** @type {Ref<number>} */
-        const count = _inject("count");
-
         function increment() {
             count.value++;
             pushToast("green", "IncrementX!");
@@ -108,7 +101,7 @@
             pushToast("orange-darken-1", "DecrementX!");
         }
 
-        return {count, increment, decrement};
+        return {toasts, loading, count, pushToast, toggleLoading, increment, decrement};
     }
 
     const vueComponentReflect = _defineComponent({
@@ -297,8 +290,7 @@
                     "x-reflect": vueComponentReflect
                 },
                 setup() {
-                    const {pushToast, toggleLoading} = vueUseApplication();
-                    const {count, increment, decrement} = vueUseUtility();
+                    const {count, pushToast, toggleLoading, increment, decrement} = vueUseApplication();
 
                     const text = _ref("");
 
