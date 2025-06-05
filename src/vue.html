@@ -65,9 +65,9 @@
 
     function vueUseApplication() {
         /** @type {Ref<{color: string; text: string;}[]>} */
-        const toasts = _inject("$_toasts");
+        const toasts = _inject("toasts");
         /** @type {Ref<boolean>} */
-        const loading = _inject("$_loading");
+        const loading = _inject("loading");
 
         /**
         * @param {string} color
@@ -93,7 +93,7 @@
         const {pushToast, toggleLoading} = vueUseApplication();
 
         /** @type {Ref<number>} */
-        const count = _inject("$count");
+        const count = _inject("count");
 
         function increment() {
             count.value++;
@@ -257,9 +257,9 @@
             })
         },
         setup() {
-            _provide("$_toasts", _ref([]));
-            _provide("$_loading", _ref(false));
-            _provide("$count", _ref(0));
+            _provide("toasts", _ref([]));
+            _provide("loading", _ref(false));
+            _provide("count", _ref(0));
         }
     });
 
