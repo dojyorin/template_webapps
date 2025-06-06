@@ -69,15 +69,15 @@
         }, false, ["encrypt"]);
 
         /** @type {AesGcmParams} */
-        const aes = {
+        const gcm = {
             name: "AES-GCM",
             iv: crypto.getRandomValues(new Uint8Array(12)),
             tagLength: 128
         };
 
-        const memory = new Uint8Array(aes.iv.byteLength + data.byteLength + aes.tagLength / 8);
-        memory.set(aes.iv, 0);
-        memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, com, data)), aes.iv.byteLength);
+        const memory = new Uint8Array(gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
+        memory.set(gcm.iv, 0);
+        memory.set(new Uint8Array(await crypto.subtle.encrypt(gcm, com, data)), gcm.iv.byteLength);
 
         return memory;
     }
@@ -99,13 +99,13 @@
         }, false, ["decrypt"]);
 
         /** @type {AesGcmParams} */
-        const aes = {
+        const gcm = {
             name: "AES-GCM",
             iv: data.subarray(0, 12),
             tagLength: 128
         };
 
-        return new Uint8Array(await crypto.subtle.decrypt(aes, com, data.subarray(aes.iv.byteLength)));
+        return new Uint8Array(await crypto.subtle.decrypt(gcm, com, data.subarray(gcm.iv.byteLength)));
     }
 
     /**
