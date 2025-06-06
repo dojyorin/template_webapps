@@ -77,7 +77,7 @@
     * @return {Promise<Uint8Array>}
     */
     async function cryptoEncrypt(pub, key, data) {
-        const sec = await crypto.subtle.deriveKey({
+        const com = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", pub, "X25519", false, [])
         }, await crypto.subtle.importKey("pkcs8", key, "X25519", false, ["deriveKey"]), {
@@ -93,7 +93,7 @@
 
         const memory = new Uint8Array(aes.iv.byteLength + data.byteLength + 16);
         memory.set(aes.iv, 0);
-        memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, sec, data)), aes.iv.byteLength);
+        memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, com, data)), aes.iv.byteLength);
 
         return memory;
     }
@@ -106,7 +106,7 @@
     * ```
     */
     async function cryptoDecrypt(pub, key, data) {
-        const sec = await crypto.subtle.deriveKey({
+        const com = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", pub, "X25519", false, [])
         }, await crypto.subtle.importKey("pkcs8", key, "X25519", false, ["deriveKey"]), {
@@ -120,7 +120,7 @@
             iv: data.subarray(0, 12)
         };
 
-        return new Uint8Array(await crypto.subtle.decrypt(aes, sec, data.subarray(aes.iv.byteLength)));
+        return new Uint8Array(await crypto.subtle.decrypt(aes, com, data.subarray(aes.iv.byteLength)));
     }
 
     /**
@@ -134,12 +134,12 @@
 
     /**
     * @param {Uint8Array} pub
-    * @param {Uint8Array} signature
+    * @param {Uint8Array} sign
     * @param {Uint8Array} data
     * @return {Promise<boolean>}
     */
-    async function cryptoVerify(pub, signature, data) {
-        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", pub, "Ed25519", false, ["verify"]), signature, data);
+    async function cryptoVerify(pub, sign, data) {
+        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", pub, "Ed25519", false, ["verify"]), sign, data);
     }
 
     /**
