@@ -152,18 +152,18 @@
 
     const binary = _dummy(1024 ** 2);
     const hash = await cryptoHash(binary);
-    const encKey = await cryptoGenerateEncryptKey();
-    const sigKey = await cryptoGenerateSignKey();
-    const encode = await cryptoEncrypt(encKey.publicKey, encKey.privateKey, binary);
-    const decode = await cryptoDecrypt(encKey.publicKey, encKey.privateKey, encode);
-    const signature = await cryptoSign(sigKey.privateKey, binary);
-    const verify = await cryptoVerify(sigKey.publicKey, signature, binary);
+    const encryptKey = await cryptoGenerateEncryptKey();
+    const signKey = await cryptoGenerateSignKey();
+    const encrypted = await cryptoEncrypt(encryptKey.publicKey, encryptKey.privateKey, binary);
+    const decrypted = await cryptoDecrypt(encryptKey.publicKey, encryptKey.privateKey, encrypted);
+    const sign = await cryptoSign(signKey.privateKey, binary);
+    const verify = await cryptoVerify(signKey.publicKey, sign, binary);
 
     console.log(hash);
-    console.log(encKey);
-    console.log(sigKey);
-    console.log(encode);
-    console.log(decode);
-    console.log(signature);
+    console.log(encryptKey);
+    console.log(signKey);
+    console.log(encrypted);
+    console.log(decrypted);
+    console.log(sign);
     console.log(verify);
 </script>
