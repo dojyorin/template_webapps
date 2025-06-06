@@ -71,10 +71,11 @@
         /** @type {AesGcmParams} */
         const aes = {
             name: "AES-GCM",
-            iv: crypto.getRandomValues(new Uint8Array(12))
+            iv: crypto.getRandomValues(new Uint8Array(12)),
+            tagLength: 128
         };
 
-        const memory = new Uint8Array(aes.iv.byteLength + data.byteLength + 16);
+        const memory = new Uint8Array(aes.iv.byteLength + data.byteLength + aes.tagLength / 8);
         memory.set(aes.iv, 0);
         memory.set(new Uint8Array(await crypto.subtle.encrypt(aes, com, data)), aes.iv.byteLength);
 
@@ -100,7 +101,8 @@
         /** @type {AesGcmParams} */
         const aes = {
             name: "AES-GCM",
-            iv: data.subarray(0, 12)
+            iv: data.subarray(0, 12),
+            tagLength: 128
         };
 
         return new Uint8Array(await crypto.subtle.decrypt(aes, com, data.subarray(aes.iv.byteLength)));
