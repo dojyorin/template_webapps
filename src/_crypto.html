@@ -33,7 +33,7 @@
     * @return {Uint8Array}
     */
     function pemDecode(data) {
-        return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").replaceAll("\n", "").replace(/^-----BEGIN [A-Z0-9 ]+-----/, "").replace(/-----END [A-Z0-9 ]+-----$/, ""));
+        return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").split("\n").slice(1, -1).join(""));
     }
 
     /**
