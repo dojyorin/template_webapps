@@ -25,7 +25,7 @@
     * @return {string}
     */
     function pemEncode(name, data) {
-        return `-----BEGIN ${name.toUpperCase()}-----\n${data.toBase64()}\n-----END ${name.toUpperCase()}-----`;
+        return `-----BEGIN ${name}-----\n${data.toBase64()}\n-----END ${name}-----`;
     }
 
     /**
