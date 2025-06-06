@@ -32,4 +32,10 @@
 
         anchor.click();
     }
+
+    document.getElementById("fsr").onclick = async () => await fsRead(false);
+    document.getElementById("fsw").onclick = async () => await fsWrite("test", "test123");
 </script>
+
+<button type="button" id="fsr">Read</button>
+<button type="button" id="fsw">Write</button>
