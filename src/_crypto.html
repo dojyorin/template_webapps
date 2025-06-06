@@ -158,6 +158,8 @@
     const decrypted = await cryptoDecrypt(encryptKey.publicKey, encryptKey.privateKey, encrypted);
     const sign = await cryptoSign(signKey.privateKey, binary);
     const verify = await cryptoVerify(signKey.publicKey, sign, binary);
+    const encodedKey = pemEncode("PRIVATE KEY", encryptKey.privateKey);
+    const decodedKey = pemDecode(encodedKey);
 
     console.log(hash);
     console.log(encryptKey);
@@ -166,4 +168,6 @@
     console.log(decrypted);
     console.log(sign);
     console.log(verify);
+    console.log(encodedKey);
+    console.log(decodedKey);
 </script>
