@@ -33,7 +33,7 @@
             i += 12;
             tar.set(encoder.encode(Math.floor(files[j].lastModified / 1000).toString(8).slice(0, 11).padStart(11, "0")), i);
             i += 12;
-            tar.set(encoder.encode("        "), i);
+            tar.set(new Uint8Array(8).fill(0x20), i);
             i += 8;
             tar.set(encoder.encode("0"), i);
             i += 1;
@@ -60,7 +60,6 @@
 
         /** @type {File[]} */
         const files = [];
-        const encoder = new TextEncoder();
         const decoder = new TextDecoder();
 
         for (let i = 0; i < tar.byteLength;) {
@@ -85,7 +84,7 @@
             }
 
             const header = tar.slice(i - BLOCK, i);
-            header.set(encoder.encode("        "), BLOCK - 364);
+            header.set(new Uint8Array(8).fill(0x20), BLOCK - 364);
 
             if (checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
                 throw new ReferenceError("Invalid tar checksum.");
