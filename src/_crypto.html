@@ -30,7 +30,7 @@
     /**
     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
     */
-    async function generateEncryptKey() {
+    async function generateKeyForEncrypt() {
         /** @type {CryptoKeyPair} */
         const {publicKey, privateKey} = await crypto.subtle.generateKey("X25519", true, ["deriveKey"]);
 
@@ -43,7 +43,7 @@
     /**
     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
     */
-    async function generateSignKey() {
+    async function generateKeyForSign() {
         /** @type {CryptoKeyPair} */
         const {publicKey, privateKey} = await crypto.subtle.generateKey("Ed25519", true, ["sign"]);
 
@@ -154,8 +154,8 @@
 
     const binary = _dummy(1024 ** 2);
     const hash = await digest(binary);
-    const encryptKey = await generateEncryptKey();
-    const signKey = await generateSignKey();
+    const encryptKey = await generateKeyForEncrypt();
+    const signKey = await generateKeyForSign();
     const encrypted = await encrypt(encryptKey.publicKey, encryptKey.privateKey, binary);
     const decrypted = await decrypt(encryptKey.publicKey, encryptKey.privateKey, encrypted);
     const signed = await sign(signKey.privateKey, binary);
