@@ -12,10 +12,9 @@
 
     /**
     * @param {File[]} files
-    * @param {boolean} [gzip]
     * @return {Promise<Uint8Array>}
     */
-    async function tarEncode(files, gzip) {
+    async function tarEncode(files) {
         const TAR_BLOCK_SIZE = 512;
 
         const tar = new Uint8Array(files.reduce((n, {size}) => n + size + size % TAR_BLOCK_SIZE + TAR_BLOCK_SIZE, 0) + TAR_BLOCK_SIZE * 2);
@@ -49,45 +48,43 @@
             i += files[j].size + files[j].size % TAR_BLOCK_SIZE;
         }
 
-        return gzip ? await new Response(new Response(tar).body?.pipeThrough(new CompressionStream("gzip"))).bytes() : tar;
+        return tar;
     }
 
     /**
     * @param {Uint8Array} tar
-    * @param {boolean} [gzip]
     * @return {Promise<File[]>}
     */
-    async function tarDecode(tar, gzip) {
+    async function tarDecode(tar) {
         const TAR_BLOCK_SIZE = 512;
 
         /** @type {File[]} */
         const files = [];
-        const tarX = gzip ? await new Response(new Response(tar).body?.pipeThrough(new DecompressionStream("gzip"))).bytes() : tar;
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
 
-        for (let i = 0; i < tarX.byteLength;) {
-            if (i + TAR_BLOCK_SIZE * 2 === tarX.byteLength && tarX.subarray(i).every((v) => v === 0x00)) {
+        for (let i = 0; i < tar.byteLength;) {
+            if (i + TAR_BLOCK_SIZE * 2 === tar.byteLength && tar.subarray(i).every((v) => v === 0x00)) {
                 break;
             }
 
-            const name = decoder.decode(tarX.subarray(i, i += 100)).replaceAll("\0", "");
+            const name = decoder.decode(tar.subarray(i, i += 100)).replaceAll("\0", "");
             i += 8;
             i += 8;
             i += 8;
-            const size = Number(`0o${decoder.decode(tarX.subarray(i, i += 12)).slice(0, 11)}`);
-            const time = Number(`0o${decoder.decode(tarX.subarray(i, i += 12)).slice(0, 11)}`);
-            const checksum = decoder.decode(tarX.subarray(i, i += 8)).slice(0, 6);
-            const type = decoder.decode(tarX.subarray(i, i += 1));
+            const size = Number(`0o${decoder.decode(tar.subarray(i, i += 12)).slice(0, 11)}`);
+            const time = Number(`0o${decoder.decode(tar.subarray(i, i += 12)).slice(0, 11)}`);
+            const checksum = decoder.decode(tar.subarray(i, i += 8)).slice(0, 6);
+            const type = decoder.decode(tar.subarray(i, i += 1));
             i += 100;
-            const magic = decoder.decode(tarX.subarray(i, i += 8)).slice(0, 7);
+            const magic = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             i += 247;
 
             if (!magic.startsWith("ustar")) {
                 throw new ReferenceError("Invalid tar magic.");
             }
 
-            const header = tarX.slice(i - TAR_BLOCK_SIZE, i);
+            const header = tar.slice(i - TAR_BLOCK_SIZE, i);
             header.set(encoder.encode("        "), TAR_BLOCK_SIZE - 364);
 
             if (checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
@@ -99,7 +96,7 @@
                 continue;
             }
 
-            const body = tarX.subarray(i, i += size);
+            const body = tar.subarray(i, i += size);
             i += size % TAR_BLOCK_SIZE;
 
             files.push(new File([body], name, {
@@ -124,8 +121,8 @@
         new File([_dummy(1024 ** 2)], "baz")
     ];
 
-    const encode = await tarEncode(files, true);
-    const decode = await tarDecode(encode, true);
+    const encode = await tarEncode(files);
+    const decode = await tarDecode(encode);
 
     console.log(encode);
     console.log(decode);
