@@ -7,7 +7,7 @@
     * @param {CompressionFormat} [format]
     * @return {Promise<Uint8Array>}
     */
-    async function gzipEncode(data, format) {
+    async function encompress(data, format) {
         return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "gzip"))).bytes();
     }
 
@@ -16,7 +16,7 @@
     * @param {CompressionFormat} [format]
     * @return {Promise<Uint8Array>}
     */
-    async function gzipDecode(data, format) {
+    async function decompress(data, format) {
         return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
     }
 
@@ -29,8 +29,8 @@
     }
 
     const binary = _dummy(16 * 1024 ** 2);
-    const encode = await gzipEncode(binary);
-    const decode = await gzipDecode(encode);
+    const encode = await encompress(binary);
+    const decode = await decompress(encode);
 
     console.log(encode);
     console.log(decode);
