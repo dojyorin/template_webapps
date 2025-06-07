@@ -15,9 +15,9 @@
     * @return {Promise<Uint8Array>}
     */
     async function tarEncode(files) {
-        const TAR_BLOCK_SIZE = 512;
+        const BLOCK = 512;
 
-        const tar = new Uint8Array(files.reduce((n, {size}) => n + size + size % TAR_BLOCK_SIZE + TAR_BLOCK_SIZE, 0) + TAR_BLOCK_SIZE * 2);
+        const tar = new Uint8Array(files.reduce((n, {size}) => n + size + size % BLOCK + BLOCK, 0) + BLOCK * 2);
         const encoder = new TextEncoder();
 
         for (let i = 0, j = 0; j < files.length; j++) {
@@ -42,10 +42,10 @@
             i += 8;
             i += 247;
 
-            tar.set(encoder.encode(`${tar.subarray(i - TAR_BLOCK_SIZE, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")}\0 `), i - 364);
+            tar.set(encoder.encode(`${tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")}\0 `), i - 364);
 
             tar.set(await files[j].bytes(), i);
-            i += files[j].size + files[j].size % TAR_BLOCK_SIZE;
+            i += files[j].size + files[j].size % BLOCK;
         }
 
         return tar;
@@ -56,7 +56,7 @@
     * @return {Promise<File[]>}
     */
     async function tarDecode(tar) {
-        const TAR_BLOCK_SIZE = 512;
+        const BLOCK = 512;
 
         /** @type {File[]} */
         const files = [];
@@ -64,7 +64,7 @@
         const decoder = new TextDecoder();
 
         for (let i = 0; i < tar.byteLength;) {
-            if (i + TAR_BLOCK_SIZE * 2 === tar.byteLength && tar.subarray(i).every((v) => v === 0x00)) {
+            if (i + BLOCK * 2 === tar.byteLength && tar.subarray(i).every((v) => v === 0x00)) {
                 break;
             }
 
@@ -84,20 +84,20 @@
                 throw new ReferenceError("Invalid tar magic.");
             }
 
-            const header = tar.slice(i - TAR_BLOCK_SIZE, i);
-            header.set(encoder.encode("        "), TAR_BLOCK_SIZE - 364);
+            const header = tar.slice(i - BLOCK, i);
+            header.set(encoder.encode("        "), BLOCK - 364);
 
             if (checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
             if (type !== "0" && type !== "\0") {
-                i += size + size % TAR_BLOCK_SIZE;
+                i += size + size % BLOCK;
                 continue;
             }
 
             const body = tar.subarray(i, i += size);
-            i += size % TAR_BLOCK_SIZE;
+            i += size % BLOCK;
 
             files.push(new File([body], name, {
                 lastModified: time
