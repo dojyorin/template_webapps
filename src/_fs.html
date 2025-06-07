@@ -3,39 +3,21 @@
 
 <script async type="module">
     /**
-    * @template {boolean} T
-    * @param {T} multiple
-    * @param {string} [accept]
-    * @return {Promise<T extends true ? File[] : File>}
-    */
-    async function fsRead(multiple, accept) {
-        return await new Promise((res, rej) => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.multiple = multiple;
-            input.accept = accept ?? "";
-
-            input.oninput = () => input.files?.length ? res(multiple ? Array.from(input.files) : input.files[0]) : rej();
-            input.click();
-        });
-    }
-
-    /**
     * @param {string} name
-    * @param {BlobPart} body
+    * @param {BlobPart} data
     * @return {void}
     */
-    function fsWrite(name, body) {
+    function download(name, data) {
         const anchor = document.createElement("a");
         anchor.download = name;
-        anchor.href = URL.createObjectURL(new Blob([body]));
+        anchor.href = URL.createObjectURL(new Blob([data]));
 
         anchor.click();
     }
 
-    document.getElementById("fsr").onclick = async () => await fsRead(false);
-    document.getElementById("fsw").onclick = async () => await fsWrite("test", "test123");
+    document.getElementById("download").onclick = async () => {
+        await download("test", "test123");
+    };
 </script>
 
-<button type="button" id="fsr">Read</button>
-<button type="button" id="fsw">Write</button>
+<button type="button" id="download">Download</button>
