@@ -94,9 +94,11 @@
             i += size % BLOCK;
 
             if (type === "0" || type === "\0") {
-                files.push(new File([body], name, {
+                const file = new File([await Promise.resolve(body)], name, {
                     lastModified: timestamp * 1000
-                }));
+                });
+
+                files.push(file);
             }
         }
 
