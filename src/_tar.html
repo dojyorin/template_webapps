@@ -73,7 +73,7 @@
             i += 8;
             const size = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const time = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
-            const checksum = decoder.decode(tar.subarray(i, i += 8)).slice(0, 6);
+            const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
             const type = decoder.decode(tar.subarray(i, i += 1));
             i += 100;
             const magic = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
@@ -86,7 +86,7 @@
             const header = tar.slice(i - BLOCK, i);
             header.set(new Uint8Array(8).fill(0x20), BLOCK - 364);
 
-            if (checksum !== header.reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")) {
+            if (checksum !== header.reduce((n, v) => n + v, 0)) {
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
