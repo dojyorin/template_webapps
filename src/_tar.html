@@ -68,9 +68,9 @@
             }
 
             const name = decoder.decode(tar.subarray(i, i += 100)).replaceAll("\0", "");
-            i += 8;
-            i += 8;
-            i += 8;
+            const _mode = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
+            const _uid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
+            const _gid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const size = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const time = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
