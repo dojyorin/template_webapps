@@ -42,7 +42,7 @@
             i += 8;
             i += 247;
 
-            tar.set(encoder.encode(`${tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")}\0 `), i - 364);
+            tar.set(encoder.encode(tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")), i - 364);
 
             tar.set(await files[j].bytes(), i);
             i += files[j].size + files[j].size % BLOCK;
