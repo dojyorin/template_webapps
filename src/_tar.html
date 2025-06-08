@@ -17,7 +17,7 @@
     async function tarEncode(files) {
         const BLOCK = 512;
 
-        const tar = new Uint8Array(files.reduce((n, {size}) => n + size + size % BLOCK + BLOCK, 0) + BLOCK * 2);
+        const tar = new Uint8Array(files.reduce((n, {size}) => n + BLOCK + size + size % BLOCK, 0) + BLOCK * 2);
         const encoder = new TextEncoder();
 
         for (let i = 0, j = 0; j < files.length; j++) {
@@ -99,7 +99,7 @@
             i += size % BLOCK;
 
             files.push(new File([body], name, {
-                lastModified: time
+                lastModified: time * 1000
             }));
         }
 
