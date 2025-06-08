@@ -90,17 +90,14 @@
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
-            if (type !== "0" && type !== "\0") {
-                i += size + size % BLOCK;
-                continue;
-            }
-
             const body = tar.subarray(i, i += size);
             i += size % BLOCK;
 
-            files.push(new File([body], name, {
-                lastModified: time * 1000
-            }));
+            if (type === "0" || type === "\0") {
+                files.push(new File([body], name, {
+                    lastModified: time * 1000
+                }));
+            }
         }
 
         return files;
