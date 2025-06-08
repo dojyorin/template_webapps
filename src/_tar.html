@@ -14,7 +14,7 @@
     * @param {File[]} files
     * @return {Promise<Uint8Array>}
     */
-    async function tarEncode(files) {
+    async function tarc(files) {
         const BLOCK = 512;
 
         const tar = new Uint8Array(files.reduce((n, {size}) => n + BLOCK + size + size % BLOCK, 0) + BLOCK * 2);
@@ -55,7 +55,7 @@
     * @param {Uint8Array} tar
     * @return {Promise<File[]>}
     */
-    async function tarDecode(tar) {
+    async function tarx(tar) {
         const BLOCK = 512;
 
         /** @type {File[]} */
@@ -119,8 +119,8 @@
         new File([_dummy(1024 ** 2)], "baz")
     ];
 
-    const encode = await tarEncode(files);
-    const decode = await tarDecode(encode);
+    const encode = await tarc(files);
+    const decode = await tarx(encode);
 
     console.log(encode);
     console.log(decode);
