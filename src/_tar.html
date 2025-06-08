@@ -72,7 +72,7 @@
             const _uid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const _gid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const size = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
-            const time = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
+            const timestamp = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
             const type = decoder.decode(tar.subarray(i, i += 1));
             i += 100;
@@ -95,7 +95,7 @@
 
             if (type === "0" || type === "\0") {
                 files.push(new File([body], name, {
-                    lastModified: time * 1000
+                    lastModified: timestamp * 1000
                 }));
             }
         }
