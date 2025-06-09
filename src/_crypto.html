@@ -83,6 +83,72 @@
     }
 
     /**
+    * @param {string} password
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function encryptWithPassword(password, data) {
+        const s = crypto.getRandomValues(new Uint8Array(16));
+
+        const key = await crypto.subtle.deriveKey({
+            name: "PBKDF2",
+            hash: "SHA-256",
+            iterations: 1000000,
+            salt: s
+        }, await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["encrypt"]);
+
+        /** @type {AesGcmParams} */
+        const gcm = {
+            name: "AES-GCM",
+            iv: crypto.getRandomValues(new Uint8Array(12)),
+            tagLength: 128
+        };
+
+        const cipher = new Uint8Array(s.byteLength + gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
+        cipher.set(s, 0);
+        cipher.set(gcm.iv, s.byteLength);
+        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, key, data)), s.byteLength + gcm.iv.byteLength);
+
+        return cipher;
+    }
+
+    /**
+    * @param {Uint8Array} hash
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function encryptWithHash(hash, data) {
+        const s = crypto.getRandomValues(new Uint8Array(hash.byteLength));
+
+        const key = await crypto.subtle.deriveKey({
+            name: "HKDF",
+            hash: "SHA-256",
+            info: new Uint8Array(0),
+            salt: s
+        }, await crypto.subtle.importKey("raw", hash, "HKDF", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["encrypt"]);
+
+        /** @type {AesGcmParams} */
+        const gcm = {
+            name: "AES-GCM",
+            iv: crypto.getRandomValues(new Uint8Array(12)),
+            tagLength: 128
+        };
+
+        const cipher = new Uint8Array(s.byteLength + gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
+        cipher.set(s, 0);
+        cipher.set(gcm.iv, s.byteLength);
+        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, key, data)), s.byteLength + gcm.iv.byteLength);
+
+        return cipher;
+    }
+
+    /**
     * @param {Uint8Array} publicKey
     * @param {Uint8Array} privateKey
     * @param {Uint8Array} data
@@ -105,6 +171,62 @@
         };
 
         return new Uint8Array(await crypto.subtle.decrypt(gcm, key, data.subarray(gcm.iv.byteLength)));
+    }
+
+    /**
+    * @param {string} password
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function decryptWithPassword(password, data) {
+        const s = data.subarray(0, 16);
+
+        const key = await crypto.subtle.deriveKey({
+            name: "PBKDF2",
+            hash: "SHA-256",
+            iterations: 1000000,
+            salt: s
+        }, await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["decrypt"]);
+
+        /** @type {AesGcmParams} */
+        const gcm = {
+            name: "AES-GCM",
+            iv: data.subarray(s.byteLength, s.byteLength + 12),
+            tagLength: 128
+        };
+
+        return new Uint8Array(await crypto.subtle.decrypt(gcm, key, data.subarray(s.byteLength + gcm.iv.byteLength)));
+    }
+
+    /**
+    * @param {Uint8Array} hash
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    */
+    async function decryptWithHash(hash, data) {
+        const s = data.subarray(0, hash.byteLength);
+
+        const key = await crypto.subtle.deriveKey({
+            name: "HKDF",
+            hash: "SHA-256",
+            info: new Uint8Array(0),
+            salt: s
+        }, await crypto.subtle.importKey("raw", hash, "HKDF", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["decrypt"]);
+
+        /** @type {AesGcmParams} */
+        const gcm = {
+            name: "AES-GCM",
+            iv: data.subarray(s.byteLength, s.byteLength + 12),
+            tagLength: 128
+        };
+
+        return new Uint8Array(await crypto.subtle.decrypt(gcm, key, data.subarray(s.byteLength + gcm.iv.byteLength)));
     }
 
     /**
@@ -156,8 +278,12 @@
     const hash = await digest(binary);
     const encryptKey = await generateKeyForEncrypt();
     const signKey = await generateKeyForSign();
-    const encrypted = await encryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, binary);
-    const decrypted = await decryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, encrypted);
+    const encryptedWithPublicKey = await encryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, binary);
+    const encryptedWithPassword = await encryptWithPassword("foobar", binary);
+    const encryptedWithHash = await encryptWithHash(hash, binary);
+    const decryptedWithPublicKey = await decryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, encryptedWithPublicKey);
+    const decryptedWithPassword = await decryptWithPassword("foobar", encryptedWithPassword);
+    const decryptedWithHash = await decryptWithHash(hash, encryptedWithHash);
     const signed = await sign(signKey.privateKey, binary);
     const verified = await verify(signKey.publicKey, signed, binary);
     const encodedKey = enpem("PRIVATE KEY", encryptKey.privateKey);
@@ -166,8 +292,12 @@
     console.log(hash);
     console.log(encryptKey);
     console.log(signKey);
-    console.log(encrypted);
-    console.log(decrypted);
+    console.log(encryptedWithPublicKey);
+    console.log(encryptedWithPassword);
+    console.log(encryptedWithHash);
+    console.log(decryptedWithPublicKey);
+    console.log(decryptedWithPassword);
+    console.log(decryptedWithHash);
     console.log(signed);
     console.log(verified);
     console.log(encodedKey);
