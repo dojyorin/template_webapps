@@ -59,7 +59,7 @@
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
-    async function encrypt(publicKey, privateKey, data) {
+    async function encryptWithPublicKey(publicKey, privateKey, data) {
         const key = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
@@ -88,7 +88,7 @@
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
-    async function decrypt(publicKey, privateKey, data) {
+    async function decryptWithPublicKey(publicKey, privateKey, data) {
         const key = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
@@ -156,8 +156,8 @@
     const hash = await digest(binary);
     const encryptKey = await generateKeyForEncrypt();
     const signKey = await generateKeyForSign();
-    const encrypted = await encrypt(encryptKey.publicKey, encryptKey.privateKey, binary);
-    const decrypted = await decrypt(encryptKey.publicKey, encryptKey.privateKey, encrypted);
+    const encrypted = await encryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, binary);
+    const decrypted = await decryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, encrypted);
     const signed = await sign(signKey.privateKey, binary);
     const verified = await verify(signKey.publicKey, signed, binary);
     const encodedKey = enpem("PRIVATE KEY", encryptKey.privateKey);
