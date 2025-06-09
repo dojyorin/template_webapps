@@ -56,24 +56,18 @@
     /**
     * @param {Uint8Array} publicKey
     * @param {Uint8Array} privateKey
-    * @return {Promise<CryptoKey>}
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
     */
-    async function deriveKeyFromPublic(publicKey, privateKey) {
-        return await crypto.subtle.deriveKey({
+    async function encrypt(publicKey, privateKey, data) {
+        const key = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
         }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), {
             name: "AES-GCM",
             length: 128
-        }, false, ["encrypt", "decrypt"]);
-    }
+        }, false, ["encrypt"]);
 
-    /**
-    * @param {CryptoKey} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
-    async function encrypt(key, data) {
         /** @type {AesGcmParams} */
         const gcm = {
             name: "AES-GCM",
@@ -89,12 +83,20 @@
     }
 
     /**
-    * @param {CryptoKey} key
+    * @param {Uint8Array} publicKey
+    * @param {Uint8Array} privateKey
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
-    * ```
     */
-    async function decrypt(key, data) {
+    async function decrypt(publicKey, privateKey, data) {
+        const key = await crypto.subtle.deriveKey({
+            name: "X25519",
+            public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
+        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["decrypt"]);
+
         /** @type {AesGcmParams} */
         const gcm = {
             name: "AES-GCM",
@@ -150,12 +152,12 @@
     }
 
     const binary = _dummy(1024 ** 2);
+
     const hash = await digest(binary);
     const encryptKey = await generateKeyForEncrypt();
     const signKey = await generateKeyForSign();
-    const derivedKey = await deriveKeyFromPublic(encryptKey.publicKey, encryptKey.privateKey);
-    const encrypted = await encrypt(derivedKey, binary);
-    const decrypted = await decrypt(derivedKey, encrypted);
+    const encrypted = await encrypt(encryptKey.publicKey, encryptKey.privateKey, binary);
+    const decrypted = await decrypt(encryptKey.publicKey, encryptKey.privateKey, encrypted);
     const signed = await sign(signKey.privateKey, binary);
     const verified = await verify(signKey.publicKey, signed, binary);
     const encodedKey = enpem("PRIVATE KEY", encryptKey.privateKey);
@@ -164,7 +166,6 @@
     console.log(hash);
     console.log(encryptKey);
     console.log(signKey);
-    console.log(derivedKey);
     console.log(encrypted);
     console.log(decrypted);
     console.log(signed);
