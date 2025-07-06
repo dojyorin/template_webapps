@@ -4,7 +4,7 @@
 <script async type="module">
     /**
     * @param {[string, Uint8Array][]} contents
-    * @return {Promise<Uint8Array>}
+    * @return {Uint8Array}
     */
     function tarc(contents) {
         const BLOCK = 512;
@@ -47,7 +47,7 @@
 
     /**
     * @param {Uint8Array} tar
-    * @return {Promise<[string, Uint8Array][]>}
+    * @return {[string, Uint8Array][]}
     */
     function tarx(tar) {
         const BLOCK = 512;
@@ -86,7 +86,7 @@
             if (type === "0" || type === "\0") {
                 contents.push([name, body]);
             } else {
-                console.warn(`Skipping due to unsupported file type. name="${name}" type="${type}"`);
+                console.warn(`Skipping due to unsupported type. name="${name}" type="${type}"`);
             }
         }
 
