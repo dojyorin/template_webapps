@@ -10,14 +10,6 @@
     /** @type {(js: string, option?: {module?: boolean;}) => {code: string;}} */
     const _minify_sync = minify_sync;
 
-    /**
-    * @summary esnext-polyfill
-    * @return {string}
-    */
-    Uint8Array.prototype.toBase64 ??= function () {
-        return btoa(Array.from(this, (v) => String.fromCharCode(v)).join(""));
-    }
-
     for (const {type, textContent} of document.getElementsByTagName("script")) {
         if (type !== "text/typescript" || !textContent) {
             continue;
