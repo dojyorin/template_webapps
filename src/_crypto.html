@@ -218,15 +218,17 @@
     }
 
     const binary = _dummy(1024 ** 2);
+    const password = "foobar";
+    const passkey = _dummy(32);
 
     const hash = await digest(binary);
     const encryptKey = await generateKeyX25519();
     const signKey = await generateKeyEd25519();
-    const encryptedWithPassword = await encrypt("foobar", binary);
-    const encryptedWithHash = await encrypt(hash, binary);
+    const encryptedWithPassword = await encrypt(password, binary);
+    const encryptedWithHash = await encrypt(passkey, binary);
     const encryptedWithPublicKey = await encrypt(encryptKey, binary);
-    const decryptedWithPassword = await decrypt("foobar", encryptedWithPassword);
-    const decryptedWithHash = await decrypt(hash, encryptedWithHash);
+    const decryptedWithPassword = await decrypt(password, encryptedWithPassword);
+    const decryptedWithHash = await decrypt(passkey, encryptedWithHash);
     const decryptedWithPublicKey = await decrypt(encryptKey, encryptedWithPublicKey);
     const signed = await sign(signKey, binary);
     const verified = await verify(signKey, signed, binary);
