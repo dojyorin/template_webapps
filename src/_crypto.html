@@ -37,16 +37,15 @@
     }
 
     /**
-    * @param {Uint8Array} publicKey
-    * @param {Uint8Array} privateKey
+    * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
-    async function encryptWithPublicKey(publicKey, privateKey, data) {
-        const secretKey = await crypto.subtle.deriveKey({
+    async function encryptWithPublicKey(key, data) {
+        const secret = await crypto.subtle.deriveKey({
             name: "X25519",
-            public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
-        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), {
+            public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
+        }, await crypto.subtle.importKey("pkcs8", key.privateKey, "X25519", false, ["deriveKey"]), {
             name: "AES-GCM",
             length: 128
         }, false, ["encrypt"]);
@@ -60,7 +59,7 @@
 
         const cipher = new Uint8Array(gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
         cipher.set(gcm.iv, 0);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, secretKey, data)), gcm.iv.byteLength);
+        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, secret, data)), gcm.iv.byteLength);
 
         return cipher;
     }
@@ -132,16 +131,15 @@
     }
 
     /**
-    * @param {Uint8Array} publicKey
-    * @param {Uint8Array} privateKey
+    * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
-    async function decryptWithPublicKey(publicKey, privateKey, data) {
-        const secretKey = await crypto.subtle.deriveKey({
+    async function decryptWithPublicKey(key, data) {
+        const secret = await crypto.subtle.deriveKey({
             name: "X25519",
-            public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
-        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), {
+            public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
+        }, await crypto.subtle.importKey("pkcs8", key.privateKey, "X25519", false, ["deriveKey"]), {
             name: "AES-GCM",
             length: 128
         }, false, ["decrypt"]);
@@ -153,7 +151,7 @@
             tagLength: 128
         };
 
-        return new Uint8Array(await crypto.subtle.decrypt(gcm, secretKey, data.subarray(gcm.iv.byteLength)));
+        return new Uint8Array(await crypto.subtle.decrypt(gcm, secret, data.subarray(gcm.iv.byteLength)));
     }
 
     /**
@@ -261,10 +259,10 @@
     const hash = await digest(binary);
     const encryptKey = await generateKeyForEncrypt();
     const signKey = await generateKeyForSign();
-    const encryptedWithPublicKey = await encryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, binary);
+    const encryptedWithPublicKey = await encryptWithPublicKey(encryptKey, binary);
     const encryptedWithPassword = await encryptWithPassword("foobar", binary);
     const encryptedWithHash = await encryptWithHash(hash, binary);
-    const decryptedWithPublicKey = await decryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, encryptedWithPublicKey);
+    const decryptedWithPublicKey = await decryptWithPublicKey(encryptKey, encryptedWithPublicKey);
     const decryptedWithPassword = await decryptWithPassword("foobar", encryptedWithPassword);
     const decryptedWithHash = await decryptWithHash(hash, encryptedWithHash);
     const signed = await sign(signKey, binary);
