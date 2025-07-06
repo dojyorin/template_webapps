@@ -213,22 +213,22 @@
     }
 
     /**
-    * @param {Uint8Array} privateKey
+    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "privateKey">} key
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
     */
-    async function sign(privateKey, data) {
-        return new Uint8Array(await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]), data));
+    async function sign(key, data) {
+        return new Uint8Array(await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", key.privateKey, "Ed25519", false, ["sign"]), data));
     }
 
     /**
-    * @param {Uint8Array} publicKey
+    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
     * @param {Uint8Array} sign
     * @param {Uint8Array} data
     * @return {Promise<boolean>}
     */
-    async function verify(publicKey, sign, data) {
-        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), sign, data);
+    async function verify(key, sign, data) {
+        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", key.publicKey, "Ed25519", false, ["verify"]), sign, data);
     }
 
     /**
@@ -267,8 +267,8 @@
     const decryptedWithPublicKey = await decryptWithPublicKey(encryptKey.publicKey, encryptKey.privateKey, encryptedWithPublicKey);
     const decryptedWithPassword = await decryptWithPassword("foobar", encryptedWithPassword);
     const decryptedWithHash = await decryptWithHash(hash, encryptedWithHash);
-    const signed = await sign(signKey.privateKey, binary);
-    const verified = await verify(signKey.publicKey, signed, binary);
+    const signed = await sign(signKey, binary);
+    const verified = await verify(signKey, signed, binary);
     const encodedKey = enpem("PRIVATE KEY", encryptKey.privateKey);
     const decodedKey = depem(encodedKey);
 
