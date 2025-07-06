@@ -37,95 +37,72 @@
     }
 
     /**
+    * @overload
+    * @param {string} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    *
+    * @overload
+    * @param {Uint8Array} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
+    *
+    * @overload
     * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
     * @param {Uint8Array} data
     * @return {Promise<Uint8Array>}
+    *
+    * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
+    * @param {Uint8Array} data
+    * @return {Promise<Uint8Array>}
     */
-    async function encryptWithPublicKey(key, data) {
-        const secret = await crypto.subtle.deriveKey({
-            name: "X25519",
-            public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
-        }, await crypto.subtle.importKey("pkcs8", key.privateKey, "X25519", false, ["deriveKey"]), {
-            name: "AES-GCM",
-            length: 128
-        }, false, ["encrypt"]);
+    async function encrypt(key, data) {
+        /** @satisfies {{algorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; format: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
+        const {algorithm, format, keyData} = typeof key === "string" ? {
+            algorithm: {
+                name: "PBKDF2",
+                hash: "SHA-256",
+                salt: crypto.getRandomValues(new Uint8Array(16)),
+                iterations: 1000000
+            },
+            format: "raw",
+            keyData: new TextEncoder().encode(key)
+        } : key instanceof Uint8Array ? {
+            algorithm: {
+                name: "HKDF",
+                hash: "SHA-256",
+                salt: crypto.getRandomValues(new Uint8Array(key.byteLength)),
+                info: new Uint8Array(0)
+            },
+            format: "raw",
+            keyData: key
+        } : {
+            algorithm: {
+                name: "X25519",
+                public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
+            },
+            format: "pkcs8",
+            keyData: key.privateKey
+        };
+
+        const offsetSalt = algorithm.salt?.byteLength ?? 0;
 
         /** @satisfies {AesGcmParams} */
-        const gcm = {
+        const aes = {
             name: "AES-GCM",
             iv: crypto.getRandomValues(new Uint8Array(12)),
             tagLength: 128
         };
 
-        const cipher = new Uint8Array(gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
-        cipher.set(gcm.iv, 0);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, secret, data)), gcm.iv.byteLength);
-
-        return cipher;
-    }
-
-    /**
-    * @param {string} password
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
-    async function encryptWithPassword(password, data) {
-        const s = crypto.getRandomValues(new Uint8Array(16));
-
-        const key = await crypto.subtle.deriveKey({
-            name: "PBKDF2",
-            hash: "SHA-256",
-            iterations: 1000000,
-            salt: s
-        }, await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]), {
-            name: "AES-GCM",
+        const secret = await crypto.subtle.deriveKey(algorithm, await crypto.subtle.importKey(format, keyData, algorithm.name, false, ["deriveKey"]), {
+            name: aes.name,
             length: 128
         }, false, ["encrypt"]);
 
-        /** @type {AesGcmParams} */
-        const gcm = {
-            name: "AES-GCM",
-            iv: crypto.getRandomValues(new Uint8Array(12)),
-            tagLength: 128
-        };
-
-        const cipher = new Uint8Array(s.byteLength + gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
-        cipher.set(s, 0);
-        cipher.set(gcm.iv, s.byteLength);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, key, data)), s.byteLength + gcm.iv.byteLength);
-
-        return cipher;
-    }
-
-    /**
-    * @param {Uint8Array} hash
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
-    async function encryptWithHash(hash, data) {
-        const s = crypto.getRandomValues(new Uint8Array(hash.byteLength));
-
-        const key = await crypto.subtle.deriveKey({
-            name: "HKDF",
-            hash: "SHA-256",
-            info: new Uint8Array(0),
-            salt: s
-        }, await crypto.subtle.importKey("raw", hash, "HKDF", false, ["deriveKey"]), {
-            name: "AES-GCM",
-            length: 128
-        }, false, ["encrypt"]);
-
-        /** @type {AesGcmParams} */
-        const gcm = {
-            name: "AES-GCM",
-            iv: crypto.getRandomValues(new Uint8Array(12)),
-            tagLength: 128
-        };
-
-        const cipher = new Uint8Array(s.byteLength + gcm.iv.byteLength + data.byteLength + gcm.tagLength / 8);
-        cipher.set(s, 0);
-        cipher.set(gcm.iv, s.byteLength);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(gcm, key, data)), s.byteLength + gcm.iv.byteLength);
+        const cipher = new Uint8Array(offsetSalt + aes.iv.byteLength + aes.tagLength / 8 + data.byteLength);
+        cipher.set(algorithm.salt ?? new Uint8Array(0), 0);
+        cipher.set(aes.iv, offsetSalt);
+        cipher.set(new Uint8Array(await crypto.subtle.encrypt(aes, secret, data)), offsetSalt + aes.iv.byteLength);
 
         return cipher;
     }
@@ -259,9 +236,9 @@
     const hash = await digest(binary);
     const encryptKey = await generateKeyX25519();
     const signKey = await generateKeyEd25519();
-    const encryptedWithPassword = await encryptWithPassword("foobar", binary);
-    const encryptedWithHash = await encryptWithHash(hash, binary);
-    const encryptedWithPublicKey = await encryptWithPublicKey(encryptKey, binary);
+    const encryptedWithPassword = await encrypt("foobar", binary);
+    const encryptedWithHash = await encrypt(hash, binary);
+    const encryptedWithPublicKey = await encrypt(encryptKey, binary);
     const decryptedWithPassword = await decryptWithPassword("foobar", encryptedWithPassword);
     const decryptedWithHash = await decryptWithHash(hash, encryptedWithHash);
     const decryptedWithPublicKey = await decryptWithPublicKey(encryptKey, encryptedWithPublicKey);
