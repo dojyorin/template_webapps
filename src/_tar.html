@@ -3,25 +3,19 @@
 
 <script async type="module">
     /**
-    * @summary esnext-polyfill
+    * @param {[string, Uint8Array][]} contents
     * @return {Promise<Uint8Array>}
     */
-    Blob.prototype.bytes ??= async function () {
-        return new Uint8Array(await this.arrayBuffer());
-    }
-
-    /**
-    * @param {File[]} files
-    * @return {Promise<Uint8Array>}
-    */
-    async function tarc(files) {
+    function tarc(contents) {
         const BLOCK = 512;
 
-        const tar = new Uint8Array(files.reduce((n, {size}) => n + BLOCK + size + size % BLOCK, 0) + BLOCK * 2);
+        const tar = new Uint8Array(contents.reduce((n, [, {byteLength}]) => n + BLOCK + byteLength + byteLength % BLOCK, 0) + BLOCK * 2);
         const encoder = new TextEncoder();
 
-        for (let i = 0, j = 0; j < files.length; j++) {
-            tar.set(encoder.encode(files[j].name).subarray(0, 100), i);
+        for (let i = 0, j = 0; i < tar.byteLength - BLOCK * 2;) {
+            const [name, body] = contents[j++];
+
+            tar.set(encoder.encode(name).subarray(0, 100), i);
             i += 100;
             tar.set(encoder.encode("0000644"), i);
             i += 8;
@@ -29,9 +23,9 @@
             i += 8;
             tar.set(encoder.encode("0000000"), i);
             i += 8;
-            tar.set(encoder.encode(files[j].size.toString(8).slice(0, 11).padStart(11, "0")), i);
+            tar.set(encoder.encode(body.byteLength.toString(8).slice(0, 11).padStart(11, "0")), i);
             i += 12;
-            tar.set(encoder.encode(Math.floor(files[j].lastModified / 1000).toString(8).slice(0, 11).padStart(11, "0")), i);
+            tar.set(encoder.encode(Math.floor(Date.now() / 1000).toString(8).slice(0, 11).padStart(11, "0")), i);
             i += 12;
             tar.set(new Uint8Array(8).fill(0x20), i);
             i += 8;
@@ -44,8 +38,8 @@
 
             tar.set(encoder.encode(tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")), i - 364);
 
-            tar.set(await files[j].bytes(), i);
-            i += files[j].size + files[j].size % BLOCK;
+            tar.set(body, i);
+            i += body.byteLength + body.byteLength % BLOCK;
         }
 
         return tar;
@@ -53,26 +47,22 @@
 
     /**
     * @param {Uint8Array} tar
-    * @return {Promise<File[]>}
+    * @return {Promise<[string, Uint8Array][]>}
     */
-    async function tarx(tar) {
+    function tarx(tar) {
         const BLOCK = 512;
 
-        /** @type {File[]} */
-        const files = [];
+        /** @type {[string, Uint8Array][]} */
+        const contents = [];
         const decoder = new TextDecoder();
 
-        for (let i = 0; i < tar.byteLength;) {
-            if (i + BLOCK * 2 === tar.byteLength && tar.subarray(i).every((v) => v === 0x00)) {
-                break;
-            }
-
+        for (let i = 0; i < tar.byteLength - BLOCK * 2;) {
             const name = decoder.decode(tar.subarray(i, i += 100)).replaceAll("\0", "");
             const _mode = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const _uid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const _gid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
             const size = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
-            const timestamp = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
+            const _timestamp = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
             const type = decoder.decode(tar.subarray(i, i += 1));
             i += 100;
@@ -90,19 +80,17 @@
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
-            const body = tar.subarray(i, i += size);
+            const body = tar.slice(i, i += size);
             i += size % BLOCK;
 
             if (type === "0" || type === "\0") {
-                const file = new File([await Promise.resolve(body)], name, {
-                    lastModified: timestamp * 1000
-                });
-
-                files.push(file);
+                contents.push([name, body]);
+            } else {
+                console.warn(`Skipping due to unsupported file type. name="${name}" type="${type}"`);
             }
         }
 
-        return files;
+        return contents;
     }
 
     /**
@@ -113,14 +101,14 @@
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    const files = [
-        new File([_dummy(1024 ** 2)], "foo"),
-        new File([_dummy(1024 ** 2)], "bar"),
-        new File([_dummy(1024 ** 2)], "baz")
+    const contents = [
+        ["foo", _dummy(1024 ** 2)],
+        ["bar", _dummy(1024 ** 2)],
+        ["baz", _dummy(1024 ** 2)]
     ];
 
-    const encode = await tarc(files);
-    const decode = await tarx(encode);
+    const encode = tarc(contents);
+    const decode = tarx(encode);
 
     console.log(encode);
     console.log(decode);
