@@ -34,7 +34,6 @@
             reset() {
                 storage.setItem(key, JSON.stringify(defaultValue));
             },
-            /** @type {string | number | boolean} */
             get value() {
                 const v = storage.getItem(key);
 
@@ -52,15 +51,20 @@
         };
     }
 
-    const aaa = createStorage("aaa", "foo", sessionStorage);
-    console.log(aaa.value);
-    aaa.value = "bar";
-    console.log(aaa.value);
+    const a = createStorage("a", "foo", sessionStorage);
+    console.log(a.value);
+    a.value = "bar";
+    console.log(a.value);
 
-    const bbb = createStorage("bbb", 0, localStorage);
-    console.log(bbb.value);
-    bbb.value = 12345;
-    console.log(bbb.value);
+    const b = createStorage("b", 0, localStorage);
+    console.log(b.value);
+    b.value = 12345;
+    console.log(b.value);
+
+    const c = createStorage("c", false, localStorage);
+    console.log(c.value);
+    c.value = true;
+    console.log(c.value);
 
     sessionStorage.clear();
     localStorage.clear();
