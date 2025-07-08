@@ -9,31 +9,29 @@
     */
     function pushToast(color, text) {
         const dialog = document.createElement("dialog");
-        const style = document.createElement("style");
-        const div = document.createElement("div");
 
-        div.textContent = text;
-        style.textContent = /*css*/`
-            @scope {
-                & {
-                    position: fixed;
-                    z-index: 255;
-                    top: 20px;
-                    max-width: calc(100dvw - 20px);
-                    padding: 8px 16px;
-                    outline: none;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    background-color: ${color};
-                    box-shadow: 0 2px 4px 0 #000000;
-                    overflow-wrap: break-word;
+        dialog.innerHTML = /*html*/`
+            <style>
+                @scope {
+                    & {
+                        position: fixed;
+                        z-index: 255;
+                        top: 20px;
+                        max-width: calc(100dvw - 20px);
+                        padding: 8px 16px;
+                        outline: none;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        background-color: ${color};
+                        box-shadow: 0 2px 4px 0 #000000;
+                        overflow-wrap: break-word;
+                    }
                 }
-            }
+            </style>
+            <div>${text}</div>
         `;
 
-        dialog.appendChild(div);
-        dialog.appendChild(style);
         document.body.appendChild(dialog);
 
         setTimeout(() => dialog.remove(), 5000);
@@ -47,36 +45,36 @@
     */
     function factoryLoading(color) {
         const dialog = document.createElement("dialog");
-        const style = document.createElement("style");
 
-        style.textContent = /*css*/`
-            @scope {
-                @keyframes loading {
-                    to {
-                        transform: rotate(1turn);
+        dialog.innerHTML = /*html*/`
+            <style>
+                @scope {
+                    @keyframes loading {
+                        to {
+                            transform: rotate(1turn);
+                        }
+                    }
+
+                    & {
+                        height: 80px;
+                        aspect-ratio: 1;
+                        padding: 8px;
+                        outline: none;
+                        border: none;
+                        border-radius: 50%;
+                        background-color: ${color};
+                        mask: conic-gradient(transparent 30%, #000000), linear-gradient(#000000 0 0) content-box;
+                        mask-composite: subtract;
+                        animation: loading 1s infinite linear;
+
+                        &::backdrop {
+                            background-color: #000000A0;
+                        }
                     }
                 }
-
-                & {
-                    height: 80px;
-                    aspect-ratio: 1;
-                    padding: 8px;
-                    outline: none;
-                    border: none;
-                    border-radius: 50%;
-                    background-color: ${color};
-                    mask: conic-gradient(transparent 30%, #000000), linear-gradient(#000000 0 0) content-box;
-                    mask-composite: subtract;
-                    animation: loading 1s infinite linear;
-
-                    &::backdrop {
-                        background-color: #000000A0;
-                    }
-                }
-            }
+            </style>
         `;
 
-        dialog.appendChild(style);
         document.body.appendChild(dialog);
 
         return {
