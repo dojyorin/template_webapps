@@ -31,9 +31,11 @@
             i += 8;
             tar.set(encoder.encode("0"), i);
             i += 1;
+            tar.set(new Uint8Array(0), i);
             i += 100;
             tar.set(encoder.encode("ustar  "), i);
             i += 8;
+            tar.set(new Uint8Array(0), i);
             i += 247;
 
             tar.set(encoder.encode(tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")), i - 364);
@@ -65,9 +67,9 @@
             const _timestamp = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
             const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
             const type = decoder.decode(tar.subarray(i, i += 1));
-            i += 100;
+            tar.subarray(i, i += 100);
             const magic = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
-            i += 247;
+            tar.subarray(i, i += 247);
 
             if (!magic.startsWith("ustar")) {
                 throw new ReferenceError("Invalid tar magic.");
