@@ -4,11 +4,11 @@
 <script async type="module">
     /**
     * @param {string} script
-    * @param {string} [type]
+    * @param {string} [mime]
     * @return {Worker}
     */
-    function createWorker(script, type) {
-        return new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+    function createWorker(script, mime) {
+        return new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
             type: "module"
         });
     }
@@ -17,14 +17,14 @@
     * @template {unknown} T
     * @template {unknown} U
     * @param {string} script
-    * @param {string} [type]
+    * @param {string} [mime]
     * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
     */
-    function factoryWorker(script, type) {
+    function factoryWorker(script, mime) {
         return {
             runWorker(message, transfers) {
                 return new Promise((res, rej) => {
-                    const worker = new Worker(`data:${type ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+                    const worker = new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
                         type: "module"
                     });
 
