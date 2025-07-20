@@ -154,11 +154,11 @@
                 template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
-                            <v-app-bar-nav-icon @click="nav = !nav"></v-app-bar-nav-icon>
+                            <v-app-bar-nav-icon @click="nav = !nav;"></v-app-bar-nav-icon>
                         </template>
 
                         <template #append>
-                            <v-btn icon="mdi-theme-light-dark" @click="toggleDark()"></v-btn>
+                            <v-btn icon="mdi-theme-light-dark" @click="toggleDark();"></v-btn>
                         </template>
 
                         <template #image>
@@ -227,8 +227,8 @@
                                     </v-card-text>
 
                                     <v-card-actions class="justify-center">
-                                        <v-btn variant="flat" color="green" @click="increment()">Increment</v-btn>
-                                        <v-btn variant="flat" color="orange-darken-1" @click="decrement()">Decrement</v-btn>
+                                        <v-btn variant="flat" color="green" @click="increment();">Increment</v-btn>
+                                        <v-btn variant="flat" color="orange-darken-1" @click="decrement();">Decrement</v-btn>
                                     </v-card-actions>
                                 </v-card>
                             </v-col>
