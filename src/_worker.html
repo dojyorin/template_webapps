@@ -3,10 +3,10 @@
 
 <script async type="module">
     /**
-    * @param {string} script
-    * @param {string} [mime]
-    * @return {Worker}
-    */
+     * @param {string} script
+     * @param {string} [mime]
+     * @return {Worker}
+     */
     function createWorker(script, mime) {
         return new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
             type: "module"
@@ -14,12 +14,12 @@
     }
 
     /**
-    * @template {unknown} T
-    * @template {unknown} U
-    * @param {string} script
-    * @param {string} [mime]
-    * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
-    */
+     * @template {unknown} T
+     * @template {unknown} U
+     * @param {string} script
+     * @param {string} [mime]
+     * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
+     */
     function factoryWorker(script, mime) {
         return {
             runWorker(message, transfers) {
@@ -54,9 +54,9 @@
     /** @type {{runWorker(message: number): Promise<Uint8Array>;}} */
     const {runWorker} = factoryWorker(/*js*/`
         /**
-        * @param {number} size
-        * @return {Uint8Array}
-        */
+         * @param {number} size
+         * @return {Uint8Array}
+         */
         function _dummy(size) {
             return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
         }

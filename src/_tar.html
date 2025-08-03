@@ -3,9 +3,9 @@
 
 <script async type="module">
     /**
-    * @param {[string, Uint8Array][]} contents
-    * @return {Uint8Array}
-    */
+     * @param {[string, Uint8Array][]} contents
+     * @return {Uint8Array}
+     */
     function tarc(contents) {
         const BLOCK = 512;
 
@@ -48,9 +48,9 @@
     }
 
     /**
-    * @param {Uint8Array} tar
-    * @return {[string, Uint8Array][]}
-    */
+     * @param {Uint8Array} tar
+     * @return {[string, Uint8Array][]}
+     */
     function tarx(tar) {
         const BLOCK = 512;
 
@@ -96,9 +96,9 @@
     }
 
     /**
-    * @param {number} size
-    * @return {Uint8Array}
-    */
+     * @param {number} size
+     * @return {Uint8Array}
+     */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }

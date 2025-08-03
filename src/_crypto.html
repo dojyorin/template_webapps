@@ -3,16 +3,16 @@
 
 <script async type="module">
     /**
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
     async function digest(data) {
         return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
     }
 
     /**
-    * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
-    */
+     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
+     */
     async function generateKeyX25519() {
         /** @satisfies {CryptoKeyPair} */
         const {publicKey, privateKey} = await crypto.subtle.generateKey("X25519", true, ["deriveKey"]);
@@ -24,8 +24,8 @@
     }
 
     /**
-    * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
-    */
+     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
+     */
     async function generateKeyEd25519() {
         /** @satisfies {CryptoKeyPair} */
         const {publicKey, privateKey} = await crypto.subtle.generateKey("Ed25519", true, ["sign"]);
@@ -37,25 +37,25 @@
     }
 
     /**
-    * @overload
-    * @param {string} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @overload
-    * @param {Uint8Array} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @overload
-    * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
+     * @overload
+     * @param {string} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @overload
+     * @param {Uint8Array} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @overload
+     * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
     async function encrypt(key, data) {
         /** @satisfies {{algorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; format: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
         const {algorithm, format, keyData} = typeof key === "string" ? {
@@ -108,25 +108,25 @@
     }
 
     /**
-    * @overload
-    * @param {string} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @overload
-    * @param {Uint8Array} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @overload
-    * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    *
-    * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
+     * @overload
+     * @param {string} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @overload
+     * @param {Uint8Array} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @overload
+     * @param {Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     *
+     * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
     async function decrypt(key, data) {
         /** @satisfies {{algorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; format: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
         const {algorithm, format, keyData} = typeof key === "string" ? {
@@ -174,45 +174,45 @@
     }
 
     /**
-    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "privateKey">} key
-    * @param {Uint8Array} data
-    * @return {Promise<Uint8Array>}
-    */
+     * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "privateKey">} key
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
     async function sign(key, data) {
         return new Uint8Array(await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", key.privateKey, "Ed25519", false, ["sign"]), data));
     }
 
     /**
-    * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
-    * @param {Uint8Array} sign
-    * @param {Uint8Array} data
-    * @return {Promise<boolean>}
-    */
+     * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
+     * @param {Uint8Array} sign
+     * @param {Uint8Array} data
+     * @return {Promise<boolean>}
+     */
     async function verify(key, sign, data) {
         return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", key.publicKey, "Ed25519", false, ["verify"]), sign, data);
     }
 
     /**
-    * @param {Uppercase<string>} name
-    * @param {Uint8Array} data
-    * @return {string}
-    */
+     * @param {Uppercase<string>} name
+     * @param {Uint8Array} data
+     * @return {string}
+     */
     function enpem(name, data) {
         return `-----BEGIN ${name}-----\n${data.toBase64()}\n-----END ${name}-----`;
     }
 
     /**
-    * @param {string} data
-    * @return {Uint8Array}
-    */
+     * @param {string} data
+     * @return {Uint8Array}
+     */
     function depem(data) {
         return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").split("\n").slice(1, -1).join(""));
     }
 
     /**
-    * @param {number} size
-    * @return {Uint8Array}
-    */
+     * @param {number} size
+     * @return {Uint8Array}
+     */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }

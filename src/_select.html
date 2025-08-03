@@ -3,9 +3,9 @@
 
 <script async type="module">
     /**
-    * @param {string} name
-    * @return {HTMLInputElement | undefined}
-    */
+     * @param {string} name
+     * @return {HTMLInputElement | undefined}
+     */
     function radioActive(name) {
         for (const element of document.getElementsByName(name)) {
             if (element instanceof HTMLInputElement && element.type === "radio" && element.checked) {

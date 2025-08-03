@@ -3,26 +3,26 @@
 
 <script async type="module">
     /**
-    * @param {number} n
-    * @return {string}
-    */
+     * @param {number} n
+     * @return {string}
+     */
     function displaytime(n) {
         return [n / 3600, n % 3600 / 60, n % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
     }
 
     /**
-    * @param {string | number | Date} [part]
-    * @return {number}
-    */
+     * @param {string | number | Date} [part]
+     * @return {number}
+     */
     function unixtime(part) {
         return typeof part === "number" ? part : Math.floor((!part ? Date.now() : typeof part === "string" ? Date.parse(part) : part.getTime()) / 1000);
     }
 
     /**
-    * @param {string | number | Date} [part]
-    * @param {"datetime" | "date" | "time" | "datetime-numeric" | "date-numeric" | "time-numeric"} [type]
-    * @return {string}
-    */
+     * @param {string | number | Date} [part]
+     * @param {"datetime" | "date" | "time" | "datetime-numeric" | "date-numeric" | "time-numeric"} [type]
+     * @return {string}
+     */
     function formatdate(part, type) {
         const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
 
@@ -38,10 +38,10 @@
     }
 
     /**
-    * @param {string | number | Date} [part]
-    * @param {string} [timezone]
-    * @return {string}
-    */
+     * @param {string | number | Date} [part]
+     * @param {string} [timezone]
+     * @return {string}
+     */
     function iso8601(part, timezone) {
         const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
 
@@ -52,9 +52,9 @@
     }
 
     /**
-    * @param {string} text
-    * @return {boolean}
-    */
+     * @param {string} text
+     * @return {boolean}
+     */
     function iso8601test(text) {
         return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|\+\d{2}:\d{2}){0,1}){0,1}$/.test(text);
     }

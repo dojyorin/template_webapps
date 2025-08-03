@@ -5,12 +5,12 @@
     import {Chart} from "https://esm.sh/chart.js@4.4.9/auto?target=esnext";
 
     /**
-    * @typedef {{type: string; data: {datasets: {data: unknown[]; label?: string; backgroundColor?: string;}[]; labels?: string[];}; options?: {plugins?: {title?: {display?: boolean; text?: string;}; tooltip?: {callbacks?: {afterLabel?(): string | string[] | void;};};};} & BarOption;}} Option
-    */
+     * @typedef {{type: string; data: {datasets: {data: unknown[]; label?: string; backgroundColor?: string;}[]; labels?: string[];}; options?: {plugins?: {title?: {display?: boolean; text?: string;}; tooltip?: {callbacks?: {afterLabel?(): string | string[] | void;};};};} & BarOption;}} Option
+     */
 
     /**
-    * @typedef {{scales?: {y?: {ticks?: {stepSize?: number; precision?: number;};};};}} BarOption
-    */
+     * @typedef {{scales?: {y?: {ticks?: {stepSize?: number; precision?: number;};};};}} BarOption
+     */
 
     /** @type {new (target: HTMLCanvasElement | OffscreenCanvas, option: Option) => {clear(): void; update(): void;} & Omit<Option, "type">} */
     const _Chart = Chart;

@@ -3,27 +3,27 @@
 
 <script async type="module">
     /**
-    * @param {Uint8Array} data
-    * @param {CompressionFormat} [format]
-    * @return {Promise<Uint8Array>}
-    */
+     * @param {Uint8Array} data
+     * @param {CompressionFormat} [format]
+     * @return {Promise<Uint8Array>}
+     */
     async function encompress(data, format) {
         return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
-    * @param {Uint8Array} data
-    * @param {CompressionFormat} [format]
-    * @return {Promise<Uint8Array>}
-    */
+     * @param {Uint8Array} data
+     * @param {CompressionFormat} [format]
+     * @return {Promise<Uint8Array>}
+     */
     async function decompress(data, format) {
         return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
-    * @param {number} size
-    * @return {Uint8Array}
-    */
+     * @param {number} size
+     * @return {Uint8Array}
+     */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }

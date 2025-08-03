@@ -3,9 +3,9 @@
 
 <script async type="module">
     /**
-    * @param {string} text
-    * @return {string}
-    */
+     * @param {string} text
+     * @return {string}
+     */
     function fixWidth(text) {
         return Object.entries({
             "ｳﾞ": "ヴ",
@@ -39,11 +39,11 @@
     }
 
     /**
-    * @param {number} n
-    * @param {number} [digit]
-    * @param {number} [radix]
-    * @return {string}
-    */
+     * @param {number} n
+     * @param {number} [digit]
+     * @param {number} [radix]
+     * @return {string}
+     */
     function p0(n, digit, radix) {
         return n.toString(radix ?? 10).padStart(digit ?? 2, "0");
     }

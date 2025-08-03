@@ -3,9 +3,9 @@
 
 <script async type="module">
     /**
-    * @param {Uint8Array[]} sources
-    * @return {Uint8Array}
-    */
+     * @param {Uint8Array[]} sources
+     * @return {Uint8Array}
+     */
     function byteConcat(...sources) {
         const memory = new Uint8Array(sources.reduce((n, {byteLength}) => n + byteLength, 0));
 
@@ -20,9 +20,9 @@
     }
 
     /**
-    * @param {number} size
-    * @return {Uint8Array}
-    */
+     * @param {number} size
+     * @return {Uint8Array}
+     */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
