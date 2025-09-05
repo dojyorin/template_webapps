@@ -22,12 +22,12 @@
                         res(data);
                     };
 
-                    worker.onerror = (e) => {
+                    worker.onmessageerror = (e) => {
                         worker.terminate();
                         rej(e);
                     };
 
-                    worker.onmessageerror = (e) => {
+                    worker.onerror = (e) => {
                         worker.terminate();
                         rej(e);
                     };
