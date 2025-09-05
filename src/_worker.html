@@ -5,7 +5,7 @@
     /**
      * @template {unknown} T
      * @template {unknown} U
-     * @param {string} script
+     * @param {string | URL} script
      * @param {boolean} [ts]
      * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
      */
@@ -13,7 +13,7 @@
         return {
             runWorker(message, transfers) {
                 return new Promise((res, rej) => {
-                    const worker = new Worker(script.startsWith("\n") ? `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script).toBase64()}` : script, {
+                    const worker = new Worker(typeof script === "string" ? `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script).toBase64()}` : script, {
                         type: "module"
                     });
 
