@@ -3,28 +3,17 @@
 
 <script async type="module">
     /**
-     * @param {string} script
-     * @param {string} [mime]
-     * @return {Worker}
-     */
-    function createWorker(script, mime) {
-        return new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
-            type: "module"
-        });
-    }
-
-    /**
      * @template {unknown} T
      * @template {unknown} U
      * @param {string} script
-     * @param {string} [mime]
+     * @param {boolean} [ts]
      * @return {{runWorker(message: T, transfers?: Transferable[]): Promise<U>;}}
      */
-    function factoryWorker(script, mime) {
+    function factoryWorker(script, ts) {
         return {
             runWorker(message, transfers) {
                 return new Promise((res, rej) => {
-                    const worker = new Worker(`data:${mime ?? "text/javascript"};base64,${new TextEncoder().encode(script).toBase64()}`, {
+                    const worker = new Worker(script.startsWith("\n") ? `data:text/${ts ? "typescript" : "javascript"};base64,${new TextEncoder().encode(script).toBase64()}` : script, {
                         type: "module"
                     });
 
@@ -73,17 +62,4 @@
     const binary = await runWorker(128 * 1024 ** 2);
 
     console.log(binary);
-
-    const context = createWorker(/*js*/`
-        globalThis.onmessage = ({data}) => {
-            globalThis.postMessage(data * 2);
-        };
-    `);
-
-    context.onmessage = ({data}) => {
-        context.terminate();
-        console.log(data);
-    };
-
-    context.postMessage(1024);
 </script>
