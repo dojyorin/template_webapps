@@ -128,7 +128,7 @@
     const thread = createThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`);
 
     const result = await thread.submit({
-        message: 128 * 1024 ** 2
+        message: 8 * 1024 ** 2
     });
 
     console.log(result);
