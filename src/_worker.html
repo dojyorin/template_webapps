@@ -3,6 +3,139 @@
 
 <script async type="module">
     /**
+     * @template T
+     * @typedef {{id: string; body: T;}} WorkerMessageInternal
+     */
+
+    /**
+     * @template T
+     * @typedef {{message: T; transferables?: Transferable[];}} WorkerMessage
+     */
+
+    /**
+     * @template T
+     * @template U
+     * @typedef {{get rawWorker(): Worker; terminate(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
+     */
+
+    /**
+     * @template T
+     * @template U
+     * @param {(message: T, event: MessageEvent<WorkerMessageInternal<T>>) => WorkerMessage<U> | void | Promise<WorkerMessage<U> | void>} func
+     * @return {void}
+     */
+    function onSubmit(func) {
+        globalThis.onmessage = async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
+            try {
+                const data = await func(event.data.body, event);
+
+                globalThis.postMessage(/** @satisfies {WorkerMessageInternal<U | void>} */ {
+                    id: event.data.id,
+                    body: data?.message
+                }, {
+                    transfer: data?.transferables
+                });
+            } catch (error) {
+                throw `${error};${event.data.id};`;
+            }
+        };
+    }
+
+    /**
+     * @template T
+     * @template U
+     * @param {string | URL} script
+     * @return {WorkerThread<T, U>}
+     */
+    function createThread(script) {
+        const worker = new Worker(script, {
+            type: "module"
+        });
+
+        return {
+            get rawWorker() {
+                return worker;
+            },
+
+            terminate() {
+                worker.terminate();
+            },
+
+            submit(data) {
+                return new Promise((res, rej) => {
+                    const id = crypto.getRandomValues(new Uint8Array(32)).toHex();
+
+                    /**
+                     * @param {MessageEvent<WorkerMessageInternal<U>>} event
+                     * @return {void}
+                     */
+                    function onMessage(event) {
+                        if (event.data.id === id) {
+                            worker.removeEventListener("message", onMessage);
+                            worker.removeEventListener("error", onError);
+                            res(event.data.body);
+                        }
+                    }
+
+                    /**
+                     * @param {ErrorEvent} event
+                     * @return {void}
+                     */
+                    function onError(event) {
+                        if (event.message.endsWith(`;${id};`)) {
+                            worker.removeEventListener("message", onMessage);
+                            worker.removeEventListener("error", onError);
+                            rej(event);
+                        }
+                    }
+
+                    worker.addEventListener("message", onMessage);
+                    worker.addEventListener("error", onError);
+
+                    worker.postMessage(/** @satisfies {WorkerMessageInternal<T | void>} */ {
+                        id: id,
+                        body: data?.message
+                    }, {
+                        transfer: data?.transferables
+                    });
+                });
+            }
+        };
+    }
+
+    const js = /*js*/`
+        ${onSubmit.toString()}
+
+        /**
+         * @param {number} size
+         * @return {Uint8Array}
+         */
+        function _dummy(size) {
+            return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+        }
+
+        onSubmit((v) => {
+            const binary = _dummy(v);
+
+            return {
+                message: binary,
+                transferables: [binary.buffer]
+            };
+        });
+    `;
+
+    /** @type {WorkerThread<number, Uint8Array>} */
+    const thread = createThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`);
+
+    const result = await thread.submit({
+        message: 128 * 1024 ** 2
+    });
+
+    console.log(result);
+
+    thread.terminate();
+
+    /**
      * @template {unknown} T
      * @template {unknown} U
      * @param {string | URL} script
