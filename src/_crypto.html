@@ -73,21 +73,21 @@
         const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
 
         /** @satisfies {AesGcmParams} */
-        const aes = {
+        const encryptionAlgorithm = {
             name: "AES-GCM",
             iv: crypto.getRandomValues(new Uint8Array(12)),
             tagLength: 128
         };
 
         const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
-            name: aes.name,
+            name: encryptionAlgorithm.name,
             length: 128
         }, false, ["encrypt"]);
 
-        const cipher = new Uint8Array(offsetSalt + aes.iv.byteLength + aes.tagLength / 8 + data.byteLength);
+        const cipher = new Uint8Array(offsetSalt + encryptionAlgorithm.iv.byteLength + encryptionAlgorithm.tagLength / 8 + data.byteLength);
         cipher.set(keyAlgorithm.salt ?? new Uint8Array(0), 0);
-        cipher.set(aes.iv, offsetSalt);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(aes, secret, data)), offsetSalt + aes.iv.byteLength);
+        cipher.set(encryptionAlgorithm.iv, offsetSalt);
+        cipher.set(new Uint8Array(await crypto.subtle.encrypt(encryptionAlgorithm, secret, data)), offsetSalt + encryptionAlgorithm.iv.byteLength);
 
         return cipher;
     }
@@ -129,18 +129,18 @@
         const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
 
         /** @satisfies {AesGcmParams} */
-        const aes = {
+        const encryptionAlgorithm = {
             name: "AES-GCM",
             iv: data.subarray(offsetSalt, offsetSalt + 12),
             tagLength: 128
         };
 
         const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
-            name: aes.name,
+            name: encryptionAlgorithm.name,
             length: 128
         }, false, ["decrypt"]);
 
-        return new Uint8Array(await crypto.subtle.decrypt(aes, secret, data.subarray(offsetSalt + aes.iv.byteLength)));
+        return new Uint8Array(await crypto.subtle.decrypt(encryptionAlgorithm, secret, data.subarray(offsetSalt + encryptionAlgorithm.iv.byteLength)));
     }
 
     /**
