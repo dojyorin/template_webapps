@@ -42,35 +42,35 @@
      * @return {Promise<Uint8Array>}
      */
     async function encrypt(key, data) {
-        /** @satisfies {{algorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; format: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
-        const {algorithm, format, keyData} = typeof key === "string" ? {
-            algorithm: {
+        /** @satisfies {{keyAlgorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; keyFormat: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
+        const {keyAlgorithm, keyFormat, keyData} = typeof key === "string" ? {
+            keyAlgorithm: {
                 name: "PBKDF2",
                 hash: "SHA-256",
                 salt: crypto.getRandomValues(new Uint8Array(16)),
                 iterations: 1000000
             },
-            format: "raw",
+            keyFormat: "raw",
             keyData: new TextEncoder().encode(key)
         } : key instanceof Uint8Array ? {
-            algorithm: {
+            keyAlgorithm: {
                 name: "HKDF",
                 hash: "SHA-256",
                 salt: crypto.getRandomValues(new Uint8Array(key.byteLength)),
                 info: new Uint8Array(0)
             },
-            format: "raw",
+            keyFormat: "raw",
             keyData: key
         } : {
-            algorithm: {
+            keyAlgorithm: {
                 name: "X25519",
                 public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
             },
-            format: "pkcs8",
+            keyFormat: "pkcs8",
             keyData: key.privateKey
         };
 
-        const offsetSalt = algorithm.salt?.byteLength ?? 0;
+        const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
 
         /** @satisfies {AesGcmParams} */
         const aes = {
@@ -79,13 +79,13 @@
             tagLength: 128
         };
 
-        const secret = await crypto.subtle.deriveKey(algorithm, await crypto.subtle.importKey(format, keyData, algorithm.name, false, ["deriveKey"]), {
+        const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
             name: aes.name,
             length: 128
         }, false, ["encrypt"]);
 
         const cipher = new Uint8Array(offsetSalt + aes.iv.byteLength + aes.tagLength / 8 + data.byteLength);
-        cipher.set(algorithm.salt ?? new Uint8Array(0), 0);
+        cipher.set(keyAlgorithm.salt ?? new Uint8Array(0), 0);
         cipher.set(aes.iv, offsetSalt);
         cipher.set(new Uint8Array(await crypto.subtle.encrypt(aes, secret, data)), offsetSalt + aes.iv.byteLength);
 
@@ -98,35 +98,35 @@
      * @return {Promise<Uint8Array>}
      */
     async function decrypt(key, data) {
-        /** @satisfies {{algorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; format: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
-        const {algorithm, format, keyData} = typeof key === "string" ? {
-            algorithm: {
+        /** @satisfies {{keyAlgorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; keyFormat: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
+        const {keyAlgorithm, keyFormat, keyData} = typeof key === "string" ? {
+            keyAlgorithm: {
                 name: "PBKDF2",
                 hash: "SHA-256",
                 salt: data.subarray(0, 16),
                 iterations: 1000000
             },
-            format: "raw",
+            keyFormat: "raw",
             keyData: new TextEncoder().encode(key)
         } : key instanceof Uint8Array ? {
-            algorithm: {
+            keyAlgorithm: {
                 name: "HKDF",
                 hash: "SHA-256",
                 salt: data.subarray(0, key.byteLength),
                 info: new Uint8Array(0)
             },
-            format: "raw",
+            keyFormat: "raw",
             keyData: key
         } : {
-            algorithm: {
+            keyAlgorithm: {
                 name: "X25519",
                 public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
             },
-            format: "pkcs8",
+            keyFormat: "pkcs8",
             keyData: key.privateKey
         };
 
-        const offsetSalt = algorithm.salt?.byteLength ?? 0;
+        const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
 
         /** @satisfies {AesGcmParams} */
         const aes = {
@@ -135,7 +135,7 @@
             tagLength: 128
         };
 
-        const secret = await crypto.subtle.deriveKey(algorithm, await crypto.subtle.importKey(format, keyData, algorithm.name, false, ["deriveKey"]), {
+        const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
             name: aes.name,
             length: 128
         }, false, ["decrypt"]);
