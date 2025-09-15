@@ -4,6 +4,11 @@
 <script async type="module">
     /**
      * @template T
+     * @typedef {{id: string; body: T;}} WorkerMessageInternal
+     */
+
+    /**
+     * @template T
      * @template U
      * @typedef {{get _pool(): Worker[]; get _queue(): WorkerJob<T, U>[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
      */
@@ -17,11 +22,6 @@
     /**
      * @template T
      * @typedef {{message: T; transferables?: Transferable[];}} WorkerMessage
-     */
-
-    /**
-     * @template T
-     * @typedef {{id: string; body: T;}} WorkerMessageInternal
      */
 
     /**
