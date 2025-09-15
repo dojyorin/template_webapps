@@ -25,20 +25,22 @@
      * @return {void}
      */
     function onSubmit(func) {
-        globalThis.onmessage = async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
-            try {
-                const data = await func(event.data.body, event);
+        if (globalThis.name.startsWith("WorkerThread;")) {
+            globalThis.onmessage = async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
+                try {
+                    const data = await func(event.data.body, event);
 
-                globalThis.postMessage(/** @satisfies {WorkerMessageInternal<U | void>} */ {
-                    id: event.data.id,
-                    body: data?.message
-                }, {
-                    transfer: data?.transferables
-                });
-            } catch (error) {
-                throw `${error};${event.data.id};`;
-            }
-        };
+                    globalThis.postMessage(/** @satisfies {WorkerMessageInternal<U | void>} */ {
+                        id: event.data.id,
+                        body: data?.message
+                    }, {
+                        transfer: data?.transferables
+                    });
+                } catch (error) {
+                    throw `${error};${event.data.id};`;
+                }
+            };
+        }
     }
 
     /**
@@ -121,7 +123,7 @@
         for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
             const worker = new Worker(script, {
                 type: "module",
-                name: `WorkerID:${i}`,
+                name: `WorkerThread;WorkerID=${i};`,
                 ...option
             });
 
