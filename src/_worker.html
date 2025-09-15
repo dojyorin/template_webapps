@@ -15,7 +15,7 @@
     /**
      * @template T
      * @template U
-     * @typedef {{get rawWorkers(): Worker[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
+     * @typedef {{get _pool(): Worker[]; get _queue(): WorkerJob[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
      */
 
     /**
@@ -131,8 +131,12 @@
         }
 
         return {
-            get rawWorkers() {
-                return pool;
+            get _pool() {
+                return pool.slice();
+            },
+
+            get _queue() {
+                return queue.slice();
             },
 
             close() {
