@@ -90,7 +90,7 @@
             function releaseWorker() {
                 busy.delete(worker);
 
-                const next = queue.pop();
+                const next = queue.shift();
 
                 if (next) {
                     runJob(worker, next);
