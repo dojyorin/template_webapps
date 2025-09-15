@@ -180,11 +180,11 @@
     `;
 
     /** @type {WorkerThread<number, Uint8Array>} */
-    const thread = createWorkerThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
+    const wt = createWorkerThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
-    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => thread.submit({message: 1024 ** 2})));
+    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wt.submit({message: 1024 ** 2})));
 
     console.log(results);
 
-    thread.close();
+    wt.close();
 </script>
