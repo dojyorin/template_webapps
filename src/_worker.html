@@ -25,8 +25,8 @@
      * @return {void}
      */
     function onWorkerThreadSubmit(func) {
-        if (globalThis.name.startsWith("WorkerThread;")) {
-            globalThis.onmessage = async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
+        globalThis.addEventListener("message", async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
+            if (globalThis.name.startsWith("WorkerThread;")) {
                 try {
                     const data = await func(event.data.body, event);
 
@@ -39,8 +39,8 @@
                 } catch (error) {
                     throw `${error};${event.data.id};`;
                 }
-            };
-        }
+            }
+        });
     }
 
     /**
