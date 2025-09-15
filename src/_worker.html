@@ -51,7 +51,7 @@
      * @param {Omit<WorkerOptions, "type" | "name">} [option]
      * @return {WorkerThread<T, U>}
      */
-    function createThread(script, count, option) {
+    function createWorkerThread(script, count, option) {
         /**
          * @typedef {{data?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}} WorkerJob
          */
@@ -180,7 +180,7 @@
     `;
 
     /** @type {WorkerThread<number, Uint8Array>} */
-    const thread = createThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
+    const thread = createWorkerThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
     const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => thread.submit({message: 1024 ** 2})));
 
