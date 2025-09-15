@@ -46,9 +46,10 @@
      * @template U
      * @param {string | URL} script
      * @param {number} [count]
+     * @param {Omit<WorkerOptions, "type" | "name">} [option]
      * @return {WorkerThread<T, U>}
      */
-    function createThread(script, count) {
+    function createThread(script, count, option) {
         /**
          * @typedef {{data?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}} WorkerJob
          */
@@ -120,7 +121,8 @@
         for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
             const worker = new Worker(script, {
                 type: "module",
-                name: `WorkerID:${i}`
+                name: `WorkerID:${i}`,
+                ...option
             });
 
             pool.push(worker);
