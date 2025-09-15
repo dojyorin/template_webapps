@@ -65,9 +65,6 @@
              */
             function onMessage(event) {
                 if (event.data.id === id) {
-                    worker.removeEventListener("message", onMessage);
-                    worker.removeEventListener("error", onError);
-
                     job.res(event.data.body);
                     releaseWorker();
                 }
@@ -79,15 +76,15 @@
              */
             function onError(event) {
                 if (event.message.endsWith(`;${id};`)) {
-                    worker.removeEventListener("message", onMessage);
-                    worker.removeEventListener("error", onError);
-
                     job.rej(event);
                     releaseWorker();
                 }
             }
 
             function releaseWorker() {
+                worker.removeEventListener("message", onMessage);
+                worker.removeEventListener("error", onError);
+
                 busy.delete(worker);
 
                 const next = queue.shift();
