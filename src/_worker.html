@@ -24,7 +24,7 @@
      * @param {(message: T, event: MessageEvent<WorkerMessageInternal<T>>) => WorkerMessage<U> | void | Promise<WorkerMessage<U> | void>} func
      * @return {void}
      */
-    function onSubmit(func) {
+    function onWorkerThreadSubmit(func) {
         if (globalThis.name.startsWith("WorkerThread;")) {
             globalThis.onmessage = async (/** @type {MessageEvent<WorkerMessageInternal<T>>} */ event) => {
                 try {
@@ -159,7 +159,7 @@
     }
 
     const js = /*js*/`
-        ${onSubmit.toString()}
+        ${onWorkerThreadSubmit.toString()}
 
         /**
          * @param {number} size
@@ -169,7 +169,7 @@
             return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
         }
 
-        onSubmit((v) => {
+        onWorkerThreadSubmit((v) => {
             const binary = _dummy(v);
 
             return {
