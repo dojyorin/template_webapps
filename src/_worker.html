@@ -15,7 +15,13 @@
     /**
      * @template T
      * @template U
-     * @typedef {{get _pool(): Worker[]; get _queue(): WorkerJob[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
+     * @typedef {{get _pool(): Worker[]; get _queue(): WorkerJob<T, U>[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
+     */
+
+    /**
+     * @template T
+     * @template U
+     * @typedef {{data?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}} WorkerJob
      */
 
     /**
@@ -53,12 +59,8 @@
      */
     function createWorkerThread(script, count, option) {
         /**
-         * @typedef {{data?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}} WorkerJob
-         */
-
-        /**
          * @param {Worker} worker
-         * @param {WorkerJob} job
+         * @param {WorkerJob<T, U>} job
          * @return {void}
          */
         function runJob(worker, job) {
@@ -115,7 +117,7 @@
 
         /** @type {Worker[]} */
         const pool = [];
-        /** @type {WorkerJob[]} */
+        /** @type {WorkerJob<T, U>[]} */
         const queue = [];
         /** @type {WeakSet<WeakKey>} */
         const busy = new WeakSet();
