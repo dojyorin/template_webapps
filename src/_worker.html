@@ -15,7 +15,7 @@
     /**
      * @template T
      * @template U
-     * @typedef {{get rawWorkers(): Worker[]; terminate(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
+     * @typedef {{get rawWorkers(): Worker[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
      */
 
     /**
@@ -134,7 +134,7 @@
                 return pool;
             },
 
-            terminate() {
+            close() {
                 for (const worker of pool) {
                     worker.terminate();
                 }
@@ -185,5 +185,5 @@
 
     console.log(results);
 
-    thread.terminate();
+    thread.close();
 </script>
