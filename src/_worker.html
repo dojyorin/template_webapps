@@ -145,6 +145,10 @@
             },
 
             async submit(data) {
+                if (!pool.length) {
+                    throw new ReferenceError("Worker is closed.");
+                }
+
                 return await new Promise((res, rej) => {
                     const worker = pool.find((v) => !busy.has(v));
 
