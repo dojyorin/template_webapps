@@ -37,129 +37,218 @@
     }
 
     /**
-     * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {string} password
      * @param {Uint8Array} data
      * @return {Promise<Uint8Array>}
      */
-    async function encrypt(key, data) {
-        /** @satisfies {{keyAlgorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; keyFormat: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
-        const {keyAlgorithm, keyFormat, keyData} = typeof key === "string" ? {
-            keyAlgorithm: {
-                name: "PBKDF2",
-                hash: "SHA-256",
-                salt: crypto.getRandomValues(new Uint8Array(16)),
-                iterations: 1000000
-            },
-            keyFormat: "raw",
-            keyData: new TextEncoder().encode(key)
-        } : key instanceof Uint8Array ? {
-            keyAlgorithm: {
-                name: "HKDF",
-                hash: "SHA-256",
-                salt: crypto.getRandomValues(new Uint8Array(key.byteLength)),
-                info: new Uint8Array(0)
-            },
-            keyFormat: "raw",
-            keyData: key
-        } : {
-            keyAlgorithm: {
-                name: "X25519",
-                public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
-            },
-            keyFormat: "pkcs8",
-            keyData: key.privateKey
-        };
+    async function encryptPassword(password, data) {
+        const MAC_SIZE = 16;
 
-        const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
 
-        /** @satisfies {AesGcmParams} */
-        const encryptionAlgorithm = {
+        const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            hash: "SHA-256",
+            iterations: 1000000,
+            salt: salt
+        }, material, {
             name: "AES-GCM",
-            iv: crypto.getRandomValues(new Uint8Array(12)),
-            tagLength: 128
-        };
-
-        const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
-            name: encryptionAlgorithm.name,
             length: 128
         }, false, ["encrypt"]);
 
-        const cipher = new Uint8Array(offsetSalt + encryptionAlgorithm.iv.byteLength + encryptionAlgorithm.tagLength / 8 + data.byteLength);
-        cipher.set(keyAlgorithm.salt ?? new Uint8Array(0), 0);
-        cipher.set(encryptionAlgorithm.iv, offsetSalt);
-        cipher.set(new Uint8Array(await crypto.subtle.encrypt(encryptionAlgorithm, secret, data)), offsetSalt + encryptionAlgorithm.iv.byteLength);
+        const output = await crypto.subtle.encrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data);
 
-        return cipher;
+        const compose = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
+        compose.set(salt, 0);
+        compose.set(iv, salt.byteLength);
+        compose.set(new Uint8Array(output), salt.byteLength + iv.byteLength);
+
+        return compose;
     }
 
     /**
-     * @param {string | Uint8Array | Record<keyof CryptoKeyPair, Uint8Array>} key
+     * @param {Uint8Array} hash
      * @param {Uint8Array} data
      * @return {Promise<Uint8Array>}
      */
-    async function decrypt(key, data) {
-        /** @satisfies {{keyAlgorithm: Pbkdf2Params | HkdfParams | EcdhKeyDeriveParams; keyFormat: Exclude<KeyFormat, "jwk">; keyData: Uint8Array;}} */
-        const {keyAlgorithm, keyFormat, keyData} = typeof key === "string" ? {
-            keyAlgorithm: {
-                name: "PBKDF2",
-                hash: "SHA-256",
-                salt: data.subarray(0, 16),
-                iterations: 1000000
-            },
-            keyFormat: "raw",
-            keyData: new TextEncoder().encode(key)
-        } : key instanceof Uint8Array ? {
-            keyAlgorithm: {
-                name: "HKDF",
-                hash: "SHA-256",
-                salt: data.subarray(0, key.byteLength),
-                info: new Uint8Array(0)
-            },
-            keyFormat: "raw",
-            keyData: key
-        } : {
-            keyAlgorithm: {
-                name: "X25519",
-                public: await crypto.subtle.importKey("spki", key.publicKey, "X25519", false, [])
-            },
-            keyFormat: "pkcs8",
-            keyData: key.privateKey
-        };
+    async function encryptHash(hash, data) {
+        const MAC_SIZE = 16;
 
-        const offsetSalt = keyAlgorithm.salt?.byteLength ?? 0;
+        const salt = crypto.getRandomValues(new Uint8Array(hash.byteLength));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
 
-        /** @satisfies {AesGcmParams} */
-        const encryptionAlgorithm = {
+        const material = await crypto.subtle.importKey("raw", hash, "HKDF", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            hash: "SHA-256",
+            info: new Uint8Array(0),
+            salt: salt
+        }, material, {
             name: "AES-GCM",
-            iv: data.subarray(offsetSalt, offsetSalt + 12),
-            tagLength: 128
-        };
+            length: 128
+        }, false, ["encrypt"]);
 
-        const secret = await crypto.subtle.deriveKey(keyAlgorithm, await crypto.subtle.importKey(keyFormat, keyData, keyAlgorithm.name, false, ["deriveKey"]), {
-            name: encryptionAlgorithm.name,
+        const output = await crypto.subtle.encrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data);
+
+        const compose = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
+        compose.set(salt, 0);
+        compose.set(iv, salt.byteLength);
+        compose.set(new Uint8Array(output), salt.byteLength + iv.byteLength);
+
+        return compose;
+    }
+
+    /**
+     * @param {Uint8Array} privateKey
+     * @param {Uint8Array} publicKey
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
+    async function encryptX25519(privateKey, publicKey, data) {
+        const MAC_SIZE = 16;
+
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+
+        const material = await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            public: await crypto.subtle.importKey("spki", publicKey, material.algorithm.name, false, [])
+        }, material, {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["encrypt"]);
+
+        const output = await crypto.subtle.encrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data);
+
+        const compose = new Uint8Array(iv.byteLength + MAC_SIZE + data.byteLength);
+        compose.set(iv, 0);
+        compose.set(new Uint8Array(output), iv.byteLength);
+
+        return compose;
+    }
+
+    /**
+     * @param {string} password
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
+    async function decryptPassword(password, data) {
+        const salt = data.subarray(0, 16);
+        const iv = data.subarray(salt.byteLength, salt.byteLength + 12);
+
+        const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            hash: "SHA-256",
+            iterations: 1000000,
+            salt: salt
+        }, material, {
+            name: "AES-GCM",
             length: 128
         }, false, ["decrypt"]);
 
-        return new Uint8Array(await crypto.subtle.decrypt(encryptionAlgorithm, secret, data.subarray(offsetSalt + encryptionAlgorithm.iv.byteLength)));
+        const output = await crypto.subtle.decrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data.subarray(salt.byteLength + iv.byteLength));
+
+        return new Uint8Array(output);
     }
 
     /**
-     * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "privateKey">} key
+     * @param {Uint8Array} hash
      * @param {Uint8Array} data
      * @return {Promise<Uint8Array>}
      */
-    async function sign(key, data) {
-        return new Uint8Array(await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", key.privateKey, "Ed25519", false, ["sign"]), data));
+    async function decryptHash(hash, data) {
+        const salt = data.subarray(0, hash.byteLength);
+        const iv = data.subarray(salt.byteLength, salt.byteLength + 12);
+
+        const material = await crypto.subtle.importKey("raw", hash, "HKDF", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            hash: "SHA-256",
+            info: new Uint8Array(0),
+            salt: salt
+        }, material, {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["decrypt"]);
+
+        const output = await crypto.subtle.decrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data.subarray(salt.byteLength + iv.byteLength));
+
+        return new Uint8Array(output);
     }
 
     /**
-     * @param {Pick<Record<keyof CryptoKeyPair, Uint8Array>, "publicKey">} key
+     * @param {Uint8Array} privateKey
+     * @param {Uint8Array} publicKey
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
+    async function decryptX25519(privateKey, publicKey, data) {
+        const iv = data.subarray(0, 12);
+
+        const material = await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]);
+
+        const key = await crypto.subtle.deriveKey({
+            name: material.algorithm.name,
+            public: await crypto.subtle.importKey("spki", publicKey, material.algorithm.name, false, [])
+        }, material, {
+            name: "AES-GCM",
+            length: 128
+        }, false, ["decrypt"]);
+
+        const output = await crypto.subtle.decrypt({
+            name: key.algorithm.name,
+            iv: iv
+        }, key, data.subarray(iv.byteLength));
+
+        return new Uint8Array(output);
+    }
+
+    /**
+     * @param {Uint8Array} privateKey
+     * @param {Uint8Array} data
+     * @return {Promise<Uint8Array>}
+     */
+    async function signEd25519(privateKey, data) {
+        const key = await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]);
+        const output = await crypto.subtle.sign(key.algorithm.name, key, data);
+
+        return new Uint8Array(output);
+    }
+
+    /**
+     * @param {Uint8Array} publicKey
      * @param {Uint8Array} sign
      * @param {Uint8Array} data
      * @return {Promise<boolean>}
      */
-    async function verify(key, sign, data) {
-        return await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", key.publicKey, "Ed25519", false, ["verify"]), sign, data);
+    async function verifyEd25519(publicKey, sign, data) {
+        const key = await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]);
+        const output = await crypto.subtle.verify(key.algorithm.name, key, sign, data);
+
+        return output;
     }
 
     /**
@@ -194,28 +283,32 @@
     const hash = await digest(binary);
     const encryptKey = await generateKeyX25519();
     const signKey = await generateKeyEd25519();
-    const encryptedWithPassword = await encrypt(password, binary);
-    const encryptedWithHash = await encrypt(passkey, binary);
-    const encryptedWithPublicKey = await encrypt(encryptKey, binary);
-    const decryptedWithPassword = await decrypt(password, encryptedWithPassword);
-    const decryptedWithHash = await decrypt(passkey, encryptedWithHash);
-    const decryptedWithPublicKey = await decrypt(encryptKey, encryptedWithPublicKey);
-    const signed = await sign(signKey, binary);
-    const verified = await verify(signKey, signed, binary);
-    const encodedKey = enpem("PRIVATE KEY", encryptKey.privateKey);
-    const decodedKey = depem(encodedKey);
+    const encryptPasswordResult = await encryptPassword(password, binary);
+    const encryptHashResult = await encryptHash(passkey, binary);
+    const encryptX25519Result = await encryptX25519(encryptKey.privateKey, encryptKey.publicKey, binary);
+    const decryptPasswordResult = await decryptPassword(password, encryptPasswordResult);
+    const decryptHashResult = await decryptHash(passkey, encryptHashResult);
+    const decryptX25519Result = await decryptX25519(encryptKey.privateKey, encryptKey.publicKey, encryptX25519Result);
+    const signEd25519Result = await signEd25519(signKey.privateKey, binary);
+    const verifyEd25519Result = await verifyEd25519(signKey.publicKey, signEd25519Result, binary);
+    const enpemPrivateKey = enpem("PRIVATE KEY", encryptKey.privateKey);
+    const enpemPublicKey = enpem("PUBLIC KEY", encryptKey.publicKey);
+    const depemPrivateKey = depem(enpemPrivateKey);
+    const depemPublicKey = depem(enpemPublicKey);
 
     console.log(hash);
     console.log(encryptKey);
     console.log(signKey);
-    console.log(encryptedWithPassword);
-    console.log(encryptedWithHash);
-    console.log(encryptedWithPublicKey);
-    console.log(decryptedWithPassword);
-    console.log(decryptedWithHash);
-    console.log(decryptedWithPublicKey);
-    console.log(signed);
-    console.log(verified);
-    console.log(encodedKey);
-    console.log(decodedKey);
+    console.log(encryptPasswordResult);
+    console.log(encryptHashResult);
+    console.log(encryptX25519Result);
+    console.log(decryptPasswordResult);
+    console.log(decryptHashResult);
+    console.log(decryptX25519Result);
+    console.log(signEd25519Result);
+    console.log(verifyEd25519Result);
+    console.log(enpemPrivateKey);
+    console.log(enpemPublicKey);
+    console.log(depemPrivateKey);
+    console.log(depemPublicKey);
 </script>
