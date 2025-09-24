@@ -3,20 +3,19 @@
 
 <script async type="module">
     /**
-     * @param {Uint8Array[]} sources
+     * @param {Uint8Array[]} bufs
      * @return {Uint8Array}
      */
-    function byteConcat(...sources) {
-        const memory = new Uint8Array(sources.reduce((n, {byteLength}) => n + byteLength, 0));
+    function byteJoin(...bufs) {
+        const output = new Uint8Array(bufs.reduce((v, {byteLength}) => v + byteLength, 0));
+        let offset = 0;
 
-        for (let i = 0, j = 0; i < memory.byteLength;) {
-            const source = sources[j++];
-
-            memory.set(source, i);
-            i += source.byteLength;
+        for (const buf of bufs) {
+            output.set(buf, offset);
+            offset += buf.byteLength;
         }
 
-        return memory;
+        return output;
     }
 
     /**
@@ -27,7 +26,7 @@
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    const binary = byteConcat(_dummy(1024 ** 2), _dummy(1024 ** 2), _dummy(1024 ** 2));
+    const binary = byteJoin(_dummy(1024 ** 2), _dummy(1024 ** 2), _dummy(1024 ** 2));
 
     console.log(binary);
 </script>
