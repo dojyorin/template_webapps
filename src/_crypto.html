@@ -3,15 +3,15 @@
 
 <script async type="module">
     /**
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function digest(data) {
         return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
     }
 
     /**
-     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
+     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array<ArrayBuffer>>>}
      */
     async function generateKeyX25519() {
         /** @satisfies {CryptoKeyPair} */
@@ -24,7 +24,7 @@
     }
 
     /**
-     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array>>}
+     * @return {Promise<Record<keyof CryptoKeyPair, Uint8Array<ArrayBuffer>>>}
      */
     async function generateKeyEd25519() {
         /** @satisfies {CryptoKeyPair} */
@@ -38,8 +38,8 @@
 
     /**
      * @param {string} password
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptPassword(password, data) {
         const MAC_SIZE = 16;
@@ -73,9 +73,9 @@
     }
 
     /**
-     * @param {Uint8Array} hash
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} hash
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptHash(hash, data) {
         const MAC_SIZE = 16;
@@ -109,10 +109,10 @@
     }
 
     /**
-     * @param {Uint8Array} privateKey
-     * @param {Uint8Array} publicKey
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} privateKey
+     * @param {Uint8Array<ArrayBuffer>} publicKey
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptX25519(privateKey, publicKey, data) {
         const MAC_SIZE = 16;
@@ -143,8 +143,8 @@
 
     /**
      * @param {string} password
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptPassword(password, data) {
         const salt = data.subarray(0, 16);
@@ -171,9 +171,9 @@
     }
 
     /**
-     * @param {Uint8Array} hash
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} hash
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptHash(hash, data) {
         const salt = data.subarray(0, hash.byteLength);
@@ -200,10 +200,10 @@
     }
 
     /**
-     * @param {Uint8Array} privateKey
-     * @param {Uint8Array} publicKey
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} privateKey
+     * @param {Uint8Array<ArrayBuffer>} publicKey
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptX25519(privateKey, publicKey, data) {
         const iv = data.subarray(0, 12);
@@ -227,9 +227,9 @@
     }
 
     /**
-     * @param {Uint8Array} privateKey
-     * @param {Uint8Array} data
-     * @return {Promise<Uint8Array>}
+     * @param {Uint8Array<ArrayBuffer>} privateKey
+     * @param {Uint8Array<ArrayBuffer>} data
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function signEd25519(privateKey, data) {
         const key = await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]);
@@ -239,9 +239,9 @@
     }
 
     /**
-     * @param {Uint8Array} publicKey
-     * @param {Uint8Array} sign
-     * @param {Uint8Array} data
+     * @param {Uint8Array<ArrayBuffer>} publicKey
+     * @param {Uint8Array<ArrayBuffer>} sign
+     * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<boolean>}
      */
     async function verifyEd25519(publicKey, sign, data) {
@@ -253,7 +253,7 @@
 
     /**
      * @param {Uppercase<string>} name
-     * @param {Uint8Array} data
+     * @param {Uint8Array<ArrayBuffer>} data
      * @return {string}
      */
     function enpem(name, data) {
@@ -262,7 +262,7 @@
 
     /**
      * @param {string} data
-     * @return {Uint8Array}
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function depem(data) {
         return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").split("\n").slice(1, -1).join(""));
@@ -270,7 +270,7 @@
 
     /**
      * @param {number} size
-     * @return {Uint8Array}
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);

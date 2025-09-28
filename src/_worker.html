@@ -176,7 +176,7 @@
 
     /**
      * @param {number} size
-     * @return {Uint8Array}
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
@@ -196,7 +196,7 @@
         });
     `;
 
-    /** @type {WorkerThread<number, Uint8Array>} */
+    /** @type {WorkerThread<number, Uint8Array<ArrayBuffer>>} */
     const wt = createWorkerThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
     const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wt.submit({message: 1024 ** 2})));

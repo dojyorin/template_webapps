@@ -5,7 +5,7 @@
     import {default as qrcode} from "https://esm.sh/qrcode@1.5.4?target=esnext";
     import {default as jsqr} from "https://esm.sh/jsqr@1.4.0?target=esnext";
 
-    /** @type {{toDataURL(segments: {type: "byte"; data: Uint8Array;}[]): Promise<string>;}} */
+    /** @type {{toDataURL(segments: {type: "byte"; data: Uint8Array<ArrayBuffer>;}[]): Promise<string>;}} */
     const _qrcode = qrcode;
     /** @type {(data: Uint8ClampedArray, width: number, height: number) => {data: string;} | null} */
     const _jsqr = jsqr;

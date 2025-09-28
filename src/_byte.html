@@ -3,8 +3,8 @@
 
 <script async type="module">
     /**
-     * @param {Uint8Array[]} bufs
-     * @return {Uint8Array}
+     * @param {Uint8Array<ArrayBuffer>[]} bufs
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function byteJoin(...bufs) {
         const output = new Uint8Array(bufs.reduce((v, {byteLength}) => v + byteLength, 0));
@@ -20,7 +20,7 @@
 
     /**
      * @param {number} size
-     * @return {Uint8Array}
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
