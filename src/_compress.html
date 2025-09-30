@@ -16,7 +16,7 @@
      * @param {CompressionFormat} [format]
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function decompress(data, format) {
+    async function uncompress(data, format) {
         return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
     }
 
@@ -30,7 +30,7 @@
 
     const binary = _dummy(16 * 1024 ** 2);
     const encode = await encompress(binary);
-    const decode = await decompress(encode);
+    const decode = await uncompress(encode);
 
     console.log(encode);
     console.log(decode);

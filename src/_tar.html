@@ -10,7 +10,7 @@
      * @param {FileEx[]} files
      * @return {Uint8Array<ArrayBuffer>}
      */
-    function tarc(files) {
+    function entar(files) {
         const BLOCK_SIZE = 512;
 
         const encoder = new TextEncoder();
@@ -48,7 +48,7 @@
      * @param {Uint8Array<ArrayBuffer>} tar
      * @return {NonNullable<FileEx>[]}
      */
-    function tarx(tar) {
+    function untar(tar) {
         const BLOCK_SIZE = 512;
 
         const decoder = new TextDecoder();
@@ -109,8 +109,8 @@
         body: _dummy(1024 ** 2)
     }];
 
-    const encode = tarc(samples);
-    const decode = tarx(encode);
+    const encode = entar(samples);
+    const decode = untar(encode);
 
     console.log(encode);
     console.log(decode);
