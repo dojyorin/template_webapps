@@ -3,113 +3,113 @@
 
 <script async type="module">
     /**
-     * @param {[string, Uint8Array][]} contents
-     * @return {Uint8Array}
+     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; permission?: number; uid?: number; gid?: number;}} FileEx
      */
-    function tarc(contents) {
-        const BLOCK = 512;
 
-        const tar = new Uint8Array(contents.reduce((n, [, {byteLength}]) => n + BLOCK + byteLength + byteLength % BLOCK, 0) + BLOCK * 2);
+    /**
+     * @param {FileEx[]} files
+     * @return {Uint8Array<ArrayBuffer>}
+     */
+    function tarc(files) {
+        const BLOCK_SIZE = 512;
+
         const encoder = new TextEncoder();
 
-        for (let i = 0, j = 0; i < tar.byteLength - BLOCK * 2;) {
-            const [name, body] = contents[j++];
+        const bufs = files.map((file) => {
+            const buf = new Uint8Array(BLOCK_SIZE + file.body.byteLength + (BLOCK_SIZE - file.body.byteLength % BLOCK_SIZE));
 
-            tar.set(encoder.encode(name).subarray(0, 100), i);
-            i += 100;
-            tar.set(encoder.encode("0000644"), i);
-            i += 8;
-            tar.set(encoder.encode("0000000"), i);
-            i += 8;
-            tar.set(encoder.encode("0000000"), i);
-            i += 8;
-            tar.set(encoder.encode(body.byteLength.toString(8).slice(0, 11).padStart(11, "0")), i);
-            i += 12;
-            tar.set(encoder.encode(Math.floor(Date.now() / 1000).toString(8).slice(0, 11).padStart(11, "0")), i);
-            i += 12;
-            tar.set(new Uint8Array(8).fill(0x20), i);
-            i += 8;
-            tar.set(encoder.encode("0"), i);
-            i += 1;
-            tar.set(new Uint8Array(0), i);
-            i += 100;
-            tar.set(encoder.encode("ustar  "), i);
-            i += 8;
-            tar.set(new Uint8Array(0), i);
-            i += 247;
+            buf.set(encoder.encode(file.name).subarray(0, 99), 0);
+            buf.set(encoder.encode((file.permission ?? 0o644).toString(8).padStart(7)).subarray(0, 7), 100);
+            buf.set(encoder.encode((file.uid ?? 0).toString(8).padStart(7)).subarray(0, 7), 108);
+            buf.set(encoder.encode((file.gid ?? 0).toString(8).padStart(7)).subarray(0, 7), 116);
+            buf.set(encoder.encode(file.body.byteLength.toString(8).padStart(11)).subarray(0, 11), 124);
+            buf.set(encoder.encode((file.timestamp ?? Math.floor(Date.now() / 1000)).toString(8).padStart(11)).subarray(0, 11), 136);
+            buf.set(encoder.encode("0"), 156);
+            buf.set(encoder.encode("ustar"), 257);
+            buf.set(encoder.encode("00"), 263);
+            buf.set(encoder.encode(buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0).toString(8).padEnd(8)).subarray(0, 8), 148);
+            buf.set(file.body, BLOCK_SIZE);
 
-            tar.set(encoder.encode(tar.subarray(i - BLOCK, i).reduce((n, v) => n + v, 0).toString(8).slice(0, 6).padStart(6, "0")), i - 364);
+            return buf;
+        });
 
-            tar.set(body, i);
-            i += body.byteLength + body.byteLength % BLOCK;
+        const output = new Uint8Array(bufs.reduce((v, {byteLength}) => v + byteLength, 0) + BLOCK_SIZE * 2);
+        let offset = 0;
+
+        for (const buf of bufs) {
+            output.set(buf, offset);
+            offset += buf.byteLength;
         }
 
-        return tar;
+        return output;
     }
 
     /**
-     * @param {Uint8Array} tar
-     * @return {[string, Uint8Array][]}
+     * @param {Uint8Array<ArrayBuffer>} tar
+     * @return {NonNullable<FileEx>[]}
      */
     function tarx(tar) {
-        const BLOCK = 512;
+        const BLOCK_SIZE = 512;
 
-        /** @type {[string, Uint8Array][]} */
-        const contents = [];
         const decoder = new TextDecoder();
 
-        for (let i = 0; i < tar.byteLength - BLOCK * 2;) {
-            const name = decoder.decode(tar.subarray(i, i += 100)).replaceAll("\0", "");
-            const _mode = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
-            const _uid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
-            const _gid = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
-            const size = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
-            const _timestamp = parseInt(decoder.decode(tar.subarray(i, i += 12)).slice(0, 11), 8);
-            const checksum = parseInt(decoder.decode(tar.subarray(i, i += 8)).slice(0, 6), 8);
-            const type = decoder.decode(tar.subarray(i, i += 1));
-            tar.subarray(i, i += 100);
-            const magic = decoder.decode(tar.subarray(i, i += 8)).slice(0, 7);
-            tar.subarray(i, i += 247);
+        /** @type {Uint8Array<ArrayBuffer>[]} */
+        const bufs = [];
+        let offset = 0;
 
-            if (!magic.startsWith("ustar")) {
+        while (offset < tar.byteLength - BLOCK_SIZE * 2) {
+            const size = parseInt(decoder.decode(tar.subarray(offset + 124, offset + 135)), 8);
+
+            bufs.push(tar.slice(offset, offset += BLOCK_SIZE + size + (BLOCK_SIZE - size % BLOCK_SIZE)));
+        }
+
+        return bufs.map((buf) => {
+            const name = decoder.decode(buf.subarray(0, 99)).replaceAll("\0", "");
+            const permission = parseInt(decoder.decode(buf.subarray(100, 107)), 8);
+            const uid = parseInt(decoder.decode(buf.subarray(108, 115)), 8);
+            const gid = parseInt(decoder.decode(buf.subarray(116, 123)), 8);
+            const size = parseInt(decoder.decode(buf.subarray(124, 135)), 8);
+            const timestamp = parseInt(decoder.decode(buf.subarray(136, 147)), 8);
+            const checksum = parseInt(decoder.decode(buf.subarray(148, 154)), 8);
+            const type = decoder.decode(buf.subarray(156, 157));
+            const magic = decoder.decode(buf.subarray(257, 262));
+            const body = buf.slice(BLOCK_SIZE, BLOCK_SIZE + size);
+
+            if (magic !== "ustar") {
                 throw new ReferenceError("Invalid tar magic.");
-            }
-
-            const header = tar.slice(i - BLOCK, i);
-            header.set(new Uint8Array(8).fill(0x20), BLOCK - 364);
-
-            if (checksum !== header.reduce((n, v) => n + v, 0)) {
+            } else if (checksum !== buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0)) {
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
-            const body = tar.slice(i, i += size);
-            i += size % BLOCK;
-
-            if (type === "0" || type === "\0") {
-                contents.push([name, body]);
-            } else {
-                console.warn(`Skipping due to unsupported type. name="${name}" type="${type}"`);
-            }
-        }
-
-        return contents;
+            return {
+                name: name,
+                body: ["0", "\0"].includes(type) ? body : new Uint8Array(0),
+                timestamp: timestamp,
+                permission: permission,
+                uid: uid,
+                gid: gid
+            };
+        });
     }
 
     /**
      * @param {number} size
-     * @return {Uint8Array}
+     * @return {Uint8Array<ArrayBuffer>}
      */
     function _dummy(size) {
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    const contents = [
-        ["foo", _dummy(1024 ** 2)],
-        ["bar", _dummy(1024 ** 2)],
-        ["baz", _dummy(1024 ** 2)]
-    ];
+    /** @type {FileEx[]} */
+    const samples = [{
+        name: "foo",
+        body: _dummy(1024 ** 2)
+    }, {
+        name: "bar",
+        body: _dummy(1024 ** 2)
+    }];
 
-    const encode = tarc(contents);
+    const encode = tarc(samples);
     const decode = tarx(encode);
 
     console.log(encode);
