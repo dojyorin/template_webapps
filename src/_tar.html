@@ -3,7 +3,7 @@
 
 <script async type="module">
     /**
-     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; mode?: number; uid?: number; gid?: number;}} FileEx
+     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; mode?: number; uid?: number; gid?: number; type?: string;}} FileEx
      */
 
     /**
@@ -24,7 +24,7 @@
             buf.set(encoder.encode((file.gid ?? 0).toString(8).padStart(7)).subarray(0, 7), 116);
             buf.set(encoder.encode(file.body.byteLength.toString(8).padStart(11)).subarray(0, 11), 124);
             buf.set(encoder.encode((file.timestamp ?? Math.floor(Date.now() / 1000)).toString(8).padStart(11)).subarray(0, 11), 136);
-            buf.set(encoder.encode("0"), 156);
+            buf.set(encoder.encode(file.type ?? "0").subarray(0, 1), 156);
             buf.set(encoder.encode("ustar"), 257);
             buf.set(encoder.encode("00"), 263);
             buf.set(encoder.encode(buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0).toString(8).padEnd(8)).subarray(0, 8), 148);
@@ -81,13 +81,14 @@
                 throw new ReferenceError("Invalid tar checksum.");
             }
 
-            return {
+            return /** @satisfies {NonNullable<FileEx>} */ {
                 name: name,
                 body: body,
                 timestamp: timestamp,
                 mode: mode,
                 uid: uid,
-                gid: gid
+                gid: gid,
+                type: type
             };
         });
     }
