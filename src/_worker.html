@@ -142,11 +142,9 @@
             get _pool() {
                 return pool.slice();
             },
-
             get _queue() {
                 return queue.slice();
             },
-
             close() {
                 for (const worker of pool) {
                     worker.terminate();
@@ -155,7 +153,6 @@
                 pool.splice(0);
                 queue.splice(0);
             },
-
             async submit(data) {
                 if (!pool.length) {
                     throw new ReferenceError("Worker is closed.");
