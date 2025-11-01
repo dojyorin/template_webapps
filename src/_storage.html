@@ -52,6 +52,10 @@
         /** @type {T} */
         const body = source ? JSON.parse(source) : value;
 
+        if (!source) {
+            storage.setItem(key, JSON.stringify(body));
+        }
+
         return createProxy(body);
     }
 
