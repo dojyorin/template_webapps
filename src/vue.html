@@ -63,7 +63,7 @@
     /** @type {() => Theme} */
     const _useTheme = useTheme;
 
-    function vueUseOverlay() {
+    function vueUseDialog() {
         /** @type {Ref<{color: string; text: string;}[]>} */
         const toasts = _inject("toasts");
         /** @type {Ref<boolean>} */
@@ -90,7 +90,7 @@
     }
 
     function vueUseCount() {
-        const {pushToast, toggleLoading} = vueUseOverlay();
+        const {pushToast, toggleLoading} = vueUseDialog();
 
         /** @type {Ref<number>} */
         const count = _inject("count");
@@ -133,7 +133,7 @@
                     </v-snackbar-queue>
                 `,
                 setup() {
-                    const {toasts} = vueUseOverlay();
+                    const {toasts} = vueUseDialog();
 
                     return {toasts};
                 }
@@ -145,7 +145,7 @@
                     </v-overlay>
                 `,
                 setup() {
-                    const {loading} = vueUseOverlay();
+                    const {loading} = vueUseDialog();
 
                     return {loading};
                 }
