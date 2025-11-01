@@ -49,6 +49,7 @@
 
         const storage = type === "local" ? localStorage : sessionStorage;
         const source = storage.getItem(key);
+        /** @type {T} */
         const body = source ? JSON.parse(source) : value;
 
         return createProxy(body);
