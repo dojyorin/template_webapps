@@ -59,6 +59,23 @@
         return createProxy(body);
     }
 
+    const ls = createStorage("local", "foo", {
+        value: 123
+    });
+
+    const ss = createStorage("session", "foo", {
+        value: 123
+    });
+
+    console.log(ls, localStorage.getItem("foo"));
+    console.log(ss, sessionStorage.getItem("foo"));
+
+    ls.value = 321;
+    ss.value = 321;
+
+    console.log(ls, localStorage.getItem("foo"));
+    console.log(ss, sessionStorage.getItem("foo"));
+
     sessionStorage.clear();
     localStorage.clear();
 </script>
