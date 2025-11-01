@@ -3,68 +3,56 @@
 
 <script async type="module">
     /**
-     * @overload
+     * @template {Record<string, unknown> | unknown[]} T
+     * @param {"local" | "session"} type
      * @param {string} key
-     * @param {string} defaultValue
-     * @param {Storage} storage
-     * @return {{remove(): void; reset(): void; value: string;}}
-     *
-     * @overload
-     * @param {string} key
-     * @param {number} defaultValue
-     * @param {Storage} storage
-     * @return {{remove(): void; reset(): void; value: number;}}
-     *
-     * @overload
-     * @param {string} key
-     * @param {boolean} defaultValue
-     * @param {Storage} storage
-     * @return {{remove(): void; reset(): void; value: boolean;}}
-     *
-     * @param {string} key
-     * @param {string | number | boolean} defaultValue
-     * @param {Storage} storage
-     * @return {{remove(): void; reset(): void; value: string | number | boolean;}}
+     * @param {T} value
+     * @return {T}
      */
-    function createStorage(key, defaultValue, storage) {
-        return {
-            remove() {
-                storage.removeItem(key);
-            },
-            reset() {
-                storage.setItem(key, JSON.stringify(defaultValue));
-            },
-            get value() {
-                const v = storage.getItem(key);
-
-                if (v === null) {
-                    storage.setItem(key, JSON.stringify(defaultValue));
-
-                    return defaultValue;
-                }
-
-                return JSON.parse(v);
-            },
-            set value(v) {
-                storage.setItem(key, JSON.stringify(v));
+    function createStorage(type, key, value) {
+        /**
+         * @template {unknown} U
+         * @param {U} input
+         * @return {U}
+         */
+        function createProxy(input) {
+            if (typeof input !== "object" || input === null) {
+                return input;
             }
-        };
+
+            return new Proxy(input, {
+                get(t, p) {
+                    const a = Reflect.get(t, p);
+
+                    return createProxy(a);
+                },
+                set(t, p, v) {
+                    const a = Reflect.set(t, p, v);
+
+                    if (a) {
+                        storage.setItem(key, JSON.stringify(body));
+                    }
+
+                    return a;
+                },
+                deleteProperty(t, p) {
+                    const a = Reflect.deleteProperty(t, p);
+
+                    if (a) {
+                        storage.setItem(key, JSON.stringify(body));
+                    }
+
+                    return a;
+                }
+            });
+        }
+
+        const storage = type === "local" ? localStorage : sessionStorage;
+        const source = storage.getItem(key);
+        const body = source ? JSON.parse(source) : value;
+
+        return createProxy(body);
     }
-
-    const a = createStorage("a", "foo", sessionStorage);
-    console.log(a.value);
-    a.value = "bar";
-    console.log(a.value);
-
-    const b = createStorage("b", 0, localStorage);
-    console.log(b.value);
-    b.value = 12345;
-    console.log(b.value);
-
-    const c = createStorage("c", false, localStorage);
-    console.log(c.value);
-    c.value = true;
-    console.log(c.value);
 
     sessionStorage.clear();
     localStorage.clear();
