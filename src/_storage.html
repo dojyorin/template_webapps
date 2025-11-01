@@ -50,7 +50,7 @@
         const storage = type === "local" ? localStorage : sessionStorage;
         const source = storage.getItem(key);
         /** @type {T} */
-        const body = source ? JSON.parse(source) : value;
+        const body = source ? JSON.parse(source) : structuredClone(value);
 
         if (!source) {
             storage.setItem(key, JSON.stringify(body));
