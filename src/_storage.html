@@ -30,7 +30,7 @@
                     const a = Reflect.set(t, p, v);
 
                     if (a) {
-                        storage.setItem(key, JSON.stringify(body));
+                        setValue();
                     }
 
                     return a;
@@ -39,12 +39,16 @@
                     const a = Reflect.deleteProperty(t, p);
 
                     if (a) {
-                        storage.setItem(key, JSON.stringify(body));
+                        setValue();
                     }
 
                     return a;
                 }
             });
+        }
+
+        function setValue() {
+            storage.setItem(key, JSON.stringify(body));
         }
 
         const storage = type === "local" ? localStorage : sessionStorage;
@@ -53,7 +57,7 @@
         const body = source ? JSON.parse(source) : structuredClone(value);
 
         if (!source) {
-            storage.setItem(key, JSON.stringify(body));
+            setValue();
         }
 
         return createProxy(body);
