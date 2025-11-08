@@ -8,7 +8,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encompress(data, format) {
-        return await new Response(new Blob([data]).stream().pipeThrough(new CompressionStream(format ?? "gzip"))).bytes();
+        return await new Response(new Response(data).body?.pipeThrough(new CompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
@@ -17,7 +17,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function uncompress(data, format) {
-        return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
+        return await new Response(new Response(data).body?.pipeThrough(new DecompressionStream(format ?? "gzip"))).bytes();
     }
 
     /**
