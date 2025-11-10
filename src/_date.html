@@ -11,20 +11,20 @@
     }
 
     /**
-     * @param {string | number | Date} [part]
+     * @param {ConstructorParameters<typeof Date>[0]} [source]
      * @return {number}
      */
-    function unixtime(part) {
-        return typeof part === "number" ? part : Math.floor((!part ? Date.now() : typeof part === "string" ? Date.parse(part) : part.getTime()) / 1000);
+    function unixtime(source) {
+        return Math.floor((source === undefined ? Date.now() : typeof source === "string" ? Date.parse(source) : typeof source === "number" ? source : source.getTime()) / 1000);
     }
 
     /**
-     * @param {string | number | Date} [part]
+     * @param {ConstructorParameters<typeof Date>[0]} [source]
      * @param {"datetime" | "date" | "time" | "datetime-numeric" | "date-numeric" | "time-numeric"} [type]
      * @return {string}
      */
-    function formatdate(part, type) {
-        const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
+    function formatdate(source, type) {
+        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
 
         switch (type) {
             case "datetime": return date.toLocaleString("sv-se");
@@ -38,12 +38,12 @@
     }
 
     /**
-     * @param {string | number | Date} [part]
+     * @param {ConstructorParameters<typeof Date>[0]} [source]
      * @param {string} [timezone]
      * @return {string}
      */
-    function iso8601(part, timezone) {
-        const date = typeof part === "string" ? new Date(part) : typeof part === "number" ? new Date(part * 1000) : part ?? new Date();
+    function iso8601(source, timezone) {
+        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
 
         return date.toLocaleString("sv-se", {
             timeZoneName: "longOffset",
