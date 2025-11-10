@@ -3,19 +3,25 @@
 
 <script async type="module">
     /**
-     * @param {number} n
-     * @return {string}
-     */
-    function displaytime(n) {
-        return [n / 3600, n % 3600 / 60, n % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
-    }
-
-    /**
      * @param {ConstructorParameters<typeof Date>[0]} [source]
      * @return {number}
      */
     function unixtime(source) {
         return Math.floor((source === undefined ? Date.now() : typeof source === "string" ? Date.parse(source) : typeof source === "number" ? source : source.getTime()) / 1000);
+    }
+
+    /**
+     * @param {ConstructorParameters<typeof Date>[0]} [source]
+     * @param {string} [timezone]
+     * @return {string}
+     */
+    function iso8601(source, timezone) {
+        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
+
+        return date.toLocaleString("sv-se", {
+            timeZoneName: "longOffset",
+            timeZone: timezone
+        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
     }
 
     /**
@@ -38,30 +44,15 @@
     }
 
     /**
-     * @param {ConstructorParameters<typeof Date>[0]} [source]
-     * @param {string} [timezone]
+     * @param {number} n
      * @return {string}
      */
-    function iso8601(source, timezone) {
-        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
-
-        return date.toLocaleString("sv-se", {
-            timeZoneName: "longOffset",
-            timeZone: timezone
-        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+    function displaytime(n) {
+        return [n / 3600, n % 3600 / 60, n % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
     }
 
-    /**
-     * @param {string} text
-     * @return {boolean}
-     */
-    function iso8601test(text) {
-        return /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:Z|(?:\+|-)\d{2}:\d{2}){0,1}){0,1}$/.test(text);
-    }
-
-    console.log(displaytime(12345));
     console.log(unixtime());
-    console.log(formatdate());
     console.log(iso8601());
-    console.log(iso8601test("2000-01-01T00:00:00+09:00"));
+    console.log(formatdate());
+    console.log(displaytime(12345));
 </script>
