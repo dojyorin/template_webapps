@@ -12,15 +12,15 @@
     function createStorage(type, key, value) {
         /**
          * @template {unknown} U
-         * @param {U} input
+         * @param {U} data
          * @return {U}
          */
-        function createProxy(input) {
-            if (typeof input !== "object" || input === null) {
-                return input;
+        function createProxy(data) {
+            if (typeof data !== "object" || data === null) {
+                return data;
             }
 
-            return new Proxy(input, {
+            return new Proxy(data, {
                 get(t, p) {
                     const a = Reflect.get(t, p);
 
