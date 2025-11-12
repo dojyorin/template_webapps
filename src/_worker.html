@@ -76,8 +76,8 @@
              */
             function onMessage(event) {
                 if (event.data.id === id) {
-                    job.res(event.data.body);
                     releaseWorker();
+                    job.res(event.data.body);
                 }
             }
 
@@ -87,8 +87,8 @@
              */
             function onError(event) {
                 if (event.message.endsWith(`;${id};`)) {
-                    job.rej(event);
                     releaseWorker();
+                    job.rej(event);
                 }
             }
 
