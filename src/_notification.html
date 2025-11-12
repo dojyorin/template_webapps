@@ -1,0 +1,44 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    /**
+     * @param {string} title
+     * @param {NotificationOptions} [option]
+     * @param {Partial<{show(): void | Promise<void>; click(): void | Promise<void>; close(): void | Promise<void>;}>} [on]
+     * @return {void}
+     */
+    function showNotification(title, option, on) {
+        async function onShow() {
+            await on?.show?.();
+        }
+
+        async function onClick() {
+            releaseNotification();
+            await on?.click?.();
+        }
+
+        async function onClose() {
+            releaseNotification();
+            await on?.close?.();
+        }
+
+        function onError() {
+            releaseNotification();
+        }
+
+        function releaseNotification() {
+            notification.removeEventListener(onShow);
+            notification.removeEventListener(onClick);
+            notification.removeEventListener(onClose);
+            notification.removeEventListener(onError);
+        }
+
+        const notification = new Notification(title, option);
+
+        notification.addEventListener("show", onShow);
+        notification.addEventListener("click", onClick);
+        notification.addEventListener("close", onClose);
+        notification.addEventListener("error", onError);
+    }
+</script>
