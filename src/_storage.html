@@ -30,7 +30,7 @@
                     const a = Reflect.set(t, p, v);
 
                     if (a) {
-                        setValue();
+                        setValue(body);
                     }
 
                     return a;
@@ -39,7 +39,7 @@
                     const a = Reflect.deleteProperty(t, p);
 
                     if (a) {
-                        setValue();
+                        setValue(body);
                     }
 
                     return a;
@@ -47,17 +47,28 @@
             });
         }
 
-        function setValue() {
-            storage.setItem(key, JSON.stringify(body));
+        /**
+         * @return {T | null}
+         */
+        function getValue() {
+            return JSON.parse(storage.getItem(key) ?? "null");
+        }
+
+        /**
+         * @param {T | null} data
+         * @return {void}
+         */
+        function setValue(data) {
+            storage.setItem(key, JSON.stringify(data));
         }
 
         const storage = type === "local" ? localStorage : sessionStorage;
-        const source = storage.getItem(key);
-        /** @type {T} */
-        const body = source ? JSON.parse(source) : structuredClone(value);
 
-        if (!source) {
-            setValue();
+        const maybe = getValue();
+        const body = structuredClone(maybe ?? value);
+
+        if (!maybe) {
+            setValue(body);
         }
 
         return createProxy(body);
