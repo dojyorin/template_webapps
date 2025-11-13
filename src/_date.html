@@ -7,7 +7,7 @@
      * @return {number}
      */
     function unixtime(source) {
-        return Math.floor((source === undefined ? Date.now() : typeof source === "string" ? Date.parse(source) : typeof source === "number" ? source : source.getTime()) / 1000);
+        return Math.floor((typeof source === "string" ? Date.parse(source) : typeof source === "number" ? source : source instanceof Date ? source.getTime() : Date.now()) / 1000);
     }
 
     /**
@@ -16,43 +16,12 @@
      * @return {string}
      */
     function iso8601(source, timezone) {
-        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
-
-        return date.toLocaleString("sv-se", {
+        return (typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source instanceof Date ? source : new Date()).toLocaleString("sv-se", {
             timeZoneName: "longOffset",
             timeZone: timezone
         }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
     }
 
-    /**
-     * @param {ConstructorParameters<typeof Date>[0]} [source]
-     * @param {"datetime" | "date" | "time" | "datetime-numeric" | "date-numeric" | "time-numeric"} [type]
-     * @return {string}
-     */
-    function formatdate(source, type) {
-        const date = source === undefined ? new Date() : typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source;
-
-        switch (type) {
-            case "datetime": return date.toLocaleString("sv-se");
-            case "date": return date.toLocaleDateString("sv-se");
-            case "time": return date.toLocaleTimeString("sv-se");
-            case "datetime-numeric": return date.toLocaleString("sv-se").replace(/\D/g, "");
-            case "date-numeric": return date.toLocaleDateString("sv-se").replace(/\D/g, "");
-            case "time-numeric": return date.toLocaleTimeString("sv-se").replace(/\D/g, "");
-            default: return date.toLocaleString("sv-se");
-        }
-    }
-
-    /**
-     * @param {number} n
-     * @return {string}
-     */
-    function displaytime(n) {
-        return [n / 3600, n % 3600 / 60, n % 60].map((v) => Math.floor(v).toString().padStart(2, "0")).join(":");
-    }
-
     console.log(unixtime());
     console.log(iso8601());
-    console.log(formatdate());
-    console.log(displaytime(12345));
 </script>
