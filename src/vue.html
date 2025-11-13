@@ -67,7 +67,7 @@
         const {pushToast, toggleLoading} = vueUseDialog();
 
         /** @type {Ref<number>} */
-        const count = _inject("count");
+        const count = _ref("count");
 
         function increment() {
             count.value++;
@@ -203,7 +203,6 @@
         setup() {
             _provide("toasts", _ref([]));
             _provide("loading", _ref(false));
-            _provide("count", _ref(0));
         }
     });
 
