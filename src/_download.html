@@ -3,21 +3,43 @@
 
 <script async type="module">
     /**
+     * @template {boolean} T
+     * @param {T} multiple
+     * @param {string} [accept]
+     * @return {Promise<T extends true ? File[] : File>}
+     */
+    async function upload(multiple, accept) {
+        return await new Promise((res, rej) => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.multiple = multiple;
+            input.accept = accept ?? "";
+            input.onchange = (event) => input.files?.length ? res(multiple ? Array.from(input.files) : input.files.item(0)) : rej(event);
+            input.oncancel = (event) => rej(event);
+            input.click();
+        });
+    }
+
+    /**
      * @param {string} name
      * @param {BlobPart} data
      * @return {void}
      */
     function download(name, data) {
-        const anchor = document.createElement("a");
-        anchor.download = name;
-        anchor.href = URL.createObjectURL(new Blob([data]));
-
-        anchor.click();
+        const a = document.createElement("a");
+        a.download = name;
+        a.href = URL.createObjectURL(new Blob([data]));
+        a.click();
     }
+
+    document.getElementById("upload").onclick = async () => {
+        console.log(await upload(false));
+    };
 
     document.getElementById("download").onclick = () => {
         download("test", "test123");
     };
 </script>
 
+<button type="button" id="upload">Upload</button>
 <button type="button" id="download">Download</button>
