@@ -222,12 +222,12 @@
                                     </v-card-item>
 
                                     <v-card-text>
-                                        <v-text-field variant="underlined" color="blue" label="Name" v-model="text"></v-text-field>
+                                        <v-text-field label="Name" v-model="text"></v-text-field>
                                     </v-card-text>
 
                                     <v-card-actions class="justify-center">
-                                        <v-btn variant="flat" color="green" @click="increment();">Increment</v-btn>
-                                        <v-btn variant="flat" color="orange-darken-1" @click="decrement();">Decrement</v-btn>
+                                        <v-btn color="green" @click="increment();">Increment</v-btn>
+                                        <v-btn color="orange-darken-1" @click="decrement();">Decrement</v-btn>
                                     </v-card-actions>
                                 </v-card>
                             </v-col>
@@ -278,11 +278,13 @@
         },
         defaults: {
             VBtn: {
-                style: {
-                    "text-transform": "none",
-                    "letter-spacing": "normal",
-                    "text-indent": 0
-                }
+                class: [
+                    "text-none"
+                ]
+            },
+            VTextField: {
+                variant: "underlined",
+                color: "blue"
             }
         }
     });
