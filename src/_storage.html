@@ -64,10 +64,10 @@
 
         const storage = type === "local" ? localStorage : sessionStorage;
 
-        const maybe = getValue();
-        const body = structuredClone(maybe ?? value);
+        const maybeBody = getValue();
+        const body = structuredClone(maybeBody ?? value);
 
-        if (!maybe) {
+        if (!maybeBody) {
             setValue(body);
         }
 
