@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    import {z} from "https://esm.sh/zod@4.1.12?target=esnext";
+
+    /** @type {unknown} */
+    const _z = z;
+
+    const text = _z.string().nonempty().parse("foo");
+
+    console.log(text);
+</script>
