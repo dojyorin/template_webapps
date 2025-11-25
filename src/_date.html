@@ -12,14 +12,14 @@
 
     /**
      * @param {ConstructorParameters<typeof Date>[0]} [source]
-     * @param {string} [timezone]
+     * @param {string} [zone]
      * @return {string}
      */
-    function iso8601(source, timezone) {
+    function iso8601(source, zone) {
         return (typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source instanceof Date ? source : new Date()).toLocaleString("sv-se", {
             timeZoneName: "longOffset",
-            timeZone: timezone
-        }).replace(" ", "T").replace(" GMT", "Z").replace("Z+", "+").replace("Z-", "-");
+            timeZone: zone
+        }).replace(" GMT+", "+").replace(" GMT-", "-").replace(" GMT", "Z").replace(" ", "T");
     }
 
     console.log(unixtime());
