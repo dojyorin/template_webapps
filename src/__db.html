@@ -5,4 +5,59 @@
 </script>
 
 <script type="text/typescript">
+    async function openIDB(name?: string, version?: number) {
+        const STORE_NAME = "main";
+
+        async function createTransaction<T>(mode: IDBTransactionMode, getRequest: (store: IDBObjectStore) => IDBRequest[] | void) {
+            return await new Promise<T[]>((res, rej) => {
+                const transaction = db.transaction(STORE_NAME, mode);
+
+                transaction.oncomplete = () => res(Promise.all(pendingResponses));
+                transaction.onerror = () => rej(transaction.error);
+                transaction.onabort = () => rej(transaction.error);
+
+                const store = transaction.objectStore(STORE_NAME);
+                const pendingResponses = Array.from(getRequest(store) ?? [], async (request) => {
+                    return await new Promise<T>((res, rej) => {
+                        request.onsuccess = () => res(request.result);
+                        request.onerror = () => rej(request.error);
+                    });
+                });
+            });
+        }
+
+        const db = await new Promise<IDBDatabase>((res, rej) => {
+            const request = indexedDB.open(name ?? "kv", version ?? 1);
+
+            request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
+            request.onsuccess = () => res(request.result);
+            request.onerror = () => rej(request.error);
+            request.onblocked = () => rej(request.error);
+        });
+
+        return {
+            async get<T>(key: IDBValidKey) {
+                const [value] = await createTransaction<T>("readonly", (store) => {
+                    return [store.get(key)];
+                });
+
+                return value;
+            },
+            async set(key: IDBValidKey, value: unknown) {
+                await createTransaction("readwrite", (store) => {
+                    store.put(value, key);
+                });
+            },
+            async remove(key: IDBValidKey) {
+                await createTransaction("readwrite", (store) => {
+                    store.delete(key);
+                });
+            },
+            async clear() {
+                await createTransaction("readwrite", (store) => {
+                    store.clear();
+                });
+            }
+        };
+    }
 </script>
