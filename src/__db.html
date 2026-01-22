@@ -2,14 +2,22 @@
 <meta charset="utf-8">
 
 <script async type="module">
-</script>
-
-<script type="text/typescript">
-    async function openIDB(name?: string, version?: number) {
+    /**
+     * @param {string} [name]
+     * @param {number} [version]
+     * @return {Promise<{get<T>(key: IDBValidKey): Promise<T>; set(key: IDBValidKey, value: unknown): Promise<void>; remove(key: IDBValidKey): Promise<void>; clear(): Promise<void>;}>}
+     */
+    async function openIDB(name, version) {
         const STORE_NAME = "main";
 
-        async function createTransaction<T>(mode: IDBTransactionMode, getRequest: (store: IDBObjectStore) => IDBRequest[] | void) {
-            return await new Promise<T[]>((res, rej) => {
+        /**
+         * @template T
+         * @param {IDBTransactionMode} mode
+         * @param {(store: IDBObjectStore) => IDBRequest[] | void} getRequest
+         * @return {Promise<T[]>}
+         */
+        async function createTransaction(mode, getRequest) {
+            return await new Promise((res, rej) => {
                 const transaction = db.transaction(STORE_NAME, mode);
 
                 transaction.oncomplete = () => res(Promise.all(pendingResponses));
@@ -18,7 +26,7 @@
 
                 const store = transaction.objectStore(STORE_NAME);
                 const pendingResponses = Array.from(getRequest(store) ?? [], async (request) => {
-                    return await new Promise<T>((res, rej) => {
+                    return await new Promise((res, rej) => {
                         request.onsuccess = () => res(request.result);
                         request.onerror = () => rej(request.error);
                     });
@@ -26,7 +34,8 @@
             });
         }
 
-        const db = await new Promise<IDBDatabase>((res, rej) => {
+        /** @type {IDBDatabase} */
+        const db = await new Promise((res, rej) => {
             const request = indexedDB.open(name ?? "kv", version ?? 1);
 
             request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
@@ -36,19 +45,19 @@
         });
 
         return {
-            async get<T>(key: IDBValidKey) {
-                const [value] = await createTransaction<T>("readonly", (store) => {
+            async get(key) {
+                const [value] = await createTransaction("readonly", (store) => {
                     return [store.get(key)];
                 });
 
                 return value;
             },
-            async set(key: IDBValidKey, value: unknown) {
+            async set(key, value) {
                 await createTransaction("readwrite", (store) => {
                     store.put(value, key);
                 });
             },
-            async remove(key: IDBValidKey) {
+            async remove(key) {
                 await createTransaction("readwrite", (store) => {
                     store.delete(key);
                 });
