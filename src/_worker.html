@@ -4,55 +4,25 @@
 <script async type="module">
     /**
      * @template T
-     * @typedef {{id: string; body: T;}} WorkerMessageInternal
+     * @typedef {{body: T; transferables?: Transferable[];}} WorkerMessage
      */
 
     /**
      * @template T
      * @template U
-     * @typedef {{get _pool(): Worker[]; get _queue(): WorkerJob<T, U>[]; close(): void; submit(data?: WorkerMessage<T>): Promise<U>;}} WorkerThread
-     */
-
-    /**
-     * @template T
-     * @template U
-     * @typedef {{data?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}} WorkerJob
-     */
-
-    /**
-     * @template T
-     * @typedef {{message: T; transferables?: Transferable[];}} WorkerMessage
-     */
-
-    /**
-     * @template T
-     * @template U
-     * @param {(message: T, event: MessageEvent<WorkerMessageInternal<T>>) => WorkerMessage<U> | void | Promise<WorkerMessage<U> | void>} func
+     * @param {(body: T) => WorkerMessage<U> | void | Promise<WorkerMessage<U> | void>} func
      * @return {void}
      */
-    function onWorkerThreadSubmit(func) {
-        /**
-         * @param {MessageEvent<WorkerMessageInternal<T>>} event
-         * @return {Promise<void>}
-         */
-        async function onMessage(event) {
-            if (globalThis.name.startsWith("WorkerThread;")) {
-                try {
-                    const data = await func(event.data.body, event);
+    function onWorkerSubmit(func) {
+        if (globalThis.name.startsWith("Worker#")) {
+            globalThis.onmessage = async ({data}) => {
+                const message = await func(data);
 
-                    globalThis.postMessage(/** @satisfies {WorkerMessageInternal<U | void>} */ {
-                        id: event.data.id,
-                        body: data?.message
-                    }, {
-                        transfer: data?.transferables
-                    });
-                } catch (error) {
-                    throw `${error};${event.data.id};`;
-                }
-            }
+                globalThis.postMessage(message?.body, {
+                    transfer: message?.transferables
+                });
+            };
         }
-
-        globalThis.addEventListener("message", onMessage);
     }
 
     /**
@@ -60,45 +30,22 @@
      * @template U
      * @param {string | URL} script
      * @param {number} [count]
-     * @param {Omit<WorkerOptions, "type" | "name">} [option]
-     * @return {WorkerThread<T, U>}
+     * @return {{close(): void; submit(message?: WorkerMessage<T>): Promise<U>;}}
      */
-    function createWorkerThread(script, count, option) {
+    function createWorker(script, count) {
         /**
          * @param {Worker} worker
-         * @param {WorkerJob<T, U>} job
+         * @param {typeof jobs[number]} job
          * @return {void}
          */
         function runJob(worker, job) {
-            /**
-             * @param {MessageEvent<WorkerMessageInternal<U>>} event
-             * @return {void}
-             */
-            function onMessage(event) {
-                if (event.data.id === id) {
-                    releaseWorker();
-                    job.res(event.data.body);
-                }
-            }
-
-            /**
-             * @param {ErrorEvent} event
-             * @return {void}
-             */
-            function onError(event) {
-                if (event.message.endsWith(`;${id};`)) {
-                    releaseWorker();
-                    job.rej(event);
-                }
-            }
-
             function releaseWorker() {
-                worker.removeEventListener("message", onMessage);
-                worker.removeEventListener("error", onError);
+                worker.onmessage = null;
+                worker.onerror = null;
 
                 busy.delete(worker);
 
-                const next = queue.shift();
+                const next = jobs.shift();
 
                 if (next) {
                     runJob(worker, next);
@@ -107,64 +54,58 @@
 
             busy.add(worker);
 
-            /** @type {string} */
-            const id = crypto.getRandomValues(new Uint8Array(32)).toHex();
+            worker.onmessage = ({data}) => {
+                releaseWorker();
+                job.res(data);
+            };
 
-            worker.addEventListener("message", onMessage);
-            worker.addEventListener("error", onError);
+            worker.onerror = (event) => {
+                releaseWorker();
+                job.rej(event);
+            };
 
-            worker.postMessage(/** @satisfies {WorkerMessageInternal<T | void>} */ {
-                id: id,
-                body: job.data?.message
-            }, {
-                transfer: job.data?.transferables
+            worker.postMessage(job.message?.body, {
+                transfer: job.message?.transferables
             });
         }
 
-        /** @type {Worker[]} */
-        const pool = [];
-        /** @type {WorkerJob<T, U>[]} */
-        const queue = [];
         /** @type {WeakSet<WeakKey>} */
         const busy = new WeakSet();
+        /** @type {Worker[]} */
+        const workers = [];
+        /** @type {{message?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}[]} */
+        const jobs = [];
 
         for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
-            const worker = new Worker(script, {
-                type: "module",
-                name: `WorkerThread;WorkerID=${i};`,
-                ...option
-            });
-
-            pool.push(worker);
+            workers.push(
+                new Worker(script, {
+                    type: "module",
+                    name: `Worker#${i}`
+                })
+            );
         }
 
         return {
-            get _pool() {
-                return pool.slice();
-            },
-            get _queue() {
-                return queue.slice();
-            },
             close() {
-                for (const worker of pool) {
+                for (const worker of workers) {
                     worker.terminate();
                 }
 
-                pool.splice(0);
-                queue.splice(0);
+                workers.splice(0);
+                jobs.splice(0);
             },
-            async submit(data) {
-                if (!pool.length) {
+            async submit(message) {
+                if (!workers.length) {
                     throw new ReferenceError("Worker is closed.");
                 }
 
                 return await new Promise((res, rej) => {
-                    const worker = pool.find((v) => !busy.has(v));
+                    const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runJob(worker, {data, res, rej});
+                        runJob(worker, {message, res, rej});
                     } else {
-                        queue.push({data, res, rej});
+                        jobs.push({message, res, rej});
                     }
                 });
             }
@@ -180,25 +121,24 @@
     }
 
     const js = /*js*/`
-        ${onWorkerThreadSubmit}
+        ${onWorkerSubmit}
         ${_dummy}
 
-        onWorkerThreadSubmit((v) => {
+        onWorkerSubmit((v) => {
             const binary = _dummy(v);
 
             return {
-                message: binary,
+                body: binary,
                 transferables: [binary.buffer]
             };
         });
     `;
 
-    /** @type {WorkerThread<number, Uint8Array<ArrayBuffer>>} */
-    const wt = createWorkerThread(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
+    const worker = createWorker(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
-    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wt.submit({message: 1024 ** 2})));
+    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => worker.submit({body: 1024 ** 2})));
 
     console.log(results);
 
-    wt.close();
+    worker.close();
 </script>
