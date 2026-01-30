@@ -5,9 +5,15 @@
     /**
      * @template T
      * @template U
+     * @typedef {{open(): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}} WorkerEx
+     */
+
+    /**
+     * @template T
+     * @template U
      * @param {string | URL} script
      * @param {number} [parallel]
-     * @return {{open(): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}}
+     * @return {WorkerEx<T, U>}
      */
     function createWorker(script, parallel) {
         /**
@@ -117,6 +123,7 @@
         };
     `;
 
+    /** @type {WorkerEx<number, Uint8Array<ArrayBuffer>>} */
     const worker = createWorker(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
     worker.open();
 
