@@ -15,7 +15,7 @@
          * @param {typeof jobs[number]} job
          * @return {void}
          */
-        function runJob(worker, job) {
+        function runWorker(worker, job) {
             function releaseWorker() {
                 worker.onmessage = null;
                 worker.onerror = null;
@@ -25,7 +25,7 @@
                 const next = jobs.shift();
 
                 if (next) {
-                    runJob(worker, next);
+                    runWorker(worker, next);
                 }
             }
 
@@ -79,7 +79,7 @@
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runJob(worker, {message, transfers, res, rej});
+                        runWorker(worker, {message, transfers, res, rej});
                     } else {
                         jobs.push({message, transfers, res, rej});
                     }
