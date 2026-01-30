@@ -41,8 +41,8 @@
                 job.rej(event);
             };
 
-            worker.postMessage(job.input.message, {
-                transfer: job.input.transfers
+            worker.postMessage(job.message, {
+                transfer: job.transfers
             });
         }
 
@@ -50,7 +50,7 @@
         const busy = new WeakSet();
         /** @type {Worker[]} */
         const workers = [];
-        /** @type {{res(value: U): void; rej(reason?: unknown): void; input: {message: T; transfers?: Transferable[]};}[]} */
+        /** @type {{message: T; transfers?: Transferable[]; res(value: U): void; rej(reason?: unknown): void;}[]} */
         const jobs = [];
 
         for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
@@ -76,22 +76,12 @@
                 }
 
                 return await new Promise((res, rej) => {
-                    /** @type {typeof jobs[number]} */
-                    const job = {
-                        res,
-                        rej,
-                        input: {
-                            message,
-                            transfers
-                        }
-                    };
-
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runJob(worker, job);
+                        runJob(worker, {message, transfers, res, rej});
                     } else {
-                        jobs.push(job);
+                        jobs.push({message, transfers, res, rej});
                     }
                 });
             }
