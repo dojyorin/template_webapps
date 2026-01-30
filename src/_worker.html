@@ -6,10 +6,10 @@
      * @template T
      * @template U
      * @param {string | URL} script
-     * @param {number} [count]
+     * @param {number} [parallel]
      * @return {{close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}}
      */
-    function createWorker(script, count) {
+    function createWorker(script, parallel) {
         /**
          * @param {Worker} worker
          * @param {typeof jobs[number]} job
@@ -53,7 +53,7 @@
         /** @type {{message: T; transfers?: Transferable[]; res(value: U): void; rej(reason?: unknown): void;}[]} */
         const jobs = [];
 
-        for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
+        for (let i = 0; i < (typeof parallel === "number" && parallel > 0 ? parallel : 1); i++) {
             workers.push(
                 new Worker(script, {
                     type: "module"
