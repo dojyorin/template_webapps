@@ -4,33 +4,10 @@
 <script async type="module">
     /**
      * @template T
-     * @typedef {{body: T; transferables?: Transferable[];}} WorkerMessage
-     */
-
-    /**
-     * @template T
-     * @template U
-     * @param {(body: T) => WorkerMessage<U> | void | Promise<WorkerMessage<U> | void>} func
-     * @return {void}
-     */
-    function onWorkerSubmit(func) {
-        if (globalThis.name.startsWith("Worker#")) {
-            globalThis.onmessage = async ({data}) => {
-                const message = await func(data);
-
-                globalThis.postMessage(message?.body, {
-                    transfer: message?.transferables
-                });
-            };
-        }
-    }
-
-    /**
-     * @template T
      * @template U
      * @param {string | URL} script
      * @param {number} [count]
-     * @return {{close(): void; submit(message?: WorkerMessage<T>): Promise<U>;}}
+     * @return {{close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}}
      */
     function createWorker(script, count) {
         /**
@@ -64,8 +41,8 @@
                 job.rej(event);
             };
 
-            worker.postMessage(job.message?.body, {
-                transfer: job.message?.transferables
+            worker.postMessage(job.input.message, {
+                transfer: job.input.transfers
             });
         }
 
@@ -73,14 +50,13 @@
         const busy = new WeakSet();
         /** @type {Worker[]} */
         const workers = [];
-        /** @type {{message?: WorkerMessage<T>; res(value: U): void; rej(reason?: unknown): void;}[]} */
+        /** @type {{res(value: U): void; rej(reason?: unknown): void; input: {message: T; transfers?: Transferable[]};}[]} */
         const jobs = [];
 
         for (let i = 0; i < (typeof count === "number" && count > 0 ? count : 1); i++) {
             workers.push(
                 new Worker(script, {
-                    type: "module",
-                    name: `Worker#${i}`
+                    type: "module"
                 })
             );
         }
@@ -94,18 +70,28 @@
                 workers.splice(0);
                 jobs.splice(0);
             },
-            async submit(message) {
+            async submit(message, transfers) {
                 if (!workers.length) {
                     throw new ReferenceError("Worker is closed.");
                 }
 
                 return await new Promise((res, rej) => {
+                    /** @type {typeof jobs[number]} */
+                    const job = {
+                        res,
+                        rej,
+                        input: {
+                            message,
+                            transfers
+                        }
+                    };
+
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runJob(worker, {message, res, rej});
+                        runJob(worker, job);
                     } else {
-                        jobs.push({message, res, rej});
+                        jobs.push(job);
                     }
                 });
             }
@@ -121,22 +107,20 @@
     }
 
     const js = /*js*/`
-        ${onWorkerSubmit}
         ${_dummy}
 
-        onWorkerSubmit((v) => {
-            const binary = _dummy(v);
+        globalThis.onmessage = ({data}) => {
+            const binary = _dummy(data);
 
-            return {
-                body: binary,
-                transferables: [binary.buffer]
-            };
-        });
+            globalThis.postMessage(binary, {
+                transfer: [binary.buffer]
+            });
+        };
     `;
 
     const worker = createWorker(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
-    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => worker.submit({body: 1024 ** 2})));
+    const results = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => worker.submit(1024 ** 2)));
 
     console.log(results);
 
