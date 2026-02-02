@@ -65,7 +65,7 @@
                     throw new ReferenceError("Worker is already opened.");
                 }
 
-                for (let i = 0; i < (typeof parallel === "number" && parallel > 0 ? parallel : 1); i++) {
+                for (let i = 0; i < (parallel ?? 1); i++) {
                     workers.push(
                         new Worker(script, {
                             type: "module"
