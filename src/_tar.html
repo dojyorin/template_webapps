@@ -76,9 +76,9 @@
             const body = buf.slice(BLOCK_SIZE, BLOCK_SIZE + size);
 
             if (magic !== "ustar") {
-                throw new ReferenceError("Invalid tar magic.");
+                throw new Error("Invalid tar magic.");
             } else if (checksum !== buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0)) {
-                throw new ReferenceError("Invalid tar checksum.");
+                throw new Error("Invalid tar checksum.");
             }
 
             return /** @satisfies {NonNullable<FileEx>} */ {

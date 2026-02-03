@@ -62,7 +62,7 @@
         return {
             open() {
                 if (workers.length) {
-                    throw new ReferenceError("Worker is already opened.");
+                    throw new Error("Worker is already opened.");
                 }
 
                 for (let i = 0; i < (parallel ?? 1); i++) {
@@ -87,7 +87,7 @@
             },
             async submit(message, transfers) {
                 if (!workers.length) {
-                    throw new ReferenceError("Worker is closed.");
+                    throw new Error("Worker is closed.");
                 }
 
                 return await new Promise((res, rej) => {

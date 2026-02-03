@@ -12,7 +12,7 @@
     });
 
     if (!response.ok) {
-        throw new ReferenceError("Response code returned error.");
+        throw new Error("Response code returned error.");
     }
 
     const body = await response.json();
