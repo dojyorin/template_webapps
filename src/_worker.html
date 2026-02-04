@@ -66,11 +66,7 @@
                 }
 
                 for (let i = 0; i < (parallel ?? 1); i++) {
-                    workers.push(
-                        new Worker(script, {
-                            type: "module"
-                        })
-                    );
+                    workers.push(new Worker(script, {type: "module"}));
                 }
             },
             close() {
