@@ -2,26 +2,9 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    /**
-     * @param {ConstructorParameters<typeof Date>[0]} [source]
-     * @return {number}
-     */
-    function unixtime(source) {
-        return Math.floor((typeof source === "string" ? Date.parse(source) : typeof source === "number" ? source : source instanceof Date ? source.getTime() : Date.now()) / 1000);
-    }
+    const unixtime = Date.now() / 1000 | 0;
+    const iso8601 = new Date().toLocaleString("sv-se").replace(" ", "T");
 
-    /**
-     * @param {ConstructorParameters<typeof Date>[0]} [source]
-     * @param {string} [zone]
-     * @return {string}
-     */
-    function iso8601(source, zone) {
-        return (typeof source === "string" ? new Date(source) : typeof source === "number" ? new Date(source * 1000) : source instanceof Date ? source : new Date()).toLocaleString("sv-se", {
-            timeZoneName: "longOffset",
-            timeZone: zone
-        }).replace(" GMT+", "+").replace(" GMT-", "-").replace(" GMT", "Z").replace(" ", "T");
-    }
-
-    console.log(unixtime());
-    console.log(iso8601());
+    console.log(unixtime);
+    console.log(iso8601);
 </script>
