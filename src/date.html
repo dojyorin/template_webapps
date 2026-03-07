@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const unixtime = Date.now() / 1000 | 0;
+    const unixtime = Math.floor(Date.now() / 1000);
     const iso8601 = new Date().toLocaleString("sv-se").replace(" ", "T");
 
     console.log(unixtime);
