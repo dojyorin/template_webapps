@@ -2,37 +2,45 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {default as Reveal} from "https://esm.sh/reveal.js@5.2.1?target=esnext";
-    import {default as markdown} from "https://esm.sh/reveal.js@5.2.1/plugin/markdown/markdown.esm.js?target=esnext";
-    import {default as highlight} from "https://esm.sh/reveal.js@5.2.1/plugin/highlight/highlight.esm.js?target=esnext";
-    import {default as notes} from "https://esm.sh/reveal.js@5.2.1/plugin/notes/notes.esm.js?target=esnext";
-    import {default as math} from "https://esm.sh/reveal.js@5.2.1/plugin/math/math.esm.js?target=esnext";
+    import {default as Reveal} from "https://esm.sh/reveal.js@6.0.0?target=esnext";
+    import {default as RevealHighlight} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/highlight.js?target=esnext";
+    import {default as RevealMarkdown} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/markdown.js?target=esnext";
+    import {default as RevealSearch} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/search.js?target=esnext";
+    import {default as RevealNotes} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/notes.js?target=esnext";
+    import {default as RevealMath} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/math.js?target=esnext";
+    import {default as RevealZoom} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/zoom.js?target=esnext";
 
-    /** @type {new (target: Element, option?: {hash?: boolean; plugins?: Record<string, unknown>[];}) => {initialize(): Promise<void>;}} */
+    /** @type {new (target: Element, option?: {hash?: boolean; plugins?: unknown[];}) => {initialize(): Promise<void>;}} */
     const _Reveal = Reveal;
-    /** @type {() => Record<string, unknown>} */
-    const _markdown = markdown;
-    /** @type {() => Record<string, unknown>} */
-    const _highlight = highlight;
-    /** @type {() => Record<string, unknown>} */
-    const _notes = notes;
-    /** @type {Record<string, unknown>} */
-    const _math = math;
+    /** @type {unknown} */
+    const _RevealHighlight = RevealHighlight;
+    /** @type {unknown} */
+    const _RevealMarkdown = RevealMarkdown;
+    /** @type {unknown} */
+    const _RevealSearch = RevealSearch;
+    /** @type {unknown} */
+    const _RevealNotes = RevealNotes;
+    /** @type {unknown} */
+    const _RevealMath = RevealMath;
+    /** @type {unknown} */
+    const _RevealZoom = RevealZoom;
 
     await new _Reveal(document.getElementById("reveal"), {
         hash: true,
         plugins: [
-            _markdown(),
-            _highlight(),
-            _notes(),
-            _math
+            _RevealHighlight,
+            _RevealMarkdown,
+            _RevealSearch,
+            _RevealNotes,
+            _RevealMath,
+            _RevealZoom
         ]
     }).initialize();
 </script>
 
 <style>
-    @import "https://esm.sh/reveal.js@5.2.1/dist/reveal.css";
-    @import "https://esm.sh/reveal.js@5.2.1/dist/theme/white.css";
+    @import "https://esm.sh/reveal.js@6.0.0/dist/reveal.css";
+    @import "https://esm.sh/reveal.js@6.0.0/dist/theme/white.css";
 </style>
 
 <div class="reveal" id="reveal">
