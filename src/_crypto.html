@@ -59,17 +59,17 @@
             length: 128
         }, false, ["encrypt"]);
 
-        const output = await crypto.subtle.encrypt({
+        const content = await crypto.subtle.encrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data);
 
-        const compose = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
-        compose.set(salt, 0);
-        compose.set(iv, salt.byteLength);
-        compose.set(new Uint8Array(output), salt.byteLength + iv.byteLength);
+        const output = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
+        output.set(salt, 0);
+        output.set(iv, salt.byteLength);
+        output.set(new Uint8Array(content), salt.byteLength + iv.byteLength);
 
-        return compose;
+        return output;
     }
 
     /**
@@ -95,17 +95,17 @@
             length: 128
         }, false, ["encrypt"]);
 
-        const output = await crypto.subtle.encrypt({
+        const content = await crypto.subtle.encrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data);
 
-        const compose = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
-        compose.set(salt, 0);
-        compose.set(iv, salt.byteLength);
-        compose.set(new Uint8Array(output), salt.byteLength + iv.byteLength);
+        const output = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
+        output.set(salt, 0);
+        output.set(iv, salt.byteLength);
+        output.set(new Uint8Array(content), salt.byteLength + iv.byteLength);
 
-        return compose;
+        return output;
     }
 
     /**
@@ -129,16 +129,16 @@
             length: 128
         }, false, ["encrypt"]);
 
-        const output = await crypto.subtle.encrypt({
+        const content = await crypto.subtle.encrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data);
 
-        const compose = new Uint8Array(iv.byteLength + MAC_SIZE + data.byteLength);
-        compose.set(iv, 0);
-        compose.set(new Uint8Array(output), iv.byteLength);
+        const output = new Uint8Array(iv.byteLength + MAC_SIZE + data.byteLength);
+        output.set(iv, 0);
+        output.set(new Uint8Array(content), iv.byteLength);
 
-        return compose;
+        return output;
     }
 
     /**
@@ -162,12 +162,12 @@
             length: 128
         }, false, ["decrypt"]);
 
-        const output = await crypto.subtle.decrypt({
+        const content = await crypto.subtle.decrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data.subarray(salt.byteLength + iv.byteLength));
 
-        return new Uint8Array(output);
+        return new Uint8Array(content);
     }
 
     /**
@@ -191,12 +191,12 @@
             length: 128
         }, false, ["decrypt"]);
 
-        const output = await crypto.subtle.decrypt({
+        const content = await crypto.subtle.decrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data.subarray(salt.byteLength + iv.byteLength));
 
-        return new Uint8Array(output);
+        return new Uint8Array(content);
     }
 
     /**
@@ -218,12 +218,12 @@
             length: 128
         }, false, ["decrypt"]);
 
-        const output = await crypto.subtle.decrypt({
+        const content = await crypto.subtle.decrypt({
             name: key.algorithm.name,
             iv: iv
         }, key, data.subarray(iv.byteLength));
 
-        return new Uint8Array(output);
+        return new Uint8Array(content);
     }
 
     /**
@@ -233,9 +233,9 @@
      */
     async function signEd25519(privateKey, data) {
         const key = await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]);
-        const output = await crypto.subtle.sign(key.algorithm.name, key, data);
+        const content = await crypto.subtle.sign(key.algorithm.name, key, data);
 
-        return new Uint8Array(output);
+        return new Uint8Array(content);
     }
 
     /**
@@ -246,9 +246,9 @@
      */
     async function verifyEd25519(publicKey, sign, data) {
         const key = await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]);
-        const output = await crypto.subtle.verify(key.algorithm.name, key, sign, data);
+        const content = await crypto.subtle.verify(key.algorithm.name, key, sign, data);
 
-        return output;
+        return content;
     }
 
     /**
