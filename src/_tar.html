@@ -23,7 +23,7 @@
             buf.set(encoder.encode((file.uid ?? 0).toString(8).padStart(7)).subarray(0, 7), 108);
             buf.set(encoder.encode((file.gid ?? 0).toString(8).padStart(7)).subarray(0, 7), 116);
             buf.set(encoder.encode(file.body.byteLength.toString(8).padStart(11)).subarray(0, 11), 124);
-            buf.set(encoder.encode((file.timestamp ?? Math.floor(Date.now() / 1000)).toString(8).padStart(11)).subarray(0, 11), 136);
+            buf.set(encoder.encode((file.timestamp ?? Temporal.Now.instant().round("second").epochNanoseconds / 1000000000n).toString(8).padStart(11)).subarray(0, 11), 136);
             buf.set(encoder.encode(file.type ?? "0").subarray(0, 1), 156);
             buf.set(encoder.encode("ustar"), 257);
             buf.set(encoder.encode("00"), 263);

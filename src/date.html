@@ -2,8 +2,8 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const unixtime = Math.floor(Date.now() / 1000);
-    const iso8601 = new Date().toLocaleString("sv-se").replace(" ", "T");
+    const unixtime = Number(Temporal.Now.instant().round("second").epochNanoseconds / 1000000000n);
+    const iso8601 = Temporal.Now.plainDateTimeISO().round("second").toString();
 
     console.log(unixtime);
     console.log(iso8601);
