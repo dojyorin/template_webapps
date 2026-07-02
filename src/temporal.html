@@ -2,9 +2,14 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    const unixtime = Number(Temporal.Now.instant().round("second").epochNanoseconds / 1000000000n);
-    const iso8601 = Temporal.Now.plainDateTimeISO().round("second").toString();
+    const unixtime = Number(Temporal.Now.instant().epochNanoseconds / 1000000000n);
+    const iso = Temporal.Now.zonedDateTimeISO().toString({
+        smallestUnit: "second",
+        offset: "auto",
+        timeZoneName: "never",
+        calendarName: "never"
+    });
 
     console.log(unixtime);
-    console.log(iso8601);
+    console.log(iso);
 </script>
