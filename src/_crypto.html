@@ -187,10 +187,9 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function sign(privateKey, data) {
-        const key = await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]);
-        const content = await crypto.subtle.sign(key.algorithm.name, key, data);
+        const body = await crypto.subtle.sign("Ed25519", await crypto.subtle.importKey("pkcs8", privateKey, "Ed25519", false, ["sign"]), data);
 
-        return new Uint8Array(content);
+        return new Uint8Array(body);
     }
 
     /**
@@ -200,10 +199,9 @@
      * @return {Promise<boolean>}
      */
     async function verify(publicKey, sign, data) {
-        const key = await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]);
-        const content = await crypto.subtle.verify(key.algorithm.name, key, sign, data);
+        const body = await crypto.subtle.verify("Ed25519", await crypto.subtle.importKey("spki", publicKey, "Ed25519", false, ["verify"]), sign, data);
 
-        return content;
+        return body;
     }
 
     /**
