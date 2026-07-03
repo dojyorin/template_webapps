@@ -42,32 +42,22 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptPassword(password, data) {
-        const MAC_SIZE = 16;
+        const nonce = crypto.getRandomValues(new Uint8Array(28));
 
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const body = await crypto.subtle.encrypt({
+            name: "ChaCha20-Poly1305",
+            iv: nonce.subarray(16)
+        }, await crypto.subtle.deriveKey({
+            name: "Argon2id",
+            memory: 65536,
+            passes: 1,
+            parallelism: 4,
+            nonce: nonce.subarray(0, 16)
+        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["encrypt"]), data);
 
-        const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
-
-        const key = await crypto.subtle.deriveKey({
-            name: material.algorithm.name,
-            hash: "SHA-256",
-            iterations: 1000000,
-            salt: salt
-        }, material, {
-            name: "AES-GCM",
-            length: 128
-        }, false, ["encrypt"]);
-
-        const content = await crypto.subtle.encrypt({
-            name: key.algorithm.name,
-            iv: iv
-        }, key, data);
-
-        const output = new Uint8Array(salt.byteLength + iv.byteLength + MAC_SIZE + data.byteLength);
-        output.set(salt, 0);
-        output.set(iv, salt.byteLength);
-        output.set(new Uint8Array(content), salt.byteLength + iv.byteLength);
+        const output = new Uint8Array(nonce.byteLength + body.byteLength);
+        output.set(nonce, 0);
+        output.set(new Uint8Array(body), nonce.byteLength);
 
         return output;
     }
@@ -122,27 +112,20 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptPassword(password, data) {
-        const salt = data.subarray(0, 16);
-        const iv = data.subarray(salt.byteLength, salt.byteLength + 12);
+        const nonce = data.subarray(0, 28);
 
-        const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+        const body = await crypto.subtle.decrypt({
+            name: "ChaCha20-Poly1305",
+            iv: nonce.subarray(16)
+        }, await crypto.subtle.deriveKey({
+            name: "Argon2id",
+            memory: 65536,
+            passes: 1,
+            parallelism: 4,
+            nonce: nonce.subarray(0, 16)
+        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["decrypt"]), data);
 
-        const key = await crypto.subtle.deriveKey({
-            name: material.algorithm.name,
-            hash: "SHA-256",
-            iterations: 1000000,
-            salt: salt
-        }, material, {
-            name: "AES-GCM",
-            length: 128
-        }, false, ["decrypt"]);
-
-        const content = await crypto.subtle.decrypt({
-            name: key.algorithm.name,
-            iv: iv
-        }, key, data.subarray(salt.byteLength + iv.byteLength));
-
-        return new Uint8Array(content);
+        return new Uint8Array(body);
     }
 
     /**
