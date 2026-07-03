@@ -123,7 +123,7 @@
             passes: 1,
             parallelism: 4,
             nonce: nonce.subarray(0, 16)
-        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["decrypt"]), data);
+        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["decrypt"]), data.subarray(nonce.byteLength));
 
         return new Uint8Array(body);
     }
