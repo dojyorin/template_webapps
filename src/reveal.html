@@ -2,13 +2,12 @@
 <meta charset="utf-8">
 
 <script async type="module">
-    import {default as Reveal} from "https://esm.sh/reveal.js@6.0.0?target=esnext";
-    import {default as RevealHighlight} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/highlight.js?target=esnext";
-    import {default as RevealMarkdown} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/markdown.js?target=esnext";
-    import {default as RevealSearch} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/search.js?target=esnext";
-    import {default as RevealNotes} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/notes.js?target=esnext";
-    import {default as RevealMath} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/math.js?target=esnext";
-    import {default as RevealZoom} from "https://esm.sh/reveal.js@6.0.0/dist/plugin/zoom.js?target=esnext";
+    import {default as Reveal} from "https://esm.sh/reveal.js@6.0.1?target=esnext";
+    import {default as RevealHighlight} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/highlight.js?target=esnext";
+    import {default as RevealMarkdown} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/markdown.js?target=esnext";
+    import {default as RevealNotes} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/notes.js?target=esnext";
+    import {default as RevealMath} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/math.js?target=esnext";
+    import {default as RevealZoom} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/zoom.js?target=esnext";
 
     /** @type {new (target: Element, option?: {hash?: boolean; plugins?: unknown[];}) => {initialize(): Promise<void>;}} */
     const _Reveal = Reveal;
@@ -16,8 +15,6 @@
     const _RevealHighlight = RevealHighlight;
     /** @type {unknown} */
     const _RevealMarkdown = RevealMarkdown;
-    /** @type {unknown} */
-    const _RevealSearch = RevealSearch;
     /** @type {unknown} */
     const _RevealNotes = RevealNotes;
     /** @type {unknown} */
@@ -30,7 +27,6 @@
         plugins: [
             _RevealHighlight,
             _RevealMarkdown,
-            _RevealSearch,
             _RevealNotes,
             _RevealMath,
             _RevealZoom
@@ -39,8 +35,8 @@
 </script>
 
 <style>
-    @import "https://esm.sh/reveal.js@6.0.0/dist/reveal.css";
-    @import "https://esm.sh/reveal.js@6.0.0/dist/theme/white.css";
+    @import "https://esm.sh/reveal.js@6.0.1/dist/reveal.css";
+    @import "https://esm.sh/reveal.js@6.0.1/dist/theme/white.css";
 </style>
 
 <div class="reveal" id="reveal">
