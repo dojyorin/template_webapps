@@ -1,0 +1,10 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script async type="module">
+    const base64 = crypto.getRandomValues(new Uint8Array(32)).toBase64();
+    const url = `data:application/octet-stream;base64,${base64}`;
+
+    console.log(base64);
+    console.log(url);
+</script>
