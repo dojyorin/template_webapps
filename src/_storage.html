@@ -3,94 +3,35 @@
 
 <script async type="module">
     /**
-     * @template {Record<string, unknown> | unknown[]} T
-     * @param {"local" | "session"} type
+     * @template {string | number | boolean | null} T
+     * @param {Storage} storage
      * @param {string} key
-     * @param {T} value
-     * @return {T}
+     * @param {T} initialValue
+     * @return {{value: T extends string ? string : T extends number ? number : T extends boolean ? boolean : T extends null ? null : never; remove(): void;}}
      */
-    function createStorage(type, key, value) {
-        /**
-         * @template {unknown} U
-         * @param {U} data
-         * @return {U}
-         */
-        function createProxy(data) {
-            if (typeof data !== "object" || data === null) {
-                return data;
+    function createStorage(storage, key, initialValue) {
+        return {
+            get value() {
+                const currentValue = storage.getItem(key);
+
+                return currentValue === null ? initialValue : JSON.parse(currentValue);
+            },
+            set value(newValue) {
+                storage.setItem(key, JSON.stringify(newValue));
+            },
+            remove() {
+                storage.removeItem(key);
             }
-
-            return new Proxy(data, {
-                get(t, p) {
-                    const a = Reflect.get(t, p);
-
-                    return createProxy(a);
-                },
-                set(t, p, v) {
-                    const a = Reflect.set(t, p, v);
-
-                    if (a) {
-                        setValue(body);
-                    }
-
-                    return a;
-                },
-                deleteProperty(t, p) {
-                    const a = Reflect.deleteProperty(t, p);
-
-                    if (a) {
-                        setValue(body);
-                    }
-
-                    return a;
-                }
-            });
-        }
-
-        /**
-         * @return {T | null}
-         */
-        function getValue() {
-            return JSON.parse(storage.getItem(key) ?? "null");
-        }
-
-        /**
-         * @param {T | null} data
-         * @return {void}
-         */
-        function setValue(data) {
-            storage.setItem(key, JSON.stringify(data));
-        }
-
-        const storage = type === "local" ? localStorage : sessionStorage;
-
-        const maybeBody = getValue();
-        const body = structuredClone(maybeBody ?? value);
-
-        if (!maybeBody) {
-            setValue(body);
-        }
-
-        return createProxy(body);
+        };
     }
 
-    const ls = createStorage("local", "foo", {
-        value: 123
-    });
+    const foo = createStorage(sessionStorage, "foo", 123);
 
-    const ss = createStorage("session", "foo", {
-        value: 123
-    });
+    console.log(foo.value);
 
-    console.log(ls, localStorage.getItem("foo"));
-    console.log(ss, sessionStorage.getItem("foo"));
+    foo.value = 321;
 
-    ls.value = 321;
-    ss.value = 321;
+    console.log(foo.value);
 
-    console.log(ls, localStorage.getItem("foo"));
-    console.log(ss, sessionStorage.getItem("foo"));
-
-    sessionStorage.clear();
-    localStorage.clear();
+    foo.remove();
 </script>
