@@ -3,7 +3,7 @@
 
 <script async type="module">
     /**
-     * @param {} routes
+     * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
      * @return {}
      */
     function createRouter(routes) {
