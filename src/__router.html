@@ -4,7 +4,7 @@
 <script async type="module">
     /**
      * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
-     * @return {}
+     * @return {{fetch(request: Request): Response | Promise<Response>;}}
      */
     function createRouter(routes) {
         return {
