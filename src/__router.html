@@ -2,4 +2,27 @@
 <meta charset="utf-8">
 
 <script async type="module">
+    function createRouter(routes) {
+        return {
+            async fetch(request) {
+                const routeMatches = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
+
+                if (!routeMatches.length) {
+                    return new Response(undefined, {
+                        status: 404
+                    });
+                }
+
+                const route = routeMatches.find(({method}) => method === request.method);
+
+                if (!route) {
+                    return new Response(undefined, {
+                        status: 405
+                    });
+                }
+
+                return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
+            }
+        };
+    }
 </script>
