@@ -9,15 +9,15 @@
     function createRouter(routes) {
         return {
             async fetch(request) {
-                const routeMatch = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
+                const routesMatched = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
-                if (!routeMatches.length) {
+                if (!routesMatched.length) {
                     return new Response(undefined, {
                         status: 404
                     });
                 }
 
-                const route = routeMatches.find(({method}) => method === request.method);
+                const route = routesMatched.find(({method}) => method === request.method);
 
                 if (!route) {
                     return new Response(undefined, {
