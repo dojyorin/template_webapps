@@ -6,8 +6,19 @@
      * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
      * @return {{fetch(request: Request): Promise<Response>;}}
      */
-    function createRouter(routes) {
-    }
+    const routes = [{
+        path: "/",
+        method: "GET",
+        handler() {
+            return new Response(/*html*/`
+                <h1>Hello!</h1>
+            `, {
+                headers: {
+                    "Content-Type": "text/html"
+                }
+            });
+        }
+    }];
 
     /**
      * @type {{fetch(request: Request): Promise<Response>;}}
