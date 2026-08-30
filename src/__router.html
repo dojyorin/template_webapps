@@ -3,8 +3,7 @@
 
 <script async type="module">
     /**
-     * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
-     * @return {{fetch(request: Request): Promise<Response>;}}
+     * @type {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]}
      */
     const routes = [{
         path: "/",
