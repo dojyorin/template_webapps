@@ -9,7 +9,7 @@
     function createRouter(routes) {
         return {
             async fetch(request) {
-                const routeMatches = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
+                const routeMatch = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
                 if (!routeMatches.length) {
                     return new Response(undefined, {
