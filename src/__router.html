@@ -9,6 +9,9 @@
     function createRouter(routes) {
     }
 
+    /**
+     * @type {{fetch(request: Request): Promise<Response>;}}
+     */
     export default {
         async fetch(request) {
             const routesMatched = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
