@@ -38,28 +38,19 @@
 
     /**
      * @param {string} password
-     * @param {Uint8Array<ArrayBuffer>} data
+     * @param {Uint8Array<ArrayBuffer>} salt
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function encryptPassword(password, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(28));
-
-        const body = await crypto.subtle.encrypt({
-            name: "ChaCha20-Poly1305",
-            iv: nonce.subarray(16)
-        }, await crypto.subtle.deriveKey({
+    async function deriveKeyPassword(password, salt) {
+        const key = await crypto.subtle.deriveKey({
             name: "Argon2id",
             memory: 65536,
             passes: 1,
             parallelism: 4,
-            nonce: nonce.subarray(0, 16)
-        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["encrypt"]), data);
+            nonce: salt
+        }, await crypto.subtle.importKey("raw-secret", new TextEncoder().encode(password), "Argon2id", false, ["deriveKey"]), "ChaCha20-Poly1305", true, ["encrypt", "decrypt"]);
 
-        const output = new Uint8Array(nonce.byteLength + body.byteLength);
-        output.set(nonce, 0);
-        output.set(new Uint8Array(body), nonce.byteLength);
-
-        return output;
+        return new Uint8Array(await crypto.subtle.exportKey("raw-secret", key));
     }
 
     /**
