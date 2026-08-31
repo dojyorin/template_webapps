@@ -35,64 +35,50 @@
     function createStorage(storage, key, initialValue) {
         /**
          * @template {unknown} U
-         * @param {U} data
+         * @param {U} value
          * @return {U}
          */
-        function createProxy(data) {
-            if (typeof data !== "object" || data === null) {
-                return data;
+        function createProxy(value) {
+            if (typeof value !== "object" || value === null) {
+                return value;
             }
 
-            return new Proxy(data, {
-                get(t, p) {
-                    const a = Reflect.get(t, p);
+            return new Proxy(value, {
+                get(target, property) {
+                    const effect = Reflect.get(target, property);
 
-                    return createProxy(a);
+                    return createProxy(effect);
                 },
-                set(t, p, v) {
-                    const a = Reflect.set(t, p, v);
+                set(target, property, newValue) {
+                    const effect = Reflect.set(target, property, newValue);
 
-                    if (a) {
-                        setValue(body);
+                    if (effect) {
+                        storage.setItem(key, JSON.stringify(context));
                     }
 
-                    return a;
+                    return effect;
                 },
-                deleteProperty(t, p) {
-                    const a = Reflect.deleteProperty(t, p);
+                deleteProperty(target, property) {
+                    const effect = Reflect.deleteProperty(target, property);
 
-                    if (a) {
-                        setValue(body);
+                    if (effect) {
+                        storage.setItem(key, JSON.stringify(context));
                     }
 
-                    return a;
+                    return effect;
                 }
             });
         }
 
-        /**
-         * @return {T | null}
-         */
-        function getValue() {
-            return JSON.parse(storage.getItem(key) ?? "null");
+        const json = storage.getItem(key);
+
+        if (!json) {
+            storage.setItem(key, JSON.stringify(initialValue));
         }
 
-        /**
-         * @param {T | null} data
-         * @return {void}
-         */
-        function setValue(data) {
-            storage.setItem(key, JSON.stringify(data));
-        }
+        const context = json ? JSON.parse(json) : structuredClone(initialValue);
 
-        const maybeBody = getValue();
-        const body = structuredClone(maybeBody ?? initialValue);
-
-        if (!maybeBody) {
-            setValue(body);
-        }
-
-        return createProxy(body);
+        return createProxy(context);
     }
 
     const foo = createStorage(sessionStorage, "foo", 123);
