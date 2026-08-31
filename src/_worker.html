@@ -3,19 +3,18 @@
 
 <script async type="module">
     /**
-     * @template T
-     * @template U
-     * @typedef {{open(): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}} WorkerEx
+     * @template {unknown} T
+     * @template {unknown} U
+     * @typedef {{open(parallel?: number): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}} WorkerPool
      */
 
     /**
-     * @template T
-     * @template U
+     * @template {unknown} T
+     * @template {unknown} U
      * @param {string | URL} url
-     * @param {number} [parallel]
-     * @return {WorkerEx<T, U>}
+     * @return {WorkerPool<T, U>}
      */
-    function createWorker(url, parallel) {
+    function createWorkerPool(url) {
         /**
          * @param {Worker} worker
          * @param {typeof jobs[number]} job
@@ -60,7 +59,7 @@
         const jobs = [];
 
         return {
-            open() {
+            open(parallel) {
                 if (workers.length) {
                     throw new Error("Worker is already opened.");
                 }
@@ -86,7 +85,7 @@
                     throw new Error("Worker is closed.");
                 }
 
-                return await new Promise((res, rej) => {
+                return await new Promise((resolve, reject) => {
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
@@ -119,13 +118,13 @@
         };
     `;
 
-    /** @type {WorkerEx<number, Uint8Array<ArrayBuffer>>} */
-    const worker = createWorker(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
-    worker.open();
+    /** @type {WorkerPool<number, Uint8Array<ArrayBuffer>>} */
+    const wp = createWorkerPool(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`);
+    wp.open(navigator.hardwareConcurrency);
 
-    const outputs = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => worker.submit(1024 ** 2)));
+    const outputs = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wp.submit(1024 ** 2)));
 
     console.log(outputs);
 
-    worker.close();
+    wp.close();
 </script>
