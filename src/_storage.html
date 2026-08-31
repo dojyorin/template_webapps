@@ -58,7 +58,9 @@
         return createProxy(context);
     }
 
-    const foo = createStorage(sessionStorage, "foo", 123);
+    const foo = createStorage(sessionStorage, "foo", {
+        value: 123
+    });
 
     console.log(foo.value);
 
@@ -66,5 +68,5 @@
 
     console.log(foo.value);
 
-    foo.remove();
+    sessionStorage.clear();
 </script>
