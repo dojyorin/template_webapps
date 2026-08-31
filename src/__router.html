@@ -22,8 +22,7 @@
     /**
      * @type {{fetch(request: Request): Promise<Response>;}}
      */
-    export default {
-        async fetch(request) {
+        async function serveFetch(request) {
             const routesMatched = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
             if (!routesMatched.length) {
@@ -42,5 +41,4 @@
 
             return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
         }
-    };
 </script>
