@@ -63,17 +63,17 @@
     }
 
     /**
-     * @param {Uint8Array<ArrayBuffer>} secret
+     * @param {Uint8Array<ArrayBuffer>} key
      * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function encryptSecret(secret, data) {
+    async function encrypt(key, data) {
         const nonce = crypto.getRandomValues(new Uint8Array(12));
 
         const body = await crypto.subtle.encrypt({
             name: "ChaCha20-Poly1305",
             iv: nonce
-        }, await crypto.subtle.importKey("raw-secret", secret, "ChaCha20-Poly1305", false, ["encrypt"]), data);
+        }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["encrypt"]), data);
 
         const output = new Uint8Array(nonce.byteLength + body.byteLength);
         output.set(nonce, 0);
@@ -129,17 +129,17 @@
     }
 
     /**
-     * @param {Uint8Array<ArrayBuffer>} secret
+     * @param {Uint8Array<ArrayBuffer>} key
      * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function decryptSecret(secret, data) {
+    async function decrypt(key, data) {
         const nonce = data.subarray(0, 12);
 
         const body = await crypto.subtle.decrypt({
             name: "ChaCha20-Poly1305",
             iv: nonce
-        }, await crypto.subtle.importKey("raw-secret", secret, "ChaCha20-Poly1305", false, ["decrypt"]), data.subarray(nonce.byteLength));
+        }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["decrypt"]), data.subarray(nonce.byteLength));
 
         return new Uint8Array(body);
     }
@@ -220,10 +220,10 @@
     const encryptKey = await generateKeyX25519();
     const signKey = await generateKeyEd25519();
     const encryptPasswordResult = await encryptPassword(password, binary);
-    const encryptSecretResult = await encryptSecret(passkey, binary);
+    const encryptSecretResult = await encrypt(passkey, binary);
     const encryptX25519Result = await encryptX25519(encryptKey.privateKey, encryptKey.publicKey, binary);
     const decryptPasswordResult = await decryptPassword(password, encryptPasswordResult);
-    const decryptSecretResult = await decryptSecret(passkey, encryptSecretResult);
+    const decryptSecretResult = await decrypt(passkey, encryptSecretResult);
     const decryptX25519Result = await decryptX25519(encryptKey.privateKey, encryptKey.publicKey, encryptX25519Result);
     const signResult = await sign(signKey.privateKey, binary);
     const verifyResult = await verify(signKey.publicKey, signResult, binary);
