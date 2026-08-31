@@ -153,17 +153,20 @@
 
     const binary = _dummy(1024 ** 2);
     const password = "foobar";
-    const passkey = _dummy(32);
+    const salt = _dummy(16);
+    const secret = _dummy(32);
 
     const hash = await digest(binary);
     const encryptKey = await generateKeyX25519();
     const signKey = await generateKeyEd25519();
-    const encryptPasswordResult = await encryptPassword(password, binary);
-    const encryptSecretResult = await encrypt(passkey, binary);
-    const encryptX25519Result = await encryptX25519(encryptKey.privateKey, encryptKey.publicKey, binary);
-    const decryptPasswordResult = await decryptPassword(password, encryptPasswordResult);
-    const decryptSecretResult = await decrypt(passkey, encryptSecretResult);
-    const decryptX25519Result = await decryptX25519(encryptKey.privateKey, encryptKey.publicKey, encryptX25519Result);
+    const cryptoKeyFromPassword = await deriveKeyPassword(password, salt);
+    const cryptoKeyFromX25519 = await deriveKeyX25519(encryptKey.privateKey, encryptKey.publicKey);
+    const cipherWithPassword = await encrypt(cryptoKeyFromPassword, binary);
+    const cipherWithSecret = await encrypt(secret, binary);
+    const cipherWithX25519 = await encrypt(cryptoKeyFromX25519, binary);
+    const plainWithPassword = await decrypt(cryptoKeyFromPassword, cipherWithPassword);
+    const plainWithSecret = await decrypt(secret, cipherWithSecret);
+    const plainWithX25519 = await decrypt(cryptoKeyFromX25519, cipherWithX25519);
     const signResult = await sign(signKey.privateKey, binary);
     const verifyResult = await verify(signKey.publicKey, signResult, binary);
     const enpemPrivateKey = enpem("PRIVATE KEY", encryptKey.privateKey);
@@ -174,12 +177,14 @@
     console.log(hash);
     console.log(encryptKey);
     console.log(signKey);
-    console.log(encryptPasswordResult);
-    console.log(encryptSecretResult);
-    console.log(encryptX25519Result);
-    console.log(decryptPasswordResult);
-    console.log(decryptSecretResult);
-    console.log(decryptX25519Result);
+    console.log(cryptoKeyFromPassword);
+    console.log(cryptoKeyFromX25519);
+    console.log(cipherWithPassword);
+    console.log(cipherWithSecret);
+    console.log(cipherWithX25519);
+    console.log(plainWithPassword);
+    console.log(plainWithSecret);
+    console.log(plainWithX25519);
     console.log(signResult);
     console.log(verifyResult);
     console.log(enpemPrivateKey);
