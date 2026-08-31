@@ -85,25 +85,15 @@
     /**
      * @param {Uint8Array<ArrayBuffer>} privateKey
      * @param {Uint8Array<ArrayBuffer>} publicKey
-     * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function encryptX25519(privateKey, publicKey, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(12));
-
-        const body = await crypto.subtle.encrypt({
-            name: "ChaCha20-Poly1305",
-            iv: nonce
-        }, await crypto.subtle.deriveKey({
+    async function deriveKeyX25519(privateKey, publicKey) {
+        const key = await crypto.subtle.deriveKey({
             name: "X25519",
             public: await crypto.subtle.importKey("spki", publicKey, "X25519", false, [])
-        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), "ChaCha20-Poly1305", false, ["encrypt"]), data);
+        }, await crypto.subtle.importKey("pkcs8", privateKey, "X25519", false, ["deriveKey"]), "ChaCha20-Poly1305", true, ["encrypt", "decrypt"]);
 
-        const output = new Uint8Array(nonce.byteLength + body.byteLength);
-        output.set(nonce, 0);
-        output.set(new Uint8Array(body), nonce.byteLength);
-
-        return output;
+        return new Uint8Array(await crypto.subtle.exportKey("raw-secret", key));
     }
 
     /**
