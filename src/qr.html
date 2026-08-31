@@ -33,7 +33,7 @@
             willReadFrequently: true
         });
 
-        output.value = await new Promise((res) => {
+        output.value = await new Promise((resolve) => {
             const timer = setInterval(() => {
                 render.drawImage(video, 0, 0, render.canvas.width, render.canvas.height);
 
@@ -42,7 +42,7 @@
 
                 if (result) {
                     clearInterval(timer);
-                    res(result.data);
+                    resolve(result.data);
                 }
             }, 100);
         });

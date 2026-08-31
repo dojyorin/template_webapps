@@ -9,13 +9,13 @@
      * @return {Promise<T extends true ? File[] : File>}
      */
     async function upload(multiple, accept) {
-        return await new Promise((res, rej) => {
+        return await new Promise((resolve, reject) => {
             const input = document.createElement("input");
             input.type = "file";
             input.multiple = multiple;
             input.accept = accept ?? "";
-            input.onchange = (event) => input.files?.length ? res(multiple ? Array.from(input.files) : input.files.item(0)) : rej(event);
-            input.oncancel = (event) => rej(event);
+            input.onchange = (event) => input.files?.length ? resolve(multiple ? Array.from(input.files) : input.files.item(0)) : reject(event);
+            input.oncancel = (event) => reject(event);
             input.click();
         });
     }

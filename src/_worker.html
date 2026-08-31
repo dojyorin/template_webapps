@@ -39,12 +39,12 @@
 
             worker.onmessage = ({data}) => {
                 releaseWorker();
-                job.res(data);
+                job.resolve(data);
             };
 
             worker.onerror = (event) => {
                 releaseWorker();
-                job.rej(event);
+                job.reject(event);
             };
 
             worker.postMessage(job.message, {
@@ -56,7 +56,7 @@
         const busy = new WeakSet();
         /** @type {Worker[]} */
         const workers = [];
-        /** @type {{message: T; transfers?: Transferable[]; res(value: U): void; rej(reason?: unknown): void;}[]} */
+        /** @type {{message: T; transfers?: Transferable[]; resolve(value: U): void; reject(reason?: unknown): void;}[]} */
         const jobs = [];
 
         return {
@@ -71,7 +71,7 @@
             },
             close() {
                 for (const job of jobs) {
-                    job.rej();
+                    job.reject();
                 }
 
                 for (const worker of workers) {
@@ -90,9 +90,9 @@
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runWorker(worker, {message, transfers, res, rej});
+                        runWorker(worker, {message, transfers, resolve, reject});
                     } else {
-                        jobs.push({message, transfers, res, rej});
+                        jobs.push({message, transfers, resolve, reject});
                     }
                 });
             }
