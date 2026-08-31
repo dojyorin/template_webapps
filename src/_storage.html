@@ -3,29 +3,6 @@
 
 <script async type="module">
     /**
-     * @template {string | number | boolean | null} T
-     * @param {Storage} storage
-     * @param {string} key
-     * @param {T} initialValue
-     * @return {{value: T extends string ? string : T extends number ? number : T extends boolean ? boolean : T extends null ? null : never; remove(): void;}}
-     */
-    function createStorage(storage, key, initialValue) {
-        return {
-            get value() {
-                const currentValue = storage.getItem(key);
-
-                return currentValue === null ? initialValue : JSON.parse(currentValue);
-            },
-            set value(newValue) {
-                storage.setItem(key, JSON.stringify(newValue));
-            },
-            remove() {
-                storage.removeItem(key);
-            }
-        };
-    }
-
-    /**
      * @template {Record<string, unknown> | unknown[]} T
      * @param {Storage} storage
      * @param {string} key
