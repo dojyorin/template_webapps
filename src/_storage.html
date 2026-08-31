@@ -27,12 +27,12 @@
 
     /**
      * @template {Record<string, unknown> | unknown[]} T
-     * @param {"local" | "session"} type
+     * @param {Storage} storage
      * @param {string} key
-     * @param {T} value
+     * @param {T} initialValue
      * @return {T}
      */
-    function createStorage(type, key, value) {
+    function createStorage(storage, key, initialValue) {
         /**
          * @template {unknown} U
          * @param {U} data
@@ -85,10 +85,8 @@
             storage.setItem(key, JSON.stringify(data));
         }
 
-        const storage = type === "local" ? localStorage : sessionStorage;
-
         const maybeBody = getValue();
-        const body = structuredClone(maybeBody ?? value);
+        const body = structuredClone(maybeBody ?? initialValue);
 
         if (!maybeBody) {
             setValue(body);
