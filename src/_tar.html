@@ -81,7 +81,8 @@
                 throw new Error("Invalid tar checksum.");
             }
 
-            return /** @satisfies {NonNullable<FileEx>} */ {
+            /** @type {FileTar} */
+            const file = {
                 name: name,
                 body: body,
                 timestamp: timestamp,
@@ -90,6 +91,8 @@
                 gid: gid,
                 type: type
             };
+
+            return file;
         });
     }
 
