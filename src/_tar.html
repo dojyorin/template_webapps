@@ -3,11 +3,11 @@
 
 <script async type="module">
     /**
-     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; mode?: number; uid?: number; gid?: number; type?: string;}} FileEx
+     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; mode?: number; uid?: number; gid?: number; type?: string;}} FileTar
      */
 
     /**
-     * @param {FileEx[]} files
+     * @param {FileTar[]} files
      * @return {Uint8Array<ArrayBuffer>}
      */
     function entar(files) {
@@ -46,7 +46,7 @@
 
     /**
      * @param {Uint8Array<ArrayBuffer>} tar
-     * @return {NonNullable<FileEx>[]}
+     * @return {NonNullable<FileTar>[]}
      */
     function untar(tar) {
         const BLOCK_SIZE = 512;
@@ -101,7 +101,7 @@
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    /** @type {FileEx[]} */
+    /** @type {FileTar[]} */
     const samples = [{
         name: "foo",
         body: _dummy(1024 ** 2)
