@@ -3,32 +3,45 @@
 
 <script async type="module">
     /**
-     * @template {boolean} T
-     * @param {T} multiple
+     * @overload
+     * @param {false} multiple
      * @param {string} [accept]
-     * @return {Promise<T extends true ? File[] : File>}
+     * @return {Promise<File | null>}
+     *
+     * @overload
+     * @param {true} multiple
+     * @param {string} [accept]
+     * @return {Promise<File[]>}
+     *
+     * @param {boolean} multiple
+     * @param {string} [accept]
+     * @return {Promise<File[] | File | null>}
      */
     async function upload(multiple, accept) {
         return await new Promise((resolve, reject) => {
             const input = document.createElement("input");
+
             input.type = "file";
             input.multiple = multiple;
             input.accept = accept ?? "";
-            input.onchange = (event) => input.files?.length ? resolve(multiple ? Array.from(input.files) : input.files.item(0)) : reject(event);
+            input.onchange = (event) => input.files ? resolve(multiple ? Array.from(input.files) : input.files.item(0)) : reject(event);
             input.oncancel = (event) => reject(event);
+
             input.click();
         });
     }
 
     /**
      * @param {string} name
-     * @param {BlobPart} data
+     * @param {BlobPart} body
      * @return {void}
      */
-    function download(name, data) {
+    function download(name, body) {
         const a = document.createElement("a");
+
         a.download = name;
-        a.href = URL.createObjectURL(new Blob([data]));
+        a.href = URL.createObjectURL(new Blob([body]));
+
         a.click();
     }
 
