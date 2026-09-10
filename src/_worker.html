@@ -5,52 +5,11 @@
     /**
      * @template {unknown} T
      * @template {unknown} U
-     * @typedef {{open(parallel?: number): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}} WorkerPool
-     */
-
-    /**
-     * @template {unknown} T
-     * @template {unknown} U
      * @param {string | URL} url
-     * @return {WorkerPool<T, U>}
+     * @param {number} [parallel]
+     * @return {{open(): void; close(): void; submit(message: T, transfers?: Transferable[]): Promise<U>;}}
      */
-    function createWorkerPool(url) {
-        /**
-         * @param {Worker} worker
-         * @param {typeof jobs[number]} job
-         * @return {void}
-         */
-        function runWorker(worker, job) {
-            function releaseWorker() {
-                worker.onmessage = null;
-                worker.onerror = null;
-
-                busy.delete(worker);
-
-                const next = jobs.shift();
-
-                if (next) {
-                    runWorker(worker, next);
-                }
-            }
-
-            busy.add(worker);
-
-            worker.onmessage = ({data}) => {
-                releaseWorker();
-                job.resolve(data);
-            };
-
-            worker.onerror = (event) => {
-                releaseWorker();
-                job.reject(event);
-            };
-
-            worker.postMessage(job.message, {
-                transfer: job.transfers
-            });
-        }
-
+    function createWorkerPool(url, parallel) {
         /** @type {WeakSet<Worker>} */
         const busy = new WeakSet();
         /** @type {Worker[]} */
@@ -59,22 +18,26 @@
         const jobs = [];
 
         return {
-            open(parallel) {
+            open() {
                 if (workers.length) {
-                    throw new Error("Worker is already opened.");
+                    throw new Error();
                 }
 
                 for (let i = 0; i < (parallel ?? 1); i++) {
-                    workers.push(new Worker(url, {type: "module"}));
+                    const worker = new Worker(url, {
+                        type: "module"
+                    });
+
+                    workers.push(worker);
                 }
             },
             close() {
-                for (const job of jobs) {
-                    job.reject();
-                }
-
                 for (const worker of workers) {
                     worker.terminate();
+                }
+
+                for (const job of jobs) {
+                    job.reject();
                 }
 
                 workers.splice(0);
@@ -82,14 +45,43 @@
             },
             async submit(message, transfers) {
                 if (!workers.length) {
-                    throw new Error("Worker is closed.");
+                    throw new Error();
                 }
 
                 return await new Promise((resolve, reject) => {
                     const worker = workers.find((v) => !busy.has(v));
 
                     if (worker) {
-                        runWorker(worker, {message, transfers, resolve, reject});
+                        (/** @type {(worker: Worker, job: typeof jobs[number]) => void} */function recurse(worker, job) {
+                            function release() {
+                                worker.onmessage = null;
+                                worker.onerror = null;
+
+                                busy.delete(worker);
+
+                                const next = jobs.shift();
+
+                                if (next) {
+                                    recurse(worker, next);
+                                }
+                            }
+
+                            busy.add(worker);
+
+                            worker.onmessage = ({data}) => {
+                                release();
+                                job.resolve(data);
+                            };
+
+                            worker.onerror = (event) => {
+                                release();
+                                job.reject(event);
+                            };
+
+                            worker.postMessage(job.message, {
+                                transfer: job.transfers
+                            });
+                        })(worker, {message, transfers, resolve, reject});
                     } else {
                         jobs.push({message, transfers, resolve, reject});
                     }
@@ -118,9 +110,10 @@
         };
     `;
 
-    /** @type {WorkerPool<number, Uint8Array<ArrayBuffer>>} */
-    const wp = createWorkerPool(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`);
-    wp.open(navigator.hardwareConcurrency);
+    /** @type {ReturnType<typeof createWorkerPool<number, Uint8Array<ArrayBuffer>>>} */
+    const wp = createWorkerPool(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
+
+    wp.open();
 
     const outputs = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wp.submit(1024 ** 2)));
 
