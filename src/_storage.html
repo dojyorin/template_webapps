@@ -10,27 +10,34 @@
      * @return {T}
      */
     function createStorage(storage, key, initialValue) {
-        /**
-         * @template {unknown} U
-         * @param {U} value
-         * @return {U}
-         */
-        function createProxy(value) {
-            if (typeof value !== "object" || value === null) {
-                return value;
+        const json = storage.getItem(key);
+
+        if (json === null) {
+            storage.setItem(key, JSON.stringify(initialValue));
+        }
+
+        /** @type {T} */
+        const value = JSON.parse(json ?? JSON.stringify(initialValue));
+
+        return (/** @type {<U extends unknown>(rawValue: U) => U} */function recurse(rawValue) {
+            if (typeof rawValue !== "object" || rawValue === null) {
+                return rawValue;
             }
 
-            return new Proxy(value, {
-                get(target, property) {
-                    const effect = Reflect.get(target, property);
+            for (const property of Reflect.ownKeys(rawValue)) {
+                const descriptor = Reflect.getOwnPropertyDescriptor(rawValue, property);
 
-                    return createProxy(effect);
-                },
-                set(target, property, newValue) {
-                    const effect = Reflect.set(target, property, newValue);
+                if (descriptor?.writable) {
+                    Reflect.set(rawValue, property, recurse(descriptor.value));
+                }
+            }
+
+            return new Proxy(rawValue, {
+                set(target, property, newValue, receiver) {
+                    const effect = Reflect.set(target, property, recurse(newValue), receiver);
 
                     if (effect) {
-                        storage.setItem(key, JSON.stringify(context));
+                        storage.setItem(key, JSON.stringify(value));
                     }
 
                     return effect;
@@ -39,23 +46,13 @@
                     const effect = Reflect.deleteProperty(target, property);
 
                     if (effect) {
-                        storage.setItem(key, JSON.stringify(context));
+                        storage.setItem(key, JSON.stringify(value));
                     }
 
                     return effect;
                 }
             });
-        }
-
-        const json = storage.getItem(key);
-
-        if (!json) {
-            storage.setItem(key, JSON.stringify(initialValue));
-        }
-
-        const context = json ? JSON.parse(json) : structuredClone(initialValue);
-
-        return createProxy(context);
+        })(value);
     }
 
     const foo = createStorage(sessionStorage, "foo", {
