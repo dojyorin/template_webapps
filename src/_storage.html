@@ -33,23 +33,23 @@
             }
 
             return new Proxy(rawValue, {
-                set(target, property, newValue, receiver) {
-                    const effect = Reflect.set(target, property, recurse(newValue), receiver);
+                set(target, property, newValue) {
+                    const success = Reflect.set(target, property, recurse(newValue));
 
-                    if (effect) {
+                    if (success) {
                         storage.setItem(key, JSON.stringify(value));
                     }
 
-                    return effect;
+                    return success;
                 },
                 deleteProperty(target, property) {
-                    const effect = Reflect.deleteProperty(target, property);
+                    const success = Reflect.deleteProperty(target, property);
 
-                    if (effect) {
+                    if (success) {
                         storage.setItem(key, JSON.stringify(value));
                     }
 
-                    return effect;
+                    return success;
                 }
             });
         })(value);
