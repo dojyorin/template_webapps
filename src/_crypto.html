@@ -136,6 +136,10 @@
      * @return {Uint8Array<ArrayBuffer>}
      */
     function decodePEM(data) {
+        if (data.match(/-----BEGIN /g)?.length !== 1 || data.match(/-----END /g)?.length !== 1) {
+            throw new Error();
+        }
+
         return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").split("\n").slice(1, -1).join(""));
     }
 
