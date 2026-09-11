@@ -37,54 +37,50 @@
 
     /**
      * @param {Uint8Array<ArrayBuffer>} tar
-     * @return {NonNullable<FileTar>[]}
+     * @return {Promise<File[]>}
      */
-    function untar(tar) {
+    async function untar(tar) {
         const BLOCK_SIZE = 512;
 
         const decoder = new TextDecoder();
+        /** @type {File[]} */
+        const files = [];
 
-        /** @type {Uint8Array<ArrayBuffer>[]} */
-        const bufs = [];
-        let offset = 0;
-
-        while (offset < tar.byteLength - BLOCK_SIZE * 2) {
-            const size = parseInt(decoder.decode(tar.subarray(offset + 124, offset + 135)), 8);
-
-            bufs.push(tar.slice(offset, offset += BLOCK_SIZE + size + (BLOCK_SIZE - size % BLOCK_SIZE)));
-        }
-
-        return bufs.map((buf) => {
-            const name = decoder.decode(buf.subarray(0, 99)).replaceAll("\0", "");
-            const mode = parseInt(decoder.decode(buf.subarray(100, 107)), 8);
-            const uid = parseInt(decoder.decode(buf.subarray(108, 115)), 8);
-            const gid = parseInt(decoder.decode(buf.subarray(116, 123)), 8);
-            const size = parseInt(decoder.decode(buf.subarray(124, 135)), 8);
-            const timestamp = parseInt(decoder.decode(buf.subarray(136, 147)), 8);
-            const checksum = parseInt(decoder.decode(buf.subarray(148, 154)), 8);
-            const type = decoder.decode(buf.subarray(156, 157));
-            const magic = decoder.decode(buf.subarray(257, 262));
-            const body = buf.slice(BLOCK_SIZE, BLOCK_SIZE + size);
+        for (let i = 0; i < tar.byteLength - BLOCK_SIZE * 2;) {
+            const name = decoder.decode(tar.subarray(i, i + 100)).replaceAll("\0", "");
+            const _mode = decoder.decode(tar.subarray(i + 100, i + 107));
+            const _uid = decoder.decode(tar.subarray(i + 108, i + 115));
+            const _gid = decoder.decode(tar.subarray(i + 116, i + 123));
+            const size = parseInt(decoder.decode(tar.subarray(i + 124, i + 135)), 8);
+            const timestamp = parseInt(decoder.decode(tar.subarray(i + 136, i + 147)), 8);
+            const checksum = parseInt(decoder.decode(tar.subarray(i + 148, i + 154)), 8);
+            const type = decoder.decode(tar.subarray(i + 156, i + 157));
+            const magic = decoder.decode(tar.subarray(i + 257, i + 262));
+            const version = decoder.decode(tar.subarray(i + 263, i + 265));
+            const body = tar.subarray(i + BLOCK_SIZE, i + BLOCK_SIZE + size);
 
             if (magic !== "ustar") {
-                throw new Error("Invalid tar magic.");
-            } else if (checksum !== buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0)) {
-                throw new Error("Invalid tar checksum.");
+                throw new Error();
+            } else if (version !== "00" && version !== " \0") {
+                throw new Error();
+            } else if (checksum !== tar.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0) - tar.subarray(i + 148, i + 156).reduce((v, n) => v + n, 0) + 0x20 * 8) {
+                throw new Error();
             }
 
-            /** @type {FileTar} */
-            const file = {
-                name: name,
-                body: body,
-                timestamp: timestamp,
-                mode: mode,
-                uid: uid,
-                gid: gid,
-                type: type
-            };
+            i += BLOCK_SIZE * (Math.ceil(size / BLOCK_SIZE) + 1);
 
-            return file;
-        });
+            if (type !== "0" && type !== "\0") {
+                continue;
+            }
+
+            const file = new File([body], name.replace(/^.*\//, ""), {
+                lastModified: timestamp
+            });
+
+            files.push(await Promise.resolve(file));
+        }
+
+        return files;
     }
 
     /**
