@@ -123,19 +123,19 @@
     }
 
     /**
-     * @param {Uppercase<string>} name
+     * @param {Uppercase<string>} label
      * @param {Uint8Array<ArrayBuffer>} data
      * @return {string}
      */
-    function enpem(name, data) {
-        return `-----BEGIN ${name}-----\n${data.toBase64()}\n-----END ${name}-----`;
+    function encodePEM(label, data) {
+        return `-----BEGIN ${label}-----\n${data.toBase64()}\n-----END ${label}-----`;
     }
 
     /**
      * @param {string} data
      * @return {Uint8Array<ArrayBuffer>}
      */
-    function depem(data) {
+    function decodePEM(data) {
         return Uint8Array.fromBase64(data.trim().replaceAll("\r", "").split("\n").slice(1, -1).join(""));
     }
 
@@ -153,28 +153,28 @@
     const secret = _dummy(32);
 
     const hash = await digest(binary);
-    const encryptKey = await generateKeyX25519();
-    const signKey = await generateKeyEd25519();
-    const cryptoKeyFromPassword = await deriveKeyPassword(password, salt);
-    const cryptoKeyFromX25519 = await deriveKeyX25519(encryptKey.privateKey, encryptKey.publicKey);
-    const cipherWithPassword = await encrypt(cryptoKeyFromPassword, binary);
+    const encryptKeyPair = await generateKeyX25519();
+    const signKeyPair = await generateKeyEd25519();
+    const encryptKeyFromPassword = await deriveKeyPassword(password, salt);
+    const encryptKeyFromX25519 = await deriveKeyX25519(encryptKeyPair.privateKey, encryptKeyPair.publicKey);
+    const cipherWithPassword = await encrypt(encryptKeyFromPassword, binary);
     const cipherWithSecret = await encrypt(secret, binary);
-    const cipherWithX25519 = await encrypt(cryptoKeyFromX25519, binary);
-    const plainWithPassword = await decrypt(cryptoKeyFromPassword, cipherWithPassword);
+    const cipherWithX25519 = await encrypt(encryptKeyFromX25519, binary);
+    const plainWithPassword = await decrypt(encryptKeyFromPassword, cipherWithPassword);
     const plainWithSecret = await decrypt(secret, cipherWithSecret);
-    const plainWithX25519 = await decrypt(cryptoKeyFromX25519, cipherWithX25519);
-    const signResult = await sign(signKey.privateKey, binary);
-    const verifyResult = await verify(signKey.publicKey, signResult, binary);
-    const enpemPrivateKey = enpem("PRIVATE KEY", encryptKey.privateKey);
-    const enpemPublicKey = enpem("PUBLIC KEY", encryptKey.publicKey);
-    const depemPrivateKey = depem(enpemPrivateKey);
-    const depemPublicKey = depem(enpemPublicKey);
+    const plainWithX25519 = await decrypt(encryptKeyFromX25519, cipherWithX25519);
+    const signResult = await sign(signKeyPair.privateKey, binary);
+    const verifyResult = await verify(signKeyPair.publicKey, signResult, binary);
+    const privateKeyWithPEM = encodePEM("PRIVATE KEY", encryptKeyPair.privateKey);
+    const publicKeyWithPEM = encodePEM("PUBLIC KEY", encryptKeyPair.publicKey);
+    const privateKeyFromPEM = decodePEM(privateKeyWithPEM);
+    const publicKeyFromPEM = decodePEM(publicKeyWithPEM);
 
     console.log(hash);
-    console.log(encryptKey);
-    console.log(signKey);
-    console.log(cryptoKeyFromPassword);
-    console.log(cryptoKeyFromX25519);
+    console.log(encryptKeyPair);
+    console.log(signKeyPair);
+    console.log(encryptKeyFromPassword);
+    console.log(encryptKeyFromX25519);
     console.log(cipherWithPassword);
     console.log(cipherWithSecret);
     console.log(cipherWithX25519);
@@ -183,8 +183,8 @@
     console.log(plainWithX25519);
     console.log(signResult);
     console.log(verifyResult);
-    console.log(enpemPrivateKey);
-    console.log(enpemPublicKey);
-    console.log(depemPrivateKey);
-    console.log(depemPublicKey);
+    console.log(privateKeyWithPEM);
+    console.log(publicKeyWithPEM);
+    console.log(privateKeyFromPEM);
+    console.log(publicKeyFromPEM);
 </script>
