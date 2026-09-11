@@ -51,7 +51,7 @@
     const _ref = ref;
     /** @type {<T>(key: string, value: T) => void} */
     const _provide = provide;
-    /** @type {<T>(key: string) => T} */
+    /** @type {<T>(key: string) => T | undefined} */
     const _inject = inject;
     /** @type {(option: {history: Record<string, unknown>; routes: {path: string; name?: string; component?: Component;}[];}) => Router} */
     const _createRouter = createRouter;
@@ -62,8 +62,8 @@
     /** @type {() => Theme} */
     const _useTheme = useTheme;
 
-    function vueUseCount() {
-        const {pushToast, toggleLoading} = vueUseDialog();
+    function useCount() {
+        const {pushToast, toggleLoading} = useDialog();
 
         const count = _ref(0);
 
@@ -83,10 +83,10 @@
         return {count, increment, decrement};
     }
 
-    function vueUseDialog() {
-        /** @type {Ref<{color: string; text: string;}[]>} */
+    function useDialog() {
+        /** @type {ReturnType<typeof _inject<Ref<{color: string; text: string;}[]>>>} */
         const toasts = _inject("toasts");
-        /** @type {Ref<boolean>} */
+        /** @type {ReturnType<typeof _inject<Ref<boolean>>>} */
         const loading = _inject("loading");
 
         /**
@@ -131,7 +131,7 @@
                     </v-snackbar-queue>
                 `,
                 setup() {
-                    const {toasts} = vueUseDialog();
+                    const {toasts} = useDialog();
 
                     return {toasts};
                 }
@@ -143,7 +143,7 @@
                     </v-overlay>
                 `,
                 setup() {
-                    const {loading} = vueUseDialog();
+                    const {loading} = useDialog();
 
                     return {loading};
                 }
@@ -233,7 +233,7 @@
                     </v-container>
                 `,
                 setup() {
-                    const {count, increment, decrement} = vueUseCount();
+                    const {count, increment, decrement} = useCount();
 
                     const text = _ref("");
 
