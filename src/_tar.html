@@ -3,45 +3,36 @@
 
 <script async type="module">
     /**
-     * @typedef {{name: string; body: Uint8Array<ArrayBuffer>; timestamp?: number; mode?: number; uid?: number; gid?: number; type?: string;}} FileTar
+     * @param {File[]} files
+     * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-
-    /**
-     * @param {FileTar[]} files
-     * @return {Uint8Array<ArrayBuffer>}
-     */
-    function entar(files) {
+    async function entar(files) {
         const BLOCK_SIZE = 512;
 
         const encoder = new TextEncoder();
+        const tar = new Uint8Array(files.reduce((v, {size}) => v + BLOCK_SIZE * (Math.ceil(size / BLOCK_SIZE) + 1), 0) + BLOCK_SIZE * 2);
 
-        const bufs = files.map((file) => {
-            const buf = new Uint8Array(BLOCK_SIZE + file.body.byteLength + (BLOCK_SIZE - file.body.byteLength % BLOCK_SIZE));
+        for (let i = 0, j = 0; i < tar.byteLength - BLOCK_SIZE * 2; j++) {
+            const file = files[j];
 
-            buf.set(encoder.encode(file.name).subarray(0, 99), 0);
-            buf.set(encoder.encode((file.mode ?? 0o644).toString(8).padStart(7)).subarray(0, 7), 100);
-            buf.set(encoder.encode((file.uid ?? 0).toString(8).padStart(7)).subarray(0, 7), 108);
-            buf.set(encoder.encode((file.gid ?? 0).toString(8).padStart(7)).subarray(0, 7), 116);
-            buf.set(encoder.encode(file.body.byteLength.toString(8).padStart(11)).subarray(0, 11), 124);
-            buf.set(encoder.encode((file.timestamp ?? Temporal.Now.instant().round("second").epochNanoseconds / 1000000000n).toString(8).padStart(11)).subarray(0, 11), 136);
-            buf.set(encoder.encode(file.type ?? "0").subarray(0, 1), 156);
-            buf.set(encoder.encode("ustar"), 257);
-            buf.set(encoder.encode("00"), 263);
-            buf.set(encoder.encode(buf.subarray(0, BLOCK_SIZE).reduce((v, n, i) => 147 < i && i < 156 ? v + 0x20 : v + n, 0).toString(8).padEnd(8)).subarray(0, 8), 148);
-            buf.set(file.body, BLOCK_SIZE);
+            tar.set(encoder.encode(file.name).subarray(0, 100), i);
+            tar.set(encoder.encode("0000777"), i + 100);
+            tar.set(encoder.encode("0000000"), i + 108);
+            tar.set(encoder.encode("0000000"), i + 116);
+            tar.set(encoder.encode(file.size.toString(8).padStart(11, "0")).subarray(0, 11), i + 124);
+            tar.set(encoder.encode(file.lastModified.toString(8).padStart(11, "0")).subarray(0, 11), i + 136);
+            tar.set(encoder.encode("        "), i + 148);
+            tar.set(encoder.encode("0"), i + 156);
+            tar.set(encoder.encode("ustar"), i + 257);
+            tar.set(encoder.encode("00"), i + 263);
+            tar.set(await file.bytes(), i + BLOCK_SIZE);
 
-            return buf;
-        });
+            tar.set(encoder.encode(tar.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0).toString(8).padStart(6, "0").concat("\0")).subarray(0, 7), i + 148);
 
-        const output = new Uint8Array(bufs.reduce((v, {byteLength}) => v + byteLength, 0) + BLOCK_SIZE * 2);
-        let offset = 0;
-
-        for (const buf of bufs) {
-            output.set(buf, offset);
-            offset += buf.byteLength;
+            i += BLOCK_SIZE * (Math.ceil(file.size / BLOCK_SIZE) + 1);
         }
 
-        return output;
+        return tar;
     }
 
     /**
