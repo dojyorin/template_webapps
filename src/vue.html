@@ -89,12 +89,20 @@
         /** @type {ReturnType<typeof _inject<Ref<boolean>>>} */
         const loading = _inject("loading");
 
+        if (!toasts || !loading) {
+            throw new Error();
+        }
+
         /**
          * @param {string} color
          * @param {string} text
          * @return {void}
          */
         function pushToast(color, text) {
+            if (!toasts) {
+                throw new Error();
+            }
+
             toasts.value.push({color, text});
         }
 
@@ -103,6 +111,10 @@
          * @return {void}
          */
         function toggleLoading(state) {
+            if (!loading) {
+                throw new Error();
+            }
+
             loading.value = state ?? !loading.value;
         }
 
