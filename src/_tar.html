@@ -91,17 +91,13 @@
         return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
     }
 
-    /** @type {FileTar[]} */
-    const samples = [{
-        name: "foo",
-        body: _dummy(1024 ** 2)
-    }, {
-        name: "bar",
-        body: _dummy(1024 ** 2)
-    }];
+    const samples = [
+        new File([_dummy(1024 ** 2)], "_foo"),
+        new File([_dummy(1024 ** 2)], "_bar")
+    ];
 
-    const encode = entar(samples);
-    const decode = untar(encode);
+    const encode = await entar(samples);
+    const decode = await untar(encode);
 
     console.log(encode);
     console.log(decode);
