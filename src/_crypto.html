@@ -128,7 +128,7 @@
      * @return {string}
      */
     function encodePEM(label, data) {
-        return `-----BEGIN ${label}-----\n${data.toBase64()}\n-----END ${label}-----`;
+        return `-----BEGIN ${label}-----\n${data.toBase64().split(/(?<=^(?:.{64})+)/)}\n-----END ${label}-----`;
     }
 
     /**
