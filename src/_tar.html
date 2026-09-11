@@ -10,60 +10,60 @@
         const BLOCK_SIZE = 512;
 
         const encoder = new TextEncoder();
-        const tar = new Uint8Array(files.reduce((v, {size}) => v + BLOCK_SIZE * (Math.ceil(size / BLOCK_SIZE) + 1), 0) + BLOCK_SIZE * 2);
+        const archive = new Uint8Array(files.reduce((v, {size}) => v + BLOCK_SIZE * (Math.ceil(size / BLOCK_SIZE) + 1), 0) + BLOCK_SIZE * 2);
 
-        for (let i = 0, j = 0; i < tar.byteLength - BLOCK_SIZE * 2; j++) {
+        for (let i = 0, j = 0; i < archive.byteLength - BLOCK_SIZE * 2; j++) {
             const file = files[j];
 
-            tar.set(encoder.encode(file.name).subarray(0, 100), i);
-            tar.set(encoder.encode("0000777"), i + 100);
-            tar.set(encoder.encode("0000000"), i + 108);
-            tar.set(encoder.encode("0000000"), i + 116);
-            tar.set(encoder.encode(file.size.toString(8).padStart(11, "0")).subarray(0, 11), i + 124);
-            tar.set(encoder.encode(file.lastModified.toString(8).padStart(11, "0")).subarray(0, 11), i + 136);
-            tar.set(encoder.encode("        "), i + 148);
-            tar.set(encoder.encode("0"), i + 156);
-            tar.set(encoder.encode("ustar"), i + 257);
-            tar.set(encoder.encode("00"), i + 263);
-            tar.set(await file.bytes(), i + BLOCK_SIZE);
+            archive.set(encoder.encode(file.name).subarray(0, 100), i);
+            archive.set(encoder.encode("0000777"), i + 100);
+            archive.set(encoder.encode("0000000"), i + 108);
+            archive.set(encoder.encode("0000000"), i + 116);
+            archive.set(encoder.encode(file.size.toString(8).padStart(11, "0")).subarray(0, 11), i + 124);
+            archive.set(encoder.encode(file.lastModified.toString(8).padStart(11, "0")).subarray(0, 11), i + 136);
+            archive.set(encoder.encode("        "), i + 148);
+            archive.set(encoder.encode("0"), i + 156);
+            archive.set(encoder.encode("ustar"), i + 257);
+            archive.set(encoder.encode("00"), i + 263);
+            archive.set(await file.bytes(), i + BLOCK_SIZE);
 
-            tar.set(encoder.encode(tar.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0).toString(8).padStart(6, "0").concat("\0")).subarray(0, 7), i + 148);
+            archive.set(encoder.encode(archive.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0).toString(8).padStart(6, "0").concat("\0")).subarray(0, 7), i + 148);
 
             i += BLOCK_SIZE * (Math.ceil(file.size / BLOCK_SIZE) + 1);
         }
 
-        return tar;
+        return archive;
     }
 
     /**
-     * @param {Uint8Array<ArrayBuffer>} tar
+     * @param {Uint8Array<ArrayBuffer>} archive
      * @return {Promise<File[]>}
      */
-    async function extractArchive(tar) {
+    async function extractArchive(archive) {
         const BLOCK_SIZE = 512;
 
         const decoder = new TextDecoder();
         /** @type {File[]} */
         const files = [];
 
-        for (let i = 0; i < tar.byteLength - BLOCK_SIZE * 2;) {
-            const name = decoder.decode(tar.subarray(i, i + 100)).replaceAll("\0", "");
-            const _mode = decoder.decode(tar.subarray(i + 100, i + 107));
-            const _uid = decoder.decode(tar.subarray(i + 108, i + 115));
-            const _gid = decoder.decode(tar.subarray(i + 116, i + 123));
-            const size = parseInt(decoder.decode(tar.subarray(i + 124, i + 135)), 8);
-            const timestamp = parseInt(decoder.decode(tar.subarray(i + 136, i + 147)), 8);
-            const checksum = parseInt(decoder.decode(tar.subarray(i + 148, i + 154)), 8);
-            const type = decoder.decode(tar.subarray(i + 156, i + 157));
-            const magic = decoder.decode(tar.subarray(i + 257, i + 262));
-            const version = decoder.decode(tar.subarray(i + 263, i + 265));
-            const body = tar.subarray(i + BLOCK_SIZE, i + BLOCK_SIZE + size);
+        for (let i = 0; i < archive.byteLength - BLOCK_SIZE * 2;) {
+            const name = decoder.decode(archive.subarray(i, i + 100)).replaceAll("\0", "");
+            const _mode = decoder.decode(archive.subarray(i + 100, i + 107));
+            const _uid = decoder.decode(archive.subarray(i + 108, i + 115));
+            const _gid = decoder.decode(archive.subarray(i + 116, i + 123));
+            const size = parseInt(decoder.decode(archive.subarray(i + 124, i + 135)), 8);
+            const timestamp = parseInt(decoder.decode(archive.subarray(i + 136, i + 147)), 8);
+            const checksum = parseInt(decoder.decode(archive.subarray(i + 148, i + 154)), 8);
+            const type = decoder.decode(archive.subarray(i + 156, i + 157));
+            const magic = decoder.decode(archive.subarray(i + 257, i + 262));
+            const version = decoder.decode(archive.subarray(i + 263, i + 265));
+            const body = archive.subarray(i + BLOCK_SIZE, i + BLOCK_SIZE + size);
 
             if (magic !== "ustar") {
                 throw new Error();
             } else if (version !== "00" && version !== " \0") {
                 throw new Error();
-            } else if (checksum !== tar.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0) - tar.subarray(i + 148, i + 156).reduce((v, n) => v + n, 0) + 0x20 * 8) {
+            } else if (checksum !== archive.subarray(i, i + BLOCK_SIZE).reduce((v, n) => v + n, 0) - archive.subarray(i + 148, i + 156).reduce((v, n) => v + n, 0) + 0x20 * 8) {
                 throw new Error();
             }
 
