@@ -6,7 +6,7 @@
      * @param {File[]} files
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function entar(files) {
+    async function createArchive(files) {
         const BLOCK_SIZE = 512;
 
         const encoder = new TextEncoder();
@@ -39,7 +39,7 @@
      * @param {Uint8Array<ArrayBuffer>} tar
      * @return {Promise<File[]>}
      */
-    async function untar(tar) {
+    async function extractArchive(tar) {
         const BLOCK_SIZE = 512;
 
         const decoder = new TextDecoder();
@@ -96,8 +96,8 @@
         new File([_dummy(1024 ** 2)], "_bar")
     ];
 
-    const encode = await entar(samples);
-    const decode = await untar(encode);
+    const encode = await createArchive(samples);
+    const decode = await extractArchive(encode);
 
     console.log(encode);
     console.log(decode);
