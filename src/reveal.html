@@ -9,7 +9,7 @@
     import {default as RevealMath} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/math.js?target=esnext";
     import {default as RevealZoom} from "https://esm.sh/reveal.js@6.0.1/dist/plugin/zoom.js?target=esnext";
 
-    /** @type {new (target: Element, option?: {hash?: boolean; plugins?: unknown[];}) => {initialize(): Promise<void>;}} */
+    /** @type {new (target: Element, option?: {plugins?: unknown[];}) => {initialize(): Promise<void>;}} */
     const _Reveal = Reveal;
     /** @type {unknown} */
     const _RevealHighlight = RevealHighlight;
@@ -23,7 +23,6 @@
     const _RevealZoom = RevealZoom;
 
     await new _Reveal(document.getElementById("root"), {
-        hash: true,
         plugins: [
             _RevealHighlight,
             _RevealMarkdown,
