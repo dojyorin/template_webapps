@@ -22,7 +22,7 @@
     /** @type {unknown} */
     const _RevealZoom = RevealZoom;
 
-    await new _Reveal(document.getElementById("reveal"), {
+    await new _Reveal(document.getElementById("root"), {
         hash: true,
         plugins: [
             _RevealHighlight,
@@ -39,7 +39,7 @@
     @import "https://esm.sh/reveal.js@6.0.1/dist/theme/black.css";
 </style>
 
-<div class="reveal" id="reveal">
+<div class="reveal" id="root">
     <div class="slides">
         <section data-markdown>
             # Test Page 1
