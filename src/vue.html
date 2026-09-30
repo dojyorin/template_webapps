@@ -297,7 +297,7 @@
         }
     });
 
-    _createApp(component).use(router).use(vuetify).mount("#root");
+    _createApp(component).use(router).use(vuetify).mount(document.getElementById("root") ?? "");
 </script>
 
 <style>
