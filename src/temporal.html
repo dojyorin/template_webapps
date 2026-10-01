@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 
-<script async type="module">
+<script type="module">
     const unixtime = Number(Temporal.Now.instant().epochNanoseconds / 1000000000n);
     const iso = Temporal.Now.instant().round("second").toString({
         timeZone: Temporal.Now.timeZoneId()
