@@ -132,17 +132,17 @@
     const component = _defineComponent({
         template: /*html*/`
             <v-app>
-                <x-toast></x-toast>
-                <x-loading></x-loading>
-                <x-header></x-header>
+                <Toast></Toast>
+                <Loading></Loading>
+                <Header></Header>
                 <v-main>
                     <router-view></router-view>
                 </v-main>
-                <x-footer></x-footer>
+                <Footer></Footer>
             </v-app>
         `,
         components: {
-            "x-toast": _defineComponent({
+            Toast: _defineComponent({
                 template: /*html*/`
                     <v-snackbar-queue closable location="top right" timeout="5000" v-model="toasts">
                         <template #actions="{props}">
@@ -156,7 +156,7 @@
                     return {toasts};
                 }
             }),
-            "x-loading": _defineComponent({
+            Loading: _defineComponent({
                 template: /*html*/`
                     <v-overlay persistent no-click-animation class="justify-center align-center" v-model="loading">
                         <v-progress-circular indeterminate size="60" width="4" color="primary"></v-progress-circular>
@@ -168,7 +168,7 @@
                     return {loading};
                 }
             }),
-            "x-header": _defineComponent({
+            Header: _defineComponent({
                 template: /*html*/`
                     <v-app-bar theme="dark" density="compact">
                         <template #prepend>
@@ -212,7 +212,7 @@
                     return {nav, toggleDark};
                 }
             }),
-            "x-footer": _defineComponent({
+            Footer: _defineComponent({
                 template: /*html*/`
                     <v-footer app class="justify-center align-center">Copyright</v-footer>
                 `
