@@ -78,9 +78,7 @@
                                 job.reject(event);
                             };
 
-                            worker.postMessage(job.message, {
-                                transfer: job.transfers
-                            });
+                            worker.postMessage(job.message, job.transfers);
                         })(worker, {message, transfers, resolve, reject});
                     } else {
                         jobs.push({message, transfers, resolve, reject});
@@ -104,9 +102,7 @@
         globalThis.onmessage = ({data}) => {
             const binary = _dummy(data);
 
-            globalThis.postMessage(binary, {
-                transfer: [binary.buffer]
-            });
+            globalThis.postMessage(binary, [binary.buffer]);
         };
     `;
 
