@@ -107,13 +107,13 @@
     `;
 
     /** @type {ReturnType<typeof createWorkerPool<number, Uint8Array<ArrayBuffer>>>} */
-    const wp = createWorkerPool(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
+    const pool = createWorkerPool(`data:text/javascript;base64,${new TextEncoder().encode(js).toBase64()}`, navigator.hardwareConcurrency);
 
-    wp.open();
+    pool.open();
 
-    const outputs = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => wp.submit(1024 ** 2)));
+    const outputs = await Promise.all(Array.from({length: navigator.hardwareConcurrency * 2}, () => pool.submit(1024 ** 2)));
 
     console.log(outputs);
 
-    wp.close();
+    pool.close();
 </script>
