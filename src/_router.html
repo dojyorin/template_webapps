@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script type="module">
+    /**
+     * @param {number} size
+     * @return {Uint8Array<ArrayBuffer>}
+     */
+    function _dummy(size) {
+        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    }
+
+    const binary = _dummy(16 * 1024 ** 2);
+
+    const encode = await new Response(new Response(binary).body?.pipeThrough(new CompressionStream("gzip"))).bytes();
+    const decode = await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("gzip"))).bytes();
+
+    console.log(encode);
+    console.log(decode);
+</script>
