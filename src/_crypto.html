@@ -73,11 +73,11 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encrypt(key, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(12));
+        const nonce = crypto.getRandomValues(new Uint8Array(32));
 
         const body = await crypto.subtle.encrypt({
             name: "ChaCha20-Poly1305",
-            iv: nonce
+            iv: nonce.subarray(0, 12)
         }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["encrypt"]), data);
 
         const output = new Uint8Array(nonce.byteLength + body.byteLength);
@@ -93,11 +93,11 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decrypt(key, data) {
-        const nonce = data.subarray(0, 12);
+        const nonce = data.subarray(0, 32);
 
         const body = await crypto.subtle.decrypt({
             name: "ChaCha20-Poly1305",
-            iv: nonce
+            iv: nonce.subarray(0, 12)
         }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["decrypt"]), data.subarray(nonce.byteLength));
 
         return new Uint8Array(body);
