@@ -3,18 +3,30 @@
 
 <script type="module">
     /**
-     * @param {number} size
-     * @return {Uint8Array<ArrayBuffer>}
+     * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
+     * @return {{fetch(request: Request): Promise<Response>;}}
      */
-    function _dummy(size) {
-        return new Uint8Array(new Float32Array(size / 4).map(() => Math.random()).buffer);
+    function createRouter(...routes) {
+        return {
+            async fetch(request) {
+                const routesFound = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
+
+                if (!routesFound.length) {
+                    return new Response(undefined, {
+                        status: 404
+                    });
+                }
+
+                const route = routesFound.find(({method}) => method === request.method);
+
+                if (!route) {
+                    return new Response(undefined, {
+                        status: 405
+                    });
+                }
+
+                return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
+            }
+        };
     }
-
-    const binary = _dummy(16 * 1024 ** 2);
-
-    const encode = await new Response(new Response(binary).body?.pipeThrough(new CompressionStream("gzip"))).bytes();
-    const decode = await new Response(new Response(encode).body?.pipeThrough(new DecompressionStream("gzip"))).bytes();
-
-    console.log(encode);
-    console.log(decode);
 </script>
