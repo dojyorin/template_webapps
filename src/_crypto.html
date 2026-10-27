@@ -68,14 +68,14 @@
     }
 
     /**
-     * @param {Uint8Array<ArrayBuffer>} key
+     * @param {Uint8Array<ArrayBuffer>} x
      * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function encrypt(key, data) {
+    async function encrypt(x, data) {
         const nonce = crypto.getRandomValues(new Uint8Array(32));
 
-        const key = await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["encrypt"]);
+        const key = await crypto.subtle.importKey("raw-secret", x, "ChaCha20-Poly1305", false, ["encrypt"]);
 
         const body = await crypto.subtle.encrypt({
             name: "ChaCha20-Poly1305",
@@ -90,14 +90,14 @@
     }
 
     /**
-     * @param {Uint8Array<ArrayBuffer>} key
+     * @param {Uint8Array<ArrayBuffer>} x
      * @param {Uint8Array<ArrayBuffer>} data
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
-    async function decrypt(key, data) {
+    async function decrypt(x, data) {
         const nonce = data.subarray(0, 32);
 
-        const key = await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["decrypt"]);
+        const key = await crypto.subtle.importKey("raw-secret", x, "ChaCha20-Poly1305", false, ["decrypt"]);
 
         const body = await crypto.subtle.decrypt({
             name: "ChaCha20-Poly1305",
