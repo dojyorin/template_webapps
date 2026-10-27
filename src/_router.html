@@ -18,7 +18,23 @@
     }];
 
     const response = await (async (request) => {
+        const routesFound = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
+        if (!routesFound.length) {
+            return new Response(undefined, {
+                status: 404
+            });
+        }
+
+        const route = routesFound.find(({method}) => method === request.method);
+
+        if (!route) {
+            return new Response(undefined, {
+                status: 405
+            });
+        }
+
+        return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
     })(new Request(location.origin));
 
     console.log(response);
