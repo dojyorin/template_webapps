@@ -29,4 +29,18 @@
             }
         };
     }
+
+    const router = createRouter({
+        path: "/",
+        method: "GET",
+        handler() {
+            return new Response(/*html*/`
+                <h1>Hello!</h1>
+            `, {
+                headers: {
+                    "Content-Type": "text/html"
+                }
+            });
+        }
+    });
 </script>
