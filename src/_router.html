@@ -2,35 +2,8 @@
 <meta charset="utf-8">
 
 <script type="module">
-    /**
-     * @param {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} routes
-     * @return {{fetch(request: Request): Promise<Response>;}}
-     */
-    function createRouter(...routes) {
-        return {
-            async fetch(request) {
-                const routesFound = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
-
-                if (!routesFound.length) {
-                    return new Response(undefined, {
-                        status: 404
-                    });
-                }
-
-                const route = routesFound.find(({method}) => method === request.method);
-
-                if (!route) {
-                    return new Response(undefined, {
-                        status: 405
-                    });
-                }
-
-                return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
-            }
-        };
-    }
-
-    const router = createRouter({
+    /** @type {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} */
+    const routes = [{
         path: "/",
         method: "GET",
         handler() {
@@ -42,7 +15,11 @@
                 }
             });
         }
-    });
+    }];
 
-    console.log(await router.fetch(new Request(location.origin)));
+    const response = await (async (request) => {
+
+    })(new Request(location.origin));
+
+    console.log(response);
 </script>
