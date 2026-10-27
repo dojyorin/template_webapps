@@ -17,7 +17,7 @@
         }
     }];
 
-    const response = await (async (request) => {
+    const response = (/** @type {(request: Request) => Promise<Response>} */async (request) => {
         const routesFound = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
         if (!routesFound.length) {
@@ -37,5 +37,5 @@
         return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
     })(new Request(location.origin));
 
-    console.log(response);
+    console.log(await response);
 </script>
