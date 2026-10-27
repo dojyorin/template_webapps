@@ -42,7 +42,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptSecret(secret, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(32));
+        const nonce = crypto.getRandomValues(new Uint8Array(12));
 
         const key = await crypto.subtle.importKey("raw-secret", secret, "ChaCha20-Poly1305", false, ["encrypt"]);
 
@@ -64,7 +64,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptPassword(password, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(32));
+        const nonce = crypto.getRandomValues(new Uint8Array(28));
 
         const key = await crypto.subtle.deriveKey({
             name: "Argon2id",
@@ -93,7 +93,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function encryptX25519(privateKey, publicKey, data) {
-        const nonce = crypto.getRandomValues(new Uint8Array(32));
+        const nonce = crypto.getRandomValues(new Uint8Array(12));
 
         const key = await crypto.subtle.deriveKey({
             name: "X25519",
@@ -118,7 +118,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptSecret(secret, data) {
-        const nonce = data.subarray(0, 32);
+        const nonce = data.subarray(12);
 
         const key = await crypto.subtle.importKey("raw-secret", secret, "ChaCha20-Poly1305", false, ["decrypt"]);
 
@@ -136,7 +136,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptPassword(password, data) {
-        const nonce = data.subarray(0, 32);
+        const nonce = data.subarray(0, 28);
 
         const key = await crypto.subtle.deriveKey({
             name: "Argon2id",
@@ -161,7 +161,7 @@
      * @return {Promise<Uint8Array<ArrayBuffer>>}
      */
     async function decryptX25519(privateKey, publicKey, data) {
-        const nonce = data.subarray(0, 32);
+        const nonce = data.subarray(0, 12);
 
         const key = await crypto.subtle.deriveKey({
             name: "X25519",
