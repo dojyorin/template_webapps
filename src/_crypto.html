@@ -75,10 +75,12 @@
     async function encrypt(key, data) {
         const nonce = crypto.getRandomValues(new Uint8Array(32));
 
+        const key = await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["encrypt"]);
+
         const body = await crypto.subtle.encrypt({
             name: "ChaCha20-Poly1305",
             iv: nonce.subarray(0, 12)
-        }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["encrypt"]), data);
+        }, key, data);
 
         const output = new Uint8Array(nonce.byteLength + body.byteLength);
         output.set(nonce, 0);
@@ -95,10 +97,12 @@
     async function decrypt(key, data) {
         const nonce = data.subarray(0, 32);
 
+        const key = await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["decrypt"]);
+
         const body = await crypto.subtle.decrypt({
             name: "ChaCha20-Poly1305",
             iv: nonce.subarray(0, 12)
-        }, await crypto.subtle.importKey("raw-secret", key, "ChaCha20-Poly1305", false, ["decrypt"]), data.subarray(nonce.byteLength));
+        }, key, data.subarray(nonce.byteLength));
 
         return new Uint8Array(body);
     }
