@@ -2,6 +2,14 @@
 <meta charset="utf-8">
 
 <script type="module">
+    /**
+     * @param {(request: Request) => Response | Promise<Response>} handler
+     * @return {Promise<void>}
+     */
+    async function _serve(handler) {
+        console.log(await handler(new Request(location.origin)));
+    }
+
     /** @type {{path: string; method: string; handler(request: Request, param?: Record<string, string | undefined>): Response | Promise<Response>;}[]} */
     const routes = [{
         path: "/",
@@ -17,7 +25,7 @@
         }
     }];
 
-    const response = (/** @type {(request: Request) => Promise<Response>} */async (request) => {
+    await _serve(async (request) => {
         const routesFound = routes.filter(({path}) => new URLPattern({pathname: path}).test(request.url));
 
         if (!routesFound.length) {
@@ -35,7 +43,5 @@
         }
 
         return await route.handler(request, new URLPattern({pathname: route.path}).exec(request.url)?.pathname.groups);
-    })(new Request(location.origin));
-
-    console.log(await response);
+    });
 </script>
